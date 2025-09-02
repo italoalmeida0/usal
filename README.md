@@ -1,6 +1,10 @@
+<div align="center">
+
 ![Logo USAL.js](https://github.com/italoalmeida0/usal/raw/main/assets/logo.png)
-# USAL.js
-Ultimate Scroll Animation Library - 8.4KB of pure JavaScript magic ✨
+
+**Ultimate Scroll Animation Library - 8.4KB of pure JavaScript magic ✨**
+
+</div>
 
 ## Features
 - 🎯 40+ animations (fade, zoom, flip with all directions)
