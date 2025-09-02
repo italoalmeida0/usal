@@ -1,42 +1,67 @@
 {
   "name": "usal",
   "version": "1.0.0",
-  "description": "Ultimate Scroll Animation Library - Lightweight, zero-dependency scroll animations",
-  "main": "dist/usal.js",
-  "module": "dist/usal.js",
-  "unpkg": "dist/usal.min.js",
-  "jsdelivr": "dist/usal.min.js",
+  "description": "Ultimate Scroll Animation Library - 8.4KB of pure JavaScript magic - Works with React, Vue, Svelte, Solid, Vanilla JS and more",
+  "main": "dist/usal.cjs.js",
+  "module": "dist/usal.esm.js",
+  "browser": "dist/usal.umd.js",
+  "unpkg": "dist/usal.umd.min.js",
+  "jsdelivr": "dist/usal.umd.min.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/usal.esm.js",
+      "require": "./dist/usal.cjs.js",
+      "browser": "./dist/usal.umd.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.esm.js",
+      "require": "./dist/react.cjs.js"
+    },
+    "./vue": {
+      "types": "./dist/vue.d.ts",
+      "import": "./dist/vue.esm.js",
+      "require": "./dist/vue.cjs.js"
+    },
+    "./svelte": {
+      "types": "./dist/svelte.d.ts",
+      "import": "./dist/svelte.esm.js"
+    },
+    "./solid": {
+      "types": "./dist/solid.d.ts",
+      "import": "./dist/solid.esm.js"
+    }
+  },
   "files": [
-    "dist"
+    "dist/",
+    "README.md"
   ],
   "scripts": {
-    "build": "npm run build:full && npm run build:min",
-    "build:full": "cp src/usal.js dist/usal.js",
-    "build:min": "terser src/usal.js -c -m -o dist/usal.min.js"
+    "build": "node build.js",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
-    "scroll",
-    "animation",
-    "scroll-animation",
-    "intersection-observer",
-    "fade",
-    "zoom",
-    "flip",
-    "vanilla-js",
-    "lightweight",
-    "zero-dependency"
+    "animation", "javascript", "react", "vue", "svelte", "solid", "vite",
+    "webpack", "rollup", "parcel", "universal", "framework-agnostic"
   ],
   "author": "Italo Almeida",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/italoalmeida0/usal"
-  },
-  "bugs": {
-    "url": "https://github.com/italoalmeida0/usal/issues"
-  },
-  "homepage": "https://italoalmeida0.github.io/usal",
   "devDependencies": {
-    "terser": "^5.31.0"
+    "esbuild": "^0.19.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "vue": ">=3.0.0",
+    "solid-js": ">=1.0.0",
+    "svelte": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": true },
+    "vue": { "optional": true },
+    "solid-js": { "optional": true },
+    "svelte": { "optional": true }
   }
 }
