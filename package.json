@@ -1,0 +1,42 @@
+{
+  "name": "usal",
+  "version": "1.0.0",
+  "description": "Ultimate Scroll Animation Library - Lightweight, zero-dependency scroll animations",
+  "main": "dist/usal.js",
+  "module": "dist/usal.js",
+  "unpkg": "dist/usal.min.js",
+  "jsdelivr": "dist/usal.min.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "npm run build:full && npm run build:min",
+    "build:full": "cp src/usal.js dist/usal.js",
+    "build:min": "terser src/usal.js -c -m -o dist/usal.min.js"
+  },
+  "keywords": [
+    "scroll",
+    "animation",
+    "scroll-animation",
+    "intersection-observer",
+    "fade",
+    "zoom",
+    "flip",
+    "vanilla-js",
+    "lightweight",
+    "zero-dependency"
+  ],
+  "author": "Italo Almeida",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/italoalmeida0/usal"
+  },
+  "bugs": {
+    "url": "https://github.com/italoalmeida0/usal/issues"
+  },
+  "homepage": "https://italoalmeida0.github.io/usal",
+  "devDependencies": {
+    "terser": "^5.31.0"
+  }
+}
