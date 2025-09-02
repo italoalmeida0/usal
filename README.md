@@ -4,6 +4,7 @@
 
 **Ultimate Scroll Animation Library - 8.4KB of pure JavaScript magic ✨**
 
+**Works with React, Vue, Svelte, Solid, Vanilla JS and more**
 </div>
 
 ## Features
