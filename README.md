@@ -1,7 +1,5 @@
+![Logo USAL.js](https://github.com/italoalmeida0/usal/raw/main/assets/logo.png)
 # USAL.js
-
-![Logo USAL.js](https://github.com/italoalmeida0/usal/raw/main/assets/logo.jpg)
-
 Ultimate Scroll Animation Library - 8.4KB of pure JavaScript magic ✨
 
 ## Features
