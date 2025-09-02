@@ -1,4 +1,7 @@
 # USAL.js
+
+![Logo USAL.js](https://github.com/italoalmeida0/usal/raw/main/assets/logo.jpg)
+
 Ultimate Scroll Animation Library - 8.4KB of pure JavaScript magic ✨
 
 ## Features
@@ -18,9 +21,9 @@ CDN:
 ```
 NPM:
 ```js
-# Install
+// Install
 npm install usal
-# Import
+// Import
 import USAL from 'usal'
 ```
 ```js
@@ -32,26 +35,29 @@ USAL.init();
 # API Documentation
 ## Property Names
 ### data-usal
-**Main animation attribute**
+>Main animation attribute
+
 ```html
 <div data-usal="fade-u">Content</div>
 <div data-usal="zoomin duration-800">With duration</div>
 <div data-usal="flip-r delay-500 blur">Complex</div>
 ```
 ### data-usal-id
-**Unique identifiers control animation reactivity**
+>Unique identifiers control animation reactivity
+
 ```html
 <!-- Automatic ID (re-animates when element is recreated) -->
 <div data-usal="fade-u">Auto ID</div>
 <!-- Custom ID (prevents re-animation) -->
 <div data-usal="fade-u" data-usal-id="unique-element">Fixed ID</div>
 ```
-> **Tip:** For large elements (>100vh), use lower thresholds like threshold-5 or threshold-10 to ensure animations trigger properly.
+**Tip: For large elements (>100vh), use lower thresholds like threshold-5 or threshold-10 to ensure animations trigger properly.**
 
 ## Property Values
 ### Available Animations
-**Core animation types**
-![Animations](./assets/all.gif)
+>Core animation types
+
+![Animations](https://github.com/italoalmeida0/usal/raw/main/assets/all.gif)
 ```javascript
 // Basic animations
 fade, fade-u, fade-d, fade-l, fade-r
@@ -67,8 +73,9 @@ flip, flip-u, flip-d, flip-l, flip-r
 flip-ul, flip-ur, flip-dl, flip-dr
 ```
 ### Split Animations
-**Animate text parts individually**
-![Split Animations](./assets/split.gif)
+>Animate text parts individually
+
+![Split Animations](https://github.com/italoalmeida0/usal/raw/main/assets/split.gif)
 ```javascript
 // Split by words
 split-word
@@ -82,7 +89,8 @@ split-fade-r, split-fade-u, split-zoomin
 split-delay-50, split-delay-100
 ```
 ### Modifiers
-**Animation behavior modifiers**
+>Animation behavior modifiers
+
 ```javascript
 // Duration in milliseconds
 duration-500, duration-1000, duration-2000
@@ -94,15 +102,17 @@ linear, ease, ease-in, ease-out
 blur, once, threshold-50
 ```
 ### Count Animation
-**Animate numbers from 0 to target**
-![Count Animations](./assets/count.gif)
+>Animate numbers from 0 to target
+
+![Count Animations](https://github.com/italoalmeida0/usal/raw/main/assets/count.gif)
 ```javascript
 // count-[1234], count-[98.5], count-[42,350]
 count-[number]
 ```
 ### Text Effects
-**Special text animations (for letters, use with split-letter)**
-![Text Effects](./assets/text.gif)
+>Special text animations (for letters, use with split-letter)
+
+![Text Effects](https://github.com/italoalmeida0/usal/raw/main/assets/text.gif)
 ```javascript
 // Shimmer effect
 text-shimmer
@@ -112,7 +122,8 @@ text-fluid
 
 ## JavaScript API
 ### USAL.init(options)
-**Initialize with configuration**
+>Initialize with configuration
+
 ```javascript
 USAL.init({
   maxConcurrent: 100,        // Max concurrent animations
@@ -123,13 +134,15 @@ USAL.init({
 });
 ```
 ### USAL.refresh()
-**Refresh DOM and detect new elements**
+>Refresh DOM and detect new elements
+
 ```javascript
 // Refresh after dynamic content changes
 USAL.refresh();
 ```
 ### USAL.destroy()
-**Clean up and remove all animations**
+>Clean up and remove all animations
+
 ```javascript
 // Clean up when done
 USAL.destroy();
