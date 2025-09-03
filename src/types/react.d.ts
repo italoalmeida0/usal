@@ -1,37 +1,21 @@
-import { ReactNode, ComponentProps, ElementType, ForwardRefExoticComponent, RefAttributes } from 'react';
+import { ReactNode } from 'react';
 import { USALConfig, USALInstance } from './index';
-
-export interface AnimatedProps<T extends ElementType = 'div'> {
-  children?: ReactNode;
-  animation?: string;
-  direction?: string;
-  duration?: number;
-  delay?: number;
-  threshold?: number;
-  once?: boolean;
-  blur?: boolean;
-  split?: string;
-  splitDelay?: number;
-  easing?: string;
-  count?: string;
-  text?: string;
-  as?: T;
-  className?: string;
-  style?: React.CSSProperties;
-}
-
-export type AnimatedComponent = ForwardRefExoticComponent<
-  AnimatedProps & RefAttributes<HTMLElement>
->;
 
 export const USALProvider: React.FC<{
   children: ReactNode;
   config?: USALConfig;
 }>;
 
-export const useUSAL: (config?: USALConfig) => {
-  instance: USALInstance | null;
-  refresh: () => void;
+export const useUSAL: () => {
+  getInstance: () => USALInstance | null;
+  config: (config: USALConfig) => void;
+  destroy: () => void;
 };
 
-export const Animated: AnimatedComponent;
+export const createUSAL: (config?: USALConfig) => {
+  config: (config: USALConfig) => void;
+  destroy: () => void;
+  getInstance: () => USALInstance | null;
+};
+
+export default USAL;

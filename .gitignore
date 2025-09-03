@@ -5,6 +5,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+#build
+dist
 
 # Environment variables
 .env

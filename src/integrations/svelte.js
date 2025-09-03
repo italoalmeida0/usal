@@ -1,57 +1,52 @@
-import { onMount, onDestroy, createEventDispatcher } from 'svelte';
-import USAL from '../usal.js';
+import USALLib from '../usal.js';
 
 let globalInstance = null;
 
-export const getUSAL = () => {
+export const usal = (node, value = 'fade') => {
   if (!globalInstance) {
-    globalInstance = USAL.createInstance();
-  }
-  return globalInstance;
-};
-
-export const usal = (node, params = 'fade') => {
-  const instance = getUSAL();
-
-  const getValue = (p) => {
-    if (typeof p === 'string') return p;
-
-    return Object.entries(p)
-      .map(([key, val]) => val === true ? key : `${key}-${val}`)
-      .join(' ');
-  };
-
-  const updateAttribute = (value) => {
-    node.setAttribute('data-usal', getValue(value));
-    instance.refresh();
-  };
-
-  if (!instance.initialized) {
-    instance.init();
-    instance.initialized = true;
+    globalInstance = USALLib.createInstance();
   }
 
-  updateAttribute(params);
+  node.setAttribute('data-usal', value);
 
   return {
-    update(newParams) {
-      updateAttribute(newParams);
+    update(newValue) {
+      node.setAttribute('data-usal', newValue);
     },
-    destroy() {
+    destroy() {}
+  };
+};
 
+export const useUSAL = () => {
+  if (!globalInstance) {
+    globalInstance = USALLib.createInstance();
+  }
+
+  return {
+    getInstance: () => globalInstance,
+    config: (v) => globalInstance && globalInstance.config(v),
+    destroy: () => {
+      if (globalInstance) {
+        globalInstance.destroy();
+        globalInstance = null;
+      }
     }
   };
 };
 
-export const createUSAL = (config = {}) => {
-  let instance = null;
+export const createUSAL = (configInit = {}) => {
+  let instance = USALLib.createInstance();
+  
+  if (configInit && Object.keys(configInit).length > 0) {
+    instance.config(configInit);
+  }
 
-  const init = () => {
-    instance = USAL.createInstance();
-    instance.init(config);
-    return instance;
+  const config = (v) => {
+    if (instance && Object.keys(v).length > 0) {
+      instance.config(v);
+    }
   };
-
+  
   const destroy = () => {
     if (instance) {
       instance.destroy();
@@ -59,13 +54,9 @@ export const createUSAL = (config = {}) => {
     }
   };
 
-  const refresh = () => {
-    if (instance) {
-      instance.refresh();
-    }
-  };
+  const getInstance = () => instance;
 
-  return { init, destroy, refresh, getInstance: () => instance };
+  return { config, destroy, getInstance };
 };
 
-export default USAL;
+export default USALLib;

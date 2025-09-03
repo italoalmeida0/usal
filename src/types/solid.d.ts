@@ -1,8 +1,8 @@
-import { ReactNode } from 'react';
+import { Component, JSX } from 'solid-js';
 import { USALConfig, USALInstance } from './index';
 
-export const USALProvider: React.FC<{
-  children: ReactNode;
+export const USALProvider: Component<{
+  children: JSX.Element;
   config?: USALConfig;
 }>;
 

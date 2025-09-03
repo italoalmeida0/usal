@@ -1,19 +1,30 @@
 {
   "name": "usal",
   "version": "1.0.0",
-  "description": "Ultimate Scroll Animation Library - 8.4KB of pure JavaScript magic - Works with React, Vue, Svelte, Solid, Vanilla JS and more",
+  "type": "module",
+  "description": "Ultimate Scroll Animation Library - 8KB of pure JavaScript magic - Works with React, Vue, Svelte, Solid, Lit, Angular Vanilla JS and more",
+  "homepage": "https://italoalmeida0.github.io/usal",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/italoalmeida0/usal.git"
+  },
+  "bugs": {
+    "url": "https://github.com/italoalmeida0/usal/issues"
+  },
+  "author": "Italo Almeida",
+  "license": "MIT",
   "main": "dist/usal.cjs.js",
   "module": "dist/usal.esm.js",
   "browser": "dist/usal.umd.js",
-  "unpkg": "dist/usal.umd.min.js",
-  "jsdelivr": "dist/usal.umd.min.js",
+  "unpkg": "dist/usal.min.js",
+  "jsdelivr": "dist/usal.min.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "browser": "./dist/usal.umd.js",
       "import": "./dist/usal.esm.js",
-      "require": "./dist/usal.cjs.js",
-      "browser": "./dist/usal.umd.js"
+      "require": "./dist/usal.cjs.js"
     },
     "./react": {
       "types": "./dist/react.d.ts",
@@ -27,41 +38,74 @@
     },
     "./svelte": {
       "types": "./dist/svelte.d.ts",
-      "import": "./dist/svelte.esm.js"
+      "import": "./dist/svelte.esm.js",
+      "require": "./dist/svelte.cjs.js"
     },
     "./solid": {
       "types": "./dist/solid.d.ts",
-      "import": "./dist/solid.esm.js"
+      "import": "./dist/solid.esm.js",
+      "require": "./dist/solid.cjs.js"
+    },
+    "./lit": {
+      "types": "./dist/lit.d.ts",
+      "import": "./dist/lit.esm.js",
+      "require": "./dist/lit.cjs.js"
     }
   },
   "files": [
     "dist/",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "node build.js",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
-    "animation", "javascript", "react", "vue", "svelte", "solid", "vite",
-    "webpack", "rollup", "parcel", "universal", "framework-agnostic"
+    "animation",
+    "scroll",
+    "scroll-animation",
+    "javascript",
+    "react",
+    "vue",
+    "lit",
+    "svelte",
+    "solid",
+    "vite",
+    "webpack",
+    "rollup",
+    "parcel",
+    "universal",
+    "framework-agnostic"
   ],
-  "author": "Italo Almeida",
-  "license": "MIT",
   "devDependencies": {
-    "esbuild": "^0.19.0",
+    "esbuild": "^0.25.9",
+    "esbuild-plugin-solid": "^0.6.0",
     "typescript": "^5.0.0"
   },
   "peerDependencies": {
     "react": ">=16.8.0",
-    "vue": ">=3.0.0",
     "solid-js": ">=1.0.0",
-    "svelte": ">=3.0.0"
+    "svelte": ">=3.0.0",
+    "vue": ">=3.0.0",
+    "lit": ">=2.0.0"
   },
   "peerDependenciesMeta": {
-    "react": { "optional": true },
-    "vue": { "optional": true },
-    "solid-js": { "optional": true },
-    "svelte": { "optional": true }
-  }
+    "react": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    },
+    "lit": {
+      "optional": true
+    },
+    "solid-js": {
+      "optional": true
+    },
+    "svelte": {
+      "optional": true
+    }
+  },
+  "sideEffects": false
 }
