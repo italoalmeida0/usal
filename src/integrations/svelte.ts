@@ -13,7 +13,7 @@ export const usal = (node, value = 'fade') => {
     update(newValue) {
       node.setAttribute('data-usal', newValue);
     },
-    destroy() {}
+    destroy() {},
   };
 };
 
@@ -30,13 +30,13 @@ export const useUSAL = () => {
         globalInstance.destroy();
         globalInstance = null;
       }
-    }
+    },
   };
 };
 
 export const createUSAL = (configInit = {}) => {
   let instance = USALLib.createInstance();
-  
+
   if (configInit && Object.keys(configInit).length > 0) {
     instance.config(configInit);
   }
@@ -46,7 +46,7 @@ export const createUSAL = (configInit = {}) => {
       instance.config(v);
     }
   };
-  
+
   const destroy = () => {
     if (instance) {
       instance.destroy();

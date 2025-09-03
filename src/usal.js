@@ -5,7 +5,7 @@ const USAL = (() => {
     return {
       config: noop,
       destroy: noop,
-      createInstance: () => ({ config: noop, destroy: noop}),
+      createInstance: () => ({ config: noop, destroy: noop }),
     };
   }
 
@@ -32,10 +32,10 @@ const USAL = (() => {
   const animationMap = { fade: 0, zoomin: 1, zoomout: 2, flip: 3 };
 
   // Bitwise flags for directions - allows combining multiple directions
-  const DIRECTION_UP = 1;     // 0001
-  const DIRECTION_DOWN = 2;   // 0010
-  const DIRECTION_LEFT = 4;   // 0100
-  const DIRECTION_RIGHT = 8;  // 1000
+  const DIRECTION_UP = 1; // 0001
+  const DIRECTION_DOWN = 2; // 0010
+  const DIRECTION_LEFT = 4; // 0100
+  const DIRECTION_RIGHT = 8; // 1000
 
   const EASING_EASE_OUT = 0;
   const EASING_LINEAR = 1;
@@ -87,12 +87,12 @@ const USAL = (() => {
               char === 'u'
                 ? DIRECTION_UP
                 : char === 'd'
-                ? DIRECTION_DOWN
-                : char === 'l'
-                ? DIRECTION_LEFT
-                : char === 'r'
-                ? DIRECTION_RIGHT
-                : 0;
+                  ? DIRECTION_DOWN
+                  : char === 'l'
+                    ? DIRECTION_LEFT
+                    : char === 'r'
+                      ? DIRECTION_RIGHT
+                      : 0;
           }
           parsedConfig[DIRECTION] = direction;
         }
@@ -134,10 +134,10 @@ const USAL = (() => {
 
   // Easing functions - mathematical curves for smooth animation
   const easings = [
-    (t) => 1 - Math.pow(1 - t, 3),  // ease-out
-    (t) => t,  // linear
-    (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),  // ease
-    (t) => t * t * t,  // ease-in
+    (t) => 1 - Math.pow(1 - t, 3), // ease-out
+    (t) => t, // linear
+    (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2), // ease
+    (t) => t * t * t, // ease-in
   ];
 
   const getTransform = (animation, direction, progress) => {
@@ -159,7 +159,7 @@ const USAL = (() => {
         direction !== DIRECTION_DOWN &&
         direction !== DIRECTION_LEFT &&
         direction !== DIRECTION_RIGHT
-          ? 45  // Diagonal flip
+          ? 45 // Diagonal flip
           : 90); // Single axis flip
       const parts = [];
       // Check vertical flip using bitwise AND
@@ -168,9 +168,7 @@ const USAL = (() => {
       }
       // Check horizontal flip
       if (direction & (DIRECTION_LEFT | DIRECTION_RIGHT)) {
-        parts.push(
-          `rotateY(${direction & DIRECTION_LEFT ? -value : value}deg)`
-        );
+        parts.push(`rotateY(${direction & DIRECTION_LEFT ? -value : value}deg)`);
       }
       if (!parts.length && isFlip) {
         parts.push(`rotateY(${inverse * 90}deg)`);
@@ -181,18 +179,8 @@ const USAL = (() => {
     // Add translation for non-flip animations with direction
     if (!isFlip && direction) {
       const value = inverse * 30;
-      const x =
-        direction & DIRECTION_RIGHT
-          ? -value
-          : direction & DIRECTION_LEFT
-          ? value
-          : 0;
-      const y =
-        direction & DIRECTION_DOWN
-          ? -value
-          : direction & DIRECTION_UP
-          ? value
-          : 0;
+      const x = direction & DIRECTION_RIGHT ? -value : direction & DIRECTION_LEFT ? value : 0;
+      const y = direction & DIRECTION_DOWN ? -value : direction & DIRECTION_UP ? value : 0;
       if (x || y) {
         transform += ` translate(${x}px, ${y}px)`;
       }
@@ -240,14 +228,13 @@ const USAL = (() => {
   };
 
   const formatNumber = (value, original, decimals) => {
-    let formatted =
-      decimals > 0 ? value.toFixed(decimals) : Math.floor(value).toString();
+    let formatted = decimals > 0 ? value.toFixed(decimals) : Math.floor(value).toString();
 
     // Add thousand separators if original had them
     if (original.includes(' ') || original.includes(',')) {
       const parts = formatted.split('.');
       parts[0] = parts[0].replace(
-        /\B(?=(\d{3})+(?!\d))/g,  // Regex for thousand grouping
+        /\B(?=(\d{3})+(?!\d))/g, // Regex for thousand grouping
         original.includes(' ') ? ' ' : ','
       );
       formatted = parts.join(decimals > 0 ? '.' : '');
@@ -283,7 +270,7 @@ const USAL = (() => {
         transform: element.style.transform || '',
         filter: element.style.filter || '',
       },
-      targets: null,  // For split animations
+      targets: null, // For split animations
       animated: 0,
       rafId: null,
     };
@@ -314,9 +301,7 @@ const USAL = (() => {
           } else {
             const span = document.createElement('span');
             span.textContent = part;
-            span.style.cssText = `display:inline-block;opacity:${
-              config[TEXT] ? '1' : '0'
-            }`;
+            span.style.cssText = `display:inline-block;opacity:${config[TEXT] ? '1' : '0'}`;
             element.appendChild(span);
             targets.push(span);
           }
@@ -324,8 +309,7 @@ const USAL = (() => {
       }
 
       data.targets = targets;
-      if (config[SPLIT_ANIMATION])
-        data.splitConfig = parseClasses(config[SPLIT_ANIMATION]);
+      if (config[SPLIT_ANIMATION]) data.splitConfig = parseClasses(config[SPLIT_ANIMATION]);
     }
 
     if (!config[TEXT] && !data.countSpan && !data.targets) {
@@ -338,23 +322,20 @@ const USAL = (() => {
 
   const animate = (ratio, data, instance) => {
     if (
-          data.animated ||
-          ratio < getThreshold(data) ||
-          instance.animating.has(data.element) ||
-          instance.animating.size >= instance.config.maxConcurrent  // Limit concurrent animations for performance
-    ) return;
-    
+      data.animated ||
+      ratio < getThreshold(data) ||
+      instance.animating.has(data.element) ||
+      instance.animating.size >= instance.config.maxConcurrent // Limit concurrent animations for performance
+    )
+      return;
+
     instance.animating.add(data.element);
 
     const { config, element, targets, countSpan, countData } = data;
 
     // Set initial state
     if (!config[TEXT] && !countSpan && !targets) {
-      const [, transform] = getTransform(
-        config[ANIMATION],
-        config[DIRECTION],
-        0
-      );
+      const [, transform] = getTransform(config[ANIMATION], config[DIRECTION], 0);
       $(element, {
         opacity: '0',
         transform: transform !== 'none' ? transform : 'translateZ(0)',
@@ -366,9 +347,7 @@ const USAL = (() => {
     const start = performance.now() + config[DELAY];
     const easing = easings[config[EASING]];
     const splitConfig =
-      targets && config[SPLIT_ANIMATION]
-        ? parseClasses(config[SPLIT_ANIMATION])
-        : config;
+      targets && config[SPLIT_ANIMATION] ? parseClasses(config[SPLIT_ANIMATION]) : config;
 
     // Text animation effects (shimmer/fluid)
     if (config[TEXT]) {
@@ -428,14 +407,12 @@ const USAL = (() => {
           animConfig[DIRECTION],
           animProgress
         );
-        
+
         $(el, {
           opacity: animProgress.toString(),
           transform: transform !== 'none' ? transform : 'translateZ(0)',
-          filter: config[BLUR] && animProgress < 1 
-            ? `blur(${(1 - animProgress) * 10}px)` 
-            : '',
-          willChange: animProgress < 1 ? 'transform,opacity' : 'auto', // AQUI - usar animProgress!
+          filter: config[BLUR] && animProgress < 1 ? `blur(${(1 - animProgress) * 10}px)` : '',
+          willChange: animProgress < 1 ? 'transform,opacity' : 'auto',
         });
       };
 
@@ -452,9 +429,9 @@ const USAL = (() => {
 
           const targetProgress = Math.min(targetElapsed / config[DURATION], 1);
           const targetEased = easing(targetProgress);
-          
+
           applyAnimation(target, targetEased, splitConfig);
-          
+
           if (targetProgress < 1) done = false;
         });
 
@@ -466,7 +443,7 @@ const USAL = (() => {
         }
       } else {
         applyAnimation(element, eased, config);
-        
+
         if (progress < 1) {
           data.rafId = requestAnimationFrame(tick);
         } else {
@@ -498,45 +475,40 @@ const USAL = (() => {
 
     if (countSpan) countSpan.textContent = '0';
     if (targets) {
-      targets.forEach((target) =>
-        $(target, { opacity: '0', transform: '', filter: '' })
-      );
+      targets.forEach((target) => $(target, { opacity: '0', transform: '', filter: '' }));
     }
 
-    if (!data.config[ONCE] && !instance.config.once) data.animated = 0; 
+    if (!data.config[ONCE] && !instance.config.once) data.animated = 0;
     instance.animating.delete(element);
   };
 
-const getThreshold = (data) => {
-    return Math.max(0, Math.min(1, 
-        (data.config[THRESHOLD] || defaults.threshold) / 100
-    ));
-}
+  const getThreshold = (data) =>
+    Math.max(0, Math.min(1, (data.config[THRESHOLD] || defaults.threshold) / 100));
 
-const newElement = (element, instance) => {
-  const data = processElement(element, instance);
-  if (instance.observer) {
-    instance.observer.observe(element);
-    const rect = element.getBoundingClientRect();
-    
-    const visible = 
-      rect.top < window.innerHeight && 
-      rect.bottom > 0 && 
-      rect.left < window.innerWidth && 
-      rect.right > 0;
-    
-    if (visible) {
-      const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
-      const visibleWidth = Math.min(rect.right, window.innerWidth) - Math.max(rect.left, 0);
-      
-      const visibleArea = visibleHeight * visibleWidth;
-      const totalArea = rect.height * rect.width;
-      const ratio = visibleArea / totalArea;
-    
-      animate(ratio, data, instance);
+  const newElement = (element, instance) => {
+    const data = processElement(element, instance);
+    if (instance.observer) {
+      instance.observer.observe(element);
+      const rect = element.getBoundingClientRect();
+
+      const visible =
+        rect.top < window.innerHeight &&
+        rect.bottom > 0 &&
+        rect.left < window.innerWidth &&
+        rect.right > 0;
+
+      if (visible) {
+        const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
+        const visibleWidth = Math.min(rect.right, window.innerWidth) - Math.max(rect.left, 0);
+
+        const visibleArea = visibleHeight * visibleWidth;
+        const totalArea = rect.height * rect.width;
+        const ratio = visibleArea / totalArea;
+
+        animate(ratio, data, instance);
+      }
     }
-  }
-};
+  };
 
   const handleElement = (element, instance, action = 'add') => {
     const id = element.getAttribute('data-usal-id');
@@ -554,7 +526,7 @@ const newElement = (element, instance) => {
 
     if (action === 'update') {
       const newClasses = element.getAttribute('data-usal');
-      
+
       if (!newClasses) {
         handleElement(element, instance, 'remove');
         return;
@@ -588,27 +560,24 @@ const newElement = (element, instance) => {
     instance.observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          const data = instance.elements.get(
-            entry.target.getAttribute('data-usal-id')
-          );
+          const data = instance.elements.get(entry.target.getAttribute('data-usal-id'));
           if (!data) return;
 
-          if (entry.intersectionRatio === 0 && 
-               data.animated &&
-              !data.config[ONCE] && 
-              !instance.animating.has(data.element)
-          ) reset(data, instance);
+          if (
+            entry.intersectionRatio === 0 &&
+            data.animated &&
+            !data.config[ONCE] &&
+            !instance.animating.has(data.element)
+          )
+            reset(data, instance);
           else animate(entry.intersectionRatio, data, instance);
-          
         });
       },
       // Multiple thresholds for smooth detection
       { threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] }
     );
 
-    instance.elements.forEach((data) =>
-      instance.observer.observe(data.element)
-    );
+    instance.elements.forEach((data) => instance.observer.observe(data.element));
 
     // MutationObserver for DOM changes
     instance.mutationObserver = new MutationObserver((mutations) => {
@@ -616,7 +585,8 @@ const newElement = (element, instance) => {
         if (mutation.type === 'childList') {
           // Handle added nodes
           mutation.addedNodes.forEach((node) => {
-            if (node.nodeType === 1) {  // Element node
+            if (node.nodeType === 1) {
+              // Element node
               if (node.hasAttribute('data-usal')) handleElement(node, instance);
               node
                 .querySelectorAll?.('[data-usal]')
@@ -626,19 +596,13 @@ const newElement = (element, instance) => {
           // Handle removed nodes
           mutation.removedNodes.forEach((node) => {
             if (node.nodeType === 1) {
-              if (node.hasAttribute('data-usal'))
-                handleElement(node, instance, 'remove');
+              if (node.hasAttribute('data-usal')) handleElement(node, instance, 'remove');
               node
                 .querySelectorAll?.('[data-usal]')
-                ?.forEach((element) =>
-                  handleElement(element, instance, 'remove')
-                );
+                ?.forEach((element) => handleElement(element, instance, 'remove'));
             }
           });
-        } else if (
-          mutation.type === 'attributes' &&
-          mutation.attributeName === 'data-usal'
-        ) {
+        } else if (mutation.type === 'attributes' && mutation.attributeName === 'data-usal') {
           // Handle attribute changes
           handleElement(mutation.target, instance, 'update');
         }
@@ -659,8 +623,8 @@ const newElement = (element, instance) => {
       initialized: false,
       observer: null,
       mutationObserver: null,
-      elements: new Map(),  // Track all animated elements
-      animating: new Set(),  // Currently animating elements
+      elements: new Map(), // Track all animated elements
+      animating: new Set(), // Currently animating elements
       config: { ...defaults, ...config },
     };
 
@@ -684,15 +648,15 @@ const newElement = (element, instance) => {
           [instance.observer, instance.mutationObserver].forEach((observer) =>
             observer?.disconnect()
           );
-          
+
           instance.elements.forEach((data) => {
             if (data.rafId) cancelAnimationFrame(data.rafId);
             if (data.element?.parentNode) {
               $(data.element, data.original);
-              data.element.removeAttribute('data-usal-id'); // AQUI DENTRO!
+              data.element.removeAttribute('data-usal-id');
             }
           });
-          
+
           instance.elements.clear();
           instance.animating.clear();
           instance.initialized = false;

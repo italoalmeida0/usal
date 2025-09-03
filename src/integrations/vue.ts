@@ -1,15 +1,16 @@
-import { onUnmounted, provide, inject } from 'vue';
+import { onUnmounted, inject } from 'vue';
+
 import USALLib from '../usal.js';
 
 const USAL_KEY = Symbol('usal');
 
 export const createUSAL = (config = {}) => {
   const instance = USALLib.createInstance();
-  
+
   if (config && Object.keys(config).length > 0) {
     instance.config(config);
   }
-  
+
   return {
     install(app) {
       app.config.globalProperties.$usal = instance;
@@ -21,12 +22,12 @@ export const createUSAL = (config = {}) => {
         },
         updated(el, binding) {
           el.setAttribute('data-usal', binding.value || 'fade');
-        }
+        },
       });
     },
     config: (v) => instance.config(v),
     destroy: () => instance.destroy(),
-    getInstance: () => instance
+    getInstance: () => instance,
   };
 };
 
@@ -39,10 +40,10 @@ export const useUSAL = () => {
     }
   });
 
-  return { 
+  return {
     getInstance: () => instance,
     config: (v) => instance.config(v),
-    destroy: () => instance.destroy()
+    destroy: () => instance.destroy(),
   };
 };
 

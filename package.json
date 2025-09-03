@@ -1,8 +1,9 @@
 {
-  "name": "usal",
-  "version": "1.0.0-beta.0",
+  "name": "usal-monorepo",
+  "version": "1.0.0-beta.4",
+  "private": true,
   "type": "module",
-  "description": "Ultimate Scroll Animation Library - 8KB of pure JavaScript magic - Works with React, Vue, Svelte, Solid, Lit, Angular Vanilla JS and more",
+  "description": "Ultimate Scroll Animation Library - 8KB of pure JavaScript magic",
   "homepage": "https://italoalmeida0.github.io/usal",
   "repository": {
     "type": "git",
@@ -13,99 +14,109 @@
   },
   "author": "Italo Almeida",
   "license": "MIT",
-  "main": "dist/usal.cjs.js",
-  "module": "dist/usal.esm.js",
-  "browser": "dist/usal.umd.js",
-  "unpkg": "dist/usal.min.js",
-  "jsdelivr": "dist/usal.min.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "browser": "./dist/usal.umd.js",
-      "import": "./dist/usal.esm.js",
-      "require": "./dist/usal.cjs.js"
+  "workspaces": [
+    "packages/*"
+  ],
+  "packages": {
+    "react": {
+      "dependencies": {
+        "react": [
+          ">=16.8.0",
+          false
+        ]
+      },
+      "jsx": true
     },
-    "./react": {
-      "types": "./dist/react.d.ts",
-      "import": "./dist/react.esm.js",
-      "require": "./dist/react.cjs.js"
+    "solid": {
+      "dependencies": {
+        "solid-js": [
+          ">=1.0.0",
+          false
+        ]
+      }
     },
-    "./vue": {
-      "types": "./dist/vue.d.ts",
-      "import": "./dist/vue.esm.js",
-      "require": "./dist/vue.cjs.js"
+    "svelte": {
+      "dependencies": {
+        "svelte": [
+          ">=3.0.0",
+          false
+        ]
+      },
+      "usage": "use:usal={'VALUES'}"
     },
-    "./svelte": {
-      "types": "./dist/svelte.d.ts",
-      "import": "./dist/svelte.esm.js",
-      "require": "./dist/svelte.cjs.js"
+    "vue": {
+      "dependencies": {
+        "vue": [
+          ">=3.0.0",
+          false
+        ]
+      },
+      "usage": "v-usal=\"'VALUES'\""
     },
-    "./solid": {
-      "types": "./dist/solid.d.ts",
-      "import": "./dist/solid.esm.js",
-      "require": "./dist/solid.cjs.js"
+    "lit": {
+      "dependencies": {
+        "lit": [
+          ">=2.0.0",
+          false
+        ]
+      }
     },
-    "./lit": {
-      "types": "./dist/lit.d.ts",
-      "import": "./dist/lit.esm.js",
-      "require": "./dist/lit.cjs.js"
+    "angular": {
+      "dependencies": {
+        "@angular/core": [
+          ">=12.0.0",
+          false
+        ],
+        "@angular/common": [
+          ">=12.0.0",
+          false
+        ]
+      },
+      "usage": "[usal]=\"'VALUES'\""
     }
   },
-  "files": [
-    "dist/",
-    "README.md",
-    "LICENSE"
-  ],
   "scripts": {
-    "build": "node build.js",
-    "prepublishOnly": "npm run build"
+    "dev": "npm run build -- --watch",
+    "build": "npm run lint:fix && node scripts/build.js && npm run format:doc",
+    "version:all": "npm version --workspaces",
+    "update:tags": "node scripts/update-tags.js",
+    "publish:pkgs-beta": "npm run build && npm publish --workspaces --tag beta --access public",
+    "publish:all-beta": "npm run publish:pkgs-beta && npm run update:tags",
+    "format": "prettier --write --ignore-path .gitignore **/*.{js,ts,jsx,tsx,html,css} && npm run format:doc",
+    "format:doc": "prettier --write --ignore-path .prettierignore *.{json,md} packages/**/*.{json,md}",
+    "lint": "eslint src/**/*.{js,ts,jsx,tsx}",
+    "lint:fix": "eslint src/**/*.{js,ts,jsx,tsx} --fix",
+    "lint:comments": "node scripts/lint-comments.js"
   },
-  "keywords": [
-    "animation",
-    "scroll",
-    "scroll-animation",
-    "javascript",
-    "react",
-    "vue",
-    "lit",
-    "svelte",
-    "solid",
-    "vite",
-    "webpack",
-    "rollup",
-    "parcel",
-    "universal",
-    "framework-agnostic"
-  ],
   "devDependencies": {
+    "@angular/common": ">=12.0.0",
+    "@angular/core": ">=12.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.42.0",
+    "@typescript-eslint/parser": "^8.42.0",
     "esbuild": "^0.25.9",
-    "esbuild-plugin-solid": "^0.6.0",
-    "typescript": "^5.0.0"
-  },
-  "peerDependencies": {
+    "eslint": "^9.34.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "globals": "^16.3.0",
+    "lit": ">=2.0.0",
+    "prettier": "^3.6.2",
     "react": ">=16.8.0",
     "solid-js": ">=1.0.0",
     "svelte": ">=3.0.0",
-    "vue": ">=3.0.0",
-    "lit": ">=2.0.0"
+    "typescript": "^5.0.0",
+    "vue": ">=3.0.0"
   },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    },
-    "vue": {
-      "optional": true
-    },
-    "lit": {
-      "optional": true
-    },
-    "solid-js": {
-      "optional": true
-    },
-    "svelte": {
-      "optional": true
-    }
-  },
-  "sideEffects": false
+  "keywords": [
+    "javascript",
+    "animation",
+    "css-animations",
+    "web-animation",
+    "scroll-animations",
+    "intersection-observer",
+    "scroll-lib"
+  ],
+  "dependencies": {
+    "franc": "^6.2.0",
+    "langdetect": "^0.2.1"
+  }
 }

@@ -1,4 +1,5 @@
 import { onMount, onCleanup, createContext, useContext, createSignal } from 'solid-js';
+
 import USALLib from '../usal.js';
 
 const USALContext = createContext();
@@ -21,7 +22,9 @@ export const USALProvider = (props) => {
 
   return USALContext.Provider({
     value: instance,
-    get children() { return props.children; }
+    get children() {
+      return props.children;
+    },
   });
 };
 
@@ -47,21 +50,21 @@ export const useUSAL = () => {
   return {
     getInstance: () => instance(),
     config: (v) => instance() && instance().config(v),
-    destroy: () => instance() && instance().destroy()
+    destroy: () => instance() && instance().destroy(),
   };
 };
 
 export const createUSAL = (config = {}) => {
   const instance = USALLib.createInstance();
-  
+
   if (config && Object.keys(config).length > 0) {
     instance.config(config);
   }
-  
+
   return {
     config: (v) => instance.config(v),
     destroy: () => instance.destroy(),
-    getInstance: () => instance
+    getInstance: () => instance,
   };
 };
 

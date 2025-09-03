@@ -1,5 +1,5 @@
 import { Component, JSX } from 'solid-js';
-import { USALConfig, USALInstance } from './index';
+import { USALConfig, USALInstance } from '../usal';
 
 export const USALProvider: Component<{
   children: JSX.Element;
