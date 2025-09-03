@@ -5,33 +5,66 @@ import USALLib from '../usal.js';
 const USAL_KEY = Symbol('usal');
 
 export const createUSAL = (config = {}) => {
-  const instance = USALLib.createInstance();
+  const isServer = typeof window === 'undefined';
 
-  if (config && Object.keys(config).length > 0) {
+  const instance = isServer ? null : USALLib.createInstance();
+
+  if (!isServer && instance && config && Object.keys(config).length > 0) {
     instance.config(config);
   }
 
   return {
     install(app) {
-      app.config.globalProperties.$usal = instance;
-      app.provide(USAL_KEY, instance);
+      const ssrSafeInstance = instance || {
+        config: () => {},
+        destroy: () => {},
+        getInstance: () => null,
+      };
+
+      app.config.globalProperties.$usal = ssrSafeInstance;
+      app.provide(USAL_KEY, ssrSafeInstance);
 
       app.directive('usal', {
         mounted(el, binding) {
-          el.setAttribute('data-usal', binding.value || 'fade');
+          if (typeof window !== 'undefined') {
+            el.setAttribute('data-usal', binding.value || 'fade');
+          }
         },
         updated(el, binding) {
-          el.setAttribute('data-usal', binding.value || 'fade');
+          if (typeof window !== 'undefined') {
+            el.setAttribute('data-usal', binding.value || 'fade');
+          }
+        },
+        beforeMount(el, binding) {
+          if (typeof window !== 'undefined') {
+            el.setAttribute('data-usal', binding.value || 'fade');
+          }
+        },
+        getSSRProps(binding) {
+          if (!binding) {
+            return { 'data-usal': 'fade' };
+          }
+          return {
+            'data-usal': binding.value || 'fade',
+          };
         },
       });
     },
-    config: (v) => instance.config(v),
-    destroy: () => instance.destroy(),
+    config: (v) => instance?.config(v) || (() => {}),
+    destroy: () => instance?.destroy() || (() => {}),
     getInstance: () => instance,
   };
 };
 
 export const useUSAL = () => {
+  if (typeof window === 'undefined') {
+    return {
+      getInstance: () => null,
+      config: () => {},
+      destroy: () => {},
+    };
+  }
+
   const instance = inject(USAL_KEY) || USALLib.createInstance();
 
   onUnmounted(() => {

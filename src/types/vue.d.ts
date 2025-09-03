@@ -1,5 +1,5 @@
 import { App } from 'vue';
-import { USALConfig, USALInstance } from '../usal';
+import USAL, { USALConfig, USALInstance } from '../usal';
 
 export const createUSAL: (config?: USALConfig) => {
   install(app: App): void;

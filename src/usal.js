@@ -1,5 +1,5 @@
 const USAL = (() => {
-  // Handle server-side rendering - return dummy methods if no window object
+  // Handle server-side rendering
   if (typeof window === 'undefined') {
     const noop = () => ({});
     return {
@@ -9,7 +9,7 @@ const USAL = (() => {
     };
   }
 
-  // Config array indices - using numbers instead of object keys for performance
+  // Config array indices
   const ANIMATION = 0;
   const DIRECTION = 1;
   const DURATION = 2;
@@ -24,23 +24,13 @@ const USAL = (() => {
   const COUNT = 11;
   const TEXT = 12;
 
-  const ANIMATION_FADE = 0;
-  const ANIMATION_ZOOMIN = 1;
-  const ANIMATION_ZOOMOUT = 2;
-  const ANIMATION_FLIP = 3;
-
   const animationMap = { fade: 0, zoomin: 1, zoomout: 2, flip: 3 };
 
-  // Bitwise flags for directions - allows combining multiple directions
-  const DIRECTION_UP = 1; // 0001
-  const DIRECTION_DOWN = 2; // 0010
-  const DIRECTION_LEFT = 4; // 0100
-  const DIRECTION_RIGHT = 8; // 1000
-
-  const EASING_EASE_OUT = 0;
-  const EASING_LINEAR = 1;
-  const EASING_EASE = 2;
-  const EASING_EASE_IN = 3;
+  // Bitwise flags for directions
+  const DIRECTION_UP = 1;
+  const DIRECTION_DOWN = 2;
+  const DIRECTION_LEFT = 4;
+  const DIRECTION_RIGHT = 8;
 
   const defaults = {
     maxConcurrent: 100,
@@ -51,20 +41,23 @@ const USAL = (() => {
     once: false,
   };
 
-  // Utility to apply styles
-  const $ = (element, styles) => Object.assign(element.style, styles);
+  // Utility to apply styles - now filters out null/undefined
+  const $ = (element, styles) => {
+    for (const key in styles) {
+      if (styles[key] != null) element.style[key] = styles[key];
+    }
+  };
 
   const parseClasses = (str) => {
     const tokens = str.trim().split(/\s+/);
-    // Initialize config array with default values
-    const parsedConfig = [
-      ANIMATION_FADE,
+    const config = [
+      0,
       0,
       defaults.duration,
       defaults.delay,
       defaults.threshold,
       defaults.splitDelay,
-      EASING_EASE_OUT,
+      0,
       0,
       0,
       null,
@@ -78,12 +71,11 @@ const USAL = (() => {
       const first = parts[0];
 
       if (animationMap[first] !== undefined) {
-        parsedConfig[ANIMATION] = animationMap[first];
+        config[ANIMATION] = animationMap[first];
         if (parts[1]) {
-          // Parse direction chars and combine using bitwise OR
-          let direction = 0;
+          let dir = 0;
           for (const char of parts[1]) {
-            direction |=
+            dir |=
               char === 'u'
                 ? DIRECTION_UP
                 : char === 'd'
@@ -94,45 +86,43 @@ const USAL = (() => {
                       ? DIRECTION_RIGHT
                       : 0;
           }
-          parsedConfig[DIRECTION] = direction;
+          config[DIRECTION] = dir;
         }
       } else if (first === 'split') {
         const second = parts[1];
         if (['word', 'letter', 'item'].includes(second)) {
-          parsedConfig[SPLIT] = second;
+          config[SPLIT] = second;
         } else if (second === 'delay' && parts[2]) {
-          parsedConfig[SPLIT_DELAY] = +parts[2];
+          config[SPLIT_DELAY] = +parts[2];
         } else {
-          // Store animation config for split elements
-          parsedConfig[SPLIT_ANIMATION] = token.substring(6);
+          config[SPLIT_ANIMATION] = token.substring(6);
         }
       } else if (first === 'text' && ['shimmer', 'fluid'].includes(parts[1])) {
-        parsedConfig[TEXT] = parts[1];
+        config[TEXT] = parts[1];
       } else if (token.startsWith('count-[') && token.endsWith(']')) {
-        // Extract counter pattern from count-[pattern]
-        parsedConfig[COUNT] = token.slice(7, -1);
+        config[COUNT] = token.slice(7, -1);
       } else if (parts[1] && !isNaN(+parts[1])) {
         const value = +parts[1];
-        if (first === 'duration') parsedConfig[DURATION] = value;
-        else if (first === 'delay') parsedConfig[DELAY] = value;
-        else if (first === 'threshold') parsedConfig[THRESHOLD] = value;
+        if (first === 'duration') config[DURATION] = value;
+        else if (first === 'delay') config[DELAY] = value;
+        else if (first === 'threshold') config[THRESHOLD] = value;
       } else if (token === 'blur') {
-        parsedConfig[BLUR] = 1;
+        config[BLUR] = 1;
       } else if (token === 'once') {
-        parsedConfig[ONCE] = 1;
+        config[ONCE] = 1;
       } else if (token === 'linear') {
-        parsedConfig[EASING] = EASING_LINEAR;
+        config[EASING] = 1;
       } else if (token === 'ease') {
-        parsedConfig[EASING] = EASING_EASE;
+        config[EASING] = 2;
       } else if (token === 'ease-in') {
-        parsedConfig[EASING] = EASING_EASE_IN;
+        config[EASING] = 3;
       }
     });
 
-    return parsedConfig;
+    return config;
   };
 
-  // Easing functions - mathematical curves for smooth animation
+  // Easing functions
   const easings = [
     (t) => 1 - Math.pow(1 - t, 3), // ease-out
     (t) => t, // linear
@@ -140,18 +130,18 @@ const USAL = (() => {
     (t) => t * t * t, // ease-in
   ];
 
+  // Transform generators
+  const transformFns = {
+    1: (p) => `scale(${0.6 + p * 0.4})`, // zoomin
+    2: (p) => `scale(${1.2 - p * 0.2})`, // zoomout
+  };
+
   const getTransform = (animation, direction, progress) => {
     const inverse = 1 - progress;
-    const isFlip = animation === ANIMATION_FLIP;
+    let transform = transformFns[animation]?.(progress) || '';
 
-    let transform = '';
-
-    if (animation === ANIMATION_ZOOMIN) {
-      transform = `scale(${0.6 + progress * 0.4})`;
-    } else if (animation === ANIMATION_ZOOMOUT) {
-      transform = `scale(${1.2 - progress * 0.2})`;
-    } else if (isFlip) {
-      // Calculate rotation angle based on direction flags
+    if (animation === 3) {
+      // flip
       const value =
         inverse *
         (direction &&
@@ -159,34 +149,25 @@ const USAL = (() => {
         direction !== DIRECTION_DOWN &&
         direction !== DIRECTION_LEFT &&
         direction !== DIRECTION_RIGHT
-          ? 45 // Diagonal flip
-          : 90); // Single axis flip
+          ? 45
+          : 90);
       const parts = [];
-      // Check vertical flip using bitwise AND
-      if (direction & (DIRECTION_UP | DIRECTION_DOWN)) {
+      if (direction & (DIRECTION_UP | DIRECTION_DOWN))
         parts.push(`rotateX(${direction & DIRECTION_UP ? value : -value}deg)`);
-      }
-      // Check horizontal flip
-      if (direction & (DIRECTION_LEFT | DIRECTION_RIGHT)) {
+      if (direction & (DIRECTION_LEFT | DIRECTION_RIGHT))
         parts.push(`rotateY(${direction & DIRECTION_LEFT ? -value : value}deg)`);
-      }
-      if (!parts.length && isFlip) {
-        parts.push(`rotateY(${inverse * 90}deg)`);
-      }
-      transform = parts.length ? `perspective(400px) ${parts.join(' ')}` : '';
+      if (!parts.length) parts.push(`rotateY(${inverse * 90}deg)`);
+      transform = `perspective(400px) ${parts.join(' ')}`;
     }
 
-    // Add translation for non-flip animations with direction
-    if (!isFlip && direction) {
-      const value = inverse * 30;
-      const x = direction & DIRECTION_RIGHT ? -value : direction & DIRECTION_LEFT ? value : 0;
-      const y = direction & DIRECTION_DOWN ? -value : direction & DIRECTION_UP ? value : 0;
-      if (x || y) {
-        transform += ` translate(${x}px, ${y}px)`;
-      }
+    if (animation !== 3 && direction) {
+      const val = inverse * 30;
+      const x = direction & DIRECTION_RIGHT ? -val : direction & DIRECTION_LEFT ? val : 0;
+      const y = direction & DIRECTION_DOWN ? -val : direction & DIRECTION_UP ? val : 0;
+      if (x || y) transform += ` translate(${x}px, ${y}px)`;
     }
 
-    return [progress, transform || 'none'];
+    return transform || 'none';
   };
 
   const setupCount = (element, config, data) => {
@@ -194,7 +175,6 @@ const USAL = (() => {
     const parts = text.split(config[COUNT]);
     if (parts.length !== 2) return false;
 
-    // Parse number format (handle decimals and thousand separators)
     const clean = config[COUNT].replace(/[^\d\s,.]/g, '');
     let decimals = 0,
       value = 0;
@@ -229,29 +209,53 @@ const USAL = (() => {
 
   const formatNumber = (value, original, decimals) => {
     let formatted = decimals > 0 ? value.toFixed(decimals) : Math.floor(value).toString();
-
-    // Add thousand separators if original had them
     if (original.includes(' ') || original.includes(',')) {
       const parts = formatted.split('.');
-      parts[0] = parts[0].replace(
-        /\B(?=(\d{3})+(?!\d))/g, // Regex for thousand grouping
-        original.includes(' ') ? ' ' : ','
-      );
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, original.includes(' ') ? ' ' : ',');
       formatted = parts.join(decimals > 0 ? '.' : '');
     }
-
     return formatted;
   };
 
+  // Unified split function
+  const setupSplit = (element, config) => {
+    const targets = [];
+    const opacity = config[TEXT] ? '1' : '0';
+
+    if (config[SPLIT] === 'item') {
+      Array.from(element.children).forEach((child) => {
+        child.style.opacity = opacity;
+        targets.push(child);
+      });
+    } else {
+      const text = element.textContent || '';
+      const parts = config[SPLIT] === 'word' ? text.split(/(\s+)/) : text.split('');
+      element.innerHTML = '';
+
+      parts.forEach((part) => {
+        if (!part) return;
+        if (/\s/.test(part)) {
+          element.appendChild(document.createTextNode(part));
+        } else {
+          const span = document.createElement('span');
+          span.textContent = part;
+          span.style.cssText = `display:inline-block;opacity:${opacity}`;
+          element.appendChild(span);
+          targets.push(span);
+        }
+      });
+    }
+    return targets;
+  };
+
   const processElement = (element, instance) => {
-    // Generate unique ID for tracking
     let id = element.getAttribute('data-usal-id');
     if (!id) {
       id = `u${Date.now()}${Math.random().toString(36).substr(2, 5)}`;
       element.setAttribute('data-usal-id', id);
     }
 
-    // Cancel any existing animation
+    // Cancel existing animation
     const existing = instance.elements.get(id);
     if (existing?.rafId) {
       cancelAnimationFrame(existing.rafId);
@@ -270,62 +274,66 @@ const USAL = (() => {
         transform: element.style.transform || '',
         filter: element.style.filter || '',
       },
-      targets: null, // For split animations
+      targets: null,
       animated: 0,
       rafId: null,
     };
 
     if (config[COUNT]) setupCount(element, config, data);
-
     if (config[SPLIT]) {
-      const targets = [];
-
-      if (config[SPLIT] === 'item') {
-        // Split by child elements
-        Array.from(element.children).forEach((child) => {
-          child.style.opacity = config[TEXT] ? '1' : '0';
-          targets.push(child);
-        });
-      } else {
-        // Split text into words or letters
-        const isWord = config[SPLIT] === 'word';
-        const text = element.textContent || '';
-        element.innerHTML = '';
-
-        const parts = isWord ? text.split(/(\s+)/) : text.split('');
-        parts.forEach((part) => {
-          if (!part) return;
-          if (/\s/.test(part)) {
-            // Preserve whitespace as text nodes
-            element.appendChild(document.createTextNode(part));
-          } else {
-            const span = document.createElement('span');
-            span.textContent = part;
-            span.style.cssText = `display:inline-block;opacity:${config[TEXT] ? '1' : '0'}`;
-            element.appendChild(span);
-            targets.push(span);
-          }
-        });
-      }
-
-      data.targets = targets;
+      data.targets = setupSplit(element, config);
       if (config[SPLIT_ANIMATION]) data.splitConfig = parseClasses(config[SPLIT_ANIMATION]);
     }
 
     if (!config[TEXT] && !data.countSpan && !data.targets) {
-      $(element, { opacity: '0' });
+      element.style.opacity = '0';
     }
 
     instance.elements.set(id, data);
     return data;
   };
 
+  // Unified text effect function
+  const animateText = (targets, type, duration) => {
+    const startTime = performance.now();
+    const animate = () => {
+      const elapsed = performance.now() - startTime;
+      const cycle = (elapsed % duration) / duration;
+
+      targets.forEach((target, i) => {
+        if (type === 'shimmer') {
+          const phase = cycle * Math.PI * 2 + i * 0.5;
+          const intensity = Math.sin(phase) * 0.5 + 0.5;
+          $(target, {
+            opacity: 0.5 + intensity * 0.5,
+            filter: `brightness(${1 + intensity * 0.3})`,
+          });
+        } else {
+          const wave = cycle * 1.6 - 0.3;
+          const dist = Math.abs(wave - i / targets.length);
+          const intensity = dist < 0.3 ? 1 - dist / 0.3 : 0;
+          $(target, {
+            fontWeight: Math.round(100 + intensity * 800).toString(),
+            opacity: '1',
+          });
+        }
+      });
+      return requestAnimationFrame(animate);
+    };
+    return animate();
+  };
+
   const animate = (ratio, data, instance) => {
+    const threshold = Math.max(
+      0,
+      Math.min(1, (data.config[THRESHOLD] || defaults.threshold) / 100)
+    );
+
     if (
       data.animated ||
-      ratio < getThreshold(data) ||
+      ratio < threshold ||
       instance.animating.has(data.element) ||
-      instance.animating.size >= instance.config.maxConcurrent // Limit concurrent animations for performance
+      instance.animating.size >= instance.config.maxConcurrent
     )
       return;
 
@@ -333,59 +341,27 @@ const USAL = (() => {
 
     const { config, element, targets, countSpan, countData } = data;
 
-    // Set initial state
-    if (!config[TEXT] && !countSpan && !targets) {
-      const [, transform] = getTransform(config[ANIMATION], config[DIRECTION], 0);
+    // Text animation effects
+    if (config[TEXT]) {
+      data.rafId = animateText(targets || [element], config[TEXT], config[DURATION]);
+      data.animated = 1;
+      return;
+    }
+
+    // Initial state
+    if (!countSpan && !targets) {
+      const transform = getTransform(config[ANIMATION], config[DIRECTION], 0);
       $(element, {
         opacity: '0',
         transform: transform !== 'none' ? transform : 'translateZ(0)',
-        filter: config[BLUR] ? 'blur(10px)' : '',
+        filter: config[BLUR] ? 'blur(10px)' : null,
         willChange: 'transform,opacity',
       });
     }
 
     const start = performance.now() + config[DELAY];
     const easing = easings[config[EASING]];
-    const splitConfig =
-      targets && config[SPLIT_ANIMATION] ? parseClasses(config[SPLIT_ANIMATION]) : config;
-
-    // Text animation effects (shimmer/fluid)
-    if (config[TEXT]) {
-      const textTargets = targets || [element];
-      const startTime = performance.now();
-
-      const tick = () => {
-        const elapsed = performance.now() - startTime;
-        const cycle = (elapsed % config[DURATION]) / config[DURATION];
-
-        textTargets.forEach((target, index) => {
-          if (config[TEXT] === 'shimmer') {
-            // Wave-like brightness effect
-            const phase = cycle * Math.PI * 2 + index * 0.5;
-            const intensity = Math.sin(phase) * 0.5 + 0.5;
-            $(target, {
-              opacity: 0.5 + intensity * 0.5,
-              filter: `brightness(${1 + intensity * 0.3})`,
-            });
-          } else {
-            // Fluid weight animation
-            const wave = cycle * 1.6 - 0.3;
-            const position = index / textTargets.length;
-            const distance = Math.abs(wave - position);
-            const intensity = distance < 0.3 ? 1 - distance / 0.3 : 0;
-            $(target, {
-              fontWeight: Math.round(100 + intensity * 800).toString(),
-              opacity: '1',
-            });
-          }
-        });
-        data.rafId = requestAnimationFrame(tick);
-      };
-
-      tick();
-      data.animated = 1;
-      return;
-    }
+    const splitConfig = data.splitConfig || config;
 
     // Main animation loop
     const tick = () => {
@@ -393,7 +369,6 @@ const USAL = (() => {
       const progress = Math.min(elapsed / config[DURATION], 1);
       const eased = easing(progress);
 
-      // Counter animation
       if (countSpan && countData) {
         countSpan.textContent =
           progress >= 1
@@ -402,16 +377,11 @@ const USAL = (() => {
       }
 
       const applyAnimation = (el, animProgress, animConfig) => {
-        const [, transform] = getTransform(
-          animConfig[ANIMATION],
-          animConfig[DIRECTION],
-          animProgress
-        );
-
+        const transform = getTransform(animConfig[ANIMATION], animConfig[DIRECTION], animProgress);
         $(el, {
           opacity: animProgress.toString(),
           transform: transform !== 'none' ? transform : 'translateZ(0)',
-          filter: config[BLUR] && animProgress < 1 ? `blur(${(1 - animProgress) * 10}px)` : '',
+          filter: config[BLUR] && animProgress < 1 ? `blur(${(1 - animProgress) * 10}px)` : null,
           willChange: animProgress < 1 ? 'transform,opacity' : 'auto',
         });
       };
@@ -421,17 +391,12 @@ const USAL = (() => {
         targets.forEach((target, index) => {
           const targetDelay = index * config[SPLIT_DELAY];
           const targetElapsed = elapsed - targetDelay;
-
           if (targetElapsed < 0) {
             done = false;
             return;
           }
-
           const targetProgress = Math.min(targetElapsed / config[DURATION], 1);
-          const targetEased = easing(targetProgress);
-
-          applyAnimation(target, targetEased, splitConfig);
-
+          applyAnimation(target, easing(targetProgress), splitConfig);
           if (targetProgress < 1) done = false;
         });
 
@@ -443,7 +408,6 @@ const USAL = (() => {
         }
       } else {
         applyAnimation(element, eased, config);
-
         if (progress < 1) {
           data.rafId = requestAnimationFrame(tick);
         } else {
@@ -461,53 +425,22 @@ const USAL = (() => {
       data.rafId = null;
     }
 
-    const { element, targets, countSpan, original } = data;
+    const { element, targets, countSpan, original, config } = data;
 
-    if (!data.config[TEXT] && !countSpan && !targets) {
-      $(element, { opacity: '0', transform: '', filter: '' });
+    // Reset styles
+    const resetStyles = { opacity: '0', transform: '', filter: '' };
+
+    if (!config[TEXT] && !countSpan && !targets) {
+      $(element, resetStyles);
     } else {
-      $(element, {
-        opacity: original.opacity,
-        transform: original.transform,
-        filter: original.filter,
-      });
+      $(element, original);
     }
 
     if (countSpan) countSpan.textContent = '0';
-    if (targets) {
-      targets.forEach((target) => $(target, { opacity: '0', transform: '', filter: '' }));
-    }
+    if (targets) targets.forEach((target) => $(target, resetStyles));
 
-    if (!data.config[ONCE] && !instance.config.once) data.animated = 0;
+    if (!config[ONCE] && !instance.config.once) data.animated = 0;
     instance.animating.delete(element);
-  };
-
-  const getThreshold = (data) =>
-    Math.max(0, Math.min(1, (data.config[THRESHOLD] || defaults.threshold) / 100));
-
-  const newElement = (element, instance) => {
-    const data = processElement(element, instance);
-    if (instance.observer) {
-      instance.observer.observe(element);
-      const rect = element.getBoundingClientRect();
-
-      const visible =
-        rect.top < window.innerHeight &&
-        rect.bottom > 0 &&
-        rect.left < window.innerWidth &&
-        rect.right > 0;
-
-      if (visible) {
-        const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
-        const visibleWidth = Math.min(rect.right, window.innerWidth) - Math.max(rect.left, 0);
-
-        const visibleArea = visibleHeight * visibleWidth;
-        const totalArea = rect.height * rect.width;
-        const ratio = visibleArea / totalArea;
-
-        animate(ratio, data, instance);
-      }
-    }
   };
 
   const handleElement = (element, instance, action = 'add') => {
@@ -526,7 +459,6 @@ const USAL = (() => {
 
     if (action === 'update') {
       const newClasses = element.getAttribute('data-usal');
-
       if (!newClasses) {
         handleElement(element, instance, 'remove');
         return;
@@ -534,11 +466,9 @@ const USAL = (() => {
       if (id && instance.elements.has(id)) {
         const data = instance.elements.get(id);
         if (newClasses !== data.configString) {
-          // Config changed - reset and reprocess
           reset(data, instance);
           instance.elements.delete(id);
           element.removeAttribute('data-usal-id');
-
           newElement(element, instance);
         }
       } else {
@@ -548,13 +478,34 @@ const USAL = (() => {
     }
 
     if (id && instance.elements.has(id)) return;
-
     newElement(element, instance);
   };
 
+  const newElement = (element, instance) => {
+    const data = processElement(element, instance);
+    if (instance.observer) {
+      instance.observer.observe(element);
+      const rect = element.getBoundingClientRect();
+      const visible =
+        rect.top < window.innerHeight &&
+        rect.bottom > 0 &&
+        rect.left < window.innerWidth &&
+        rect.right > 0;
+
+      if (visible) {
+        const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
+        const visibleWidth = Math.min(rect.right, window.innerWidth) - Math.max(rect.left, 0);
+        const ratio = (visibleHeight * visibleWidth) / (rect.height * rect.width);
+        animate(ratio, data, instance);
+      }
+    }
+  };
+
   const setupObservers = (instance) => {
+    // Disconnect any previous observers
     if (instance.observer) instance.observer.disconnect();
-    if (instance.mutationObserver) instance.mutationObserver.disconnect();
+    instance.mutationObservers?.forEach((obs) => obs.disconnect());
+    instance.mutationObservers = new Map(); // Use the plural version
 
     // IntersectionObserver for viewport visibility
     instance.observer = new IntersectionObserver(
@@ -568,52 +519,78 @@ const USAL = (() => {
             data.animated &&
             !data.config[ONCE] &&
             !instance.animating.has(data.element)
-          )
+          ) {
             reset(data, instance);
-          else animate(entry.intersectionRatio, data, instance);
+          } else {
+            animate(entry.intersectionRatio, data, instance);
+          }
         });
       },
-      // Multiple thresholds for smooth detection
-      { threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] }
+      { threshold: Array.from({ length: 11 }, (_, i) => i / 10) }
     );
 
+    // Re-observe all known elements
     instance.elements.forEach((data) => instance.observer.observe(data.element));
 
-    // MutationObserver for DOM changes
-    instance.mutationObserver = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          // Handle added nodes
-          mutation.addedNodes.forEach((node) => {
-            if (node.nodeType === 1) {
-              // Element node
-              if (node.hasAttribute('data-usal')) handleElement(node, instance);
-              node
-                .querySelectorAll?.('[data-usal]')
-                ?.forEach((element) => handleElement(element, instance));
-            }
-          });
-          // Handle removed nodes
-          mutation.removedNodes.forEach((node) => {
-            if (node.nodeType === 1) {
-              if (node.hasAttribute('data-usal')) handleElement(node, instance, 'remove');
-              node
-                .querySelectorAll?.('[data-usal]')
-                ?.forEach((element) => handleElement(element, instance, 'remove'));
-            }
-          });
-        } else if (mutation.type === 'attributes' && mutation.attributeName === 'data-usal') {
-          // Handle attribute changes
-          handleElement(mutation.target, instance, 'update');
-        }
-      });
-    });
+    // Start the new, robust observation process
+    walkAndObserveRoots(document.body, instance);
+  };
 
-    instance.mutationObserver.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['data-usal'],
+  const walkAndObserveRoots = (root, instance) => {
+    // 1. Process elements in the current root
+    const processRoot = (currentRoot) => {
+      if (currentRoot.hasAttribute?.('data-usal')) {
+        handleElement(currentRoot, instance);
+      }
+      currentRoot.querySelectorAll?.('[data-usal]').forEach((el) => handleElement(el, instance));
+    };
+
+    processRoot(root);
+
+    // 2. Set up a dedicated MutationObserver for this root
+    if (!instance.mutationObservers.has(root)) {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList') {
+            mutation.addedNodes.forEach((node) => {
+              if (node.nodeType === 1) {
+                processRoot(node); // Process the new node and its children
+                if (node.shadowRoot) {
+                  walkAndObserveRoots(node.shadowRoot, instance); // Recursively observe new shadow roots
+                }
+                node.querySelectorAll?.('*').forEach((el) => {
+                  if (el.shadowRoot) walkAndObserveRoots(el.shadowRoot, instance);
+                });
+              }
+            });
+            mutation.removedNodes.forEach((node) => {
+              if (node.nodeType === 1) {
+                if (node.hasAttribute?.('data-usal')) handleElement(node, instance, 'remove');
+                node
+                  .querySelectorAll?.('[data-usal]')
+                  .forEach((el) => handleElement(el, instance, 'remove'));
+              }
+            });
+          } else if (mutation.type === 'attributes' && mutation.attributeName === 'data-usal') {
+            handleElement(mutation.target, instance, 'update');
+          }
+        });
+      });
+
+      observer.observe(root, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['data-usal'],
+      });
+      instance.mutationObservers.set(root, observer);
+    }
+
+    // 3. Find and recurse into any existing shadow roots
+    root.querySelectorAll('*').forEach((el) => {
+      if (el.shadowRoot) {
+        walkAndObserveRoots(el.shadowRoot, instance);
+      }
     });
   };
 
@@ -622,32 +599,25 @@ const USAL = (() => {
     const instance = {
       initialized: false,
       observer: null,
-      mutationObserver: null,
-      elements: new Map(), // Track all animated elements
-      animating: new Set(), // Currently animating elements
+      mutationObservers: null,
+      elements: new Map(),
+      animating: new Set(),
       config: { ...defaults, ...config },
     };
 
     return {
       init(newConfig = {}) {
         if (instance.initialized) return;
-
         instance.initialized = true;
         Object.assign(instance.config, newConfig);
-        instance.observer = new IntersectionObserver(() => {});
-        document
-          .querySelectorAll('[data-usal]')
-          .forEach((element) => handleElement(element, instance));
         setupObservers(instance);
       },
 
       destroy() {
         clearTimeout(destroyTimeout);
         destroyTimeout = setTimeout(() => {
-          // Clean up all observers and animations
-          [instance.observer, instance.mutationObserver].forEach((observer) =>
-            observer?.disconnect()
-          );
+          instance.observer?.disconnect();
+          instance.mutationObservers?.forEach((obs) => obs.disconnect());
 
           instance.elements.forEach((data) => {
             if (data.rafId) cancelAnimationFrame(data.rafId);
@@ -661,7 +631,7 @@ const USAL = (() => {
           instance.animating.clear();
           instance.initialized = false;
           instance.observer = null;
-          instance.mutationObserver = null;
+          instance.mutationObservers = null;
         }, 0);
       },
 

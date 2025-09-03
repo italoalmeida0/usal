@@ -38,7 +38,6 @@ function detectPackageManager() {
 // read package.json root
 let rootPackageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
 
-// Extract project name from monorepo name (e.g., "usal-monorepo" -> "usal")
 const PROJECT_NAME = rootPackageJson.name.split('-monorepo')[0];
 
 // Ensure devDependencies exist
@@ -182,22 +181,31 @@ function createSubPackageJson(framework, config = {}) {
     bugs: rootPackageJson.bugs,
     author: rootPackageJson.author,
     license: rootPackageJson.license,
-    main: './index.cjs.js',
+    main: './index.cjs',
     module: './index.esm.js',
     types: './index.d.ts',
     exports: {
       '.': {
         types: './index.d.ts',
         import: './index.esm.js',
-        require: './index.cjs.js',
+        require: './index.cjs',
       },
     },
-    files: ['*.js', '*.d.ts', 'README.md', 'LICENSE'],
+    files: ['*.cjs', '*.js', '*.map', '*.ts', 'README.md', 'LICENSE'],
     keywords: [...rootPackageJson.keywords, framework === 'vanilla' ? null : framework].filter(
       Boolean
     ),
     sideEffects: false,
   };
+
+  if (config.plugins && Array.isArray(config.plugins)) {
+    for (const pluginName of config.plugins) {
+      packageJson.exports[`./${pluginName}`] = `./${pluginName}.js`;
+      if (!packageJson.files.includes(`${pluginName}.js`)) {
+        packageJson.files.push(`${pluginName}.js`);
+      }
+    }
+  }
 
   // Process dependencies with new format
   if (config.dependencies) {
@@ -225,7 +233,7 @@ function createSubPackageJson(framework, config = {}) {
       types: './index.d.ts',
       browser: `./${PROJECT_NAME}.umd.js`,
       import: './index.esm.js',
-      require: './index.cjs.js',
+      require: './index.cjs',
     };
   }
 
@@ -308,6 +316,26 @@ async function buildFrameworkPackage(name, config = {}) {
     console.log(`  ${colorize.accent('◆')} JSX enabled for this package`);
   }
 
+  if (config.plugins && Array.isArray(config.plugins)) {
+    console.log(`  ${colorize.info('[PLUGINS]')} Copying plugins...`);
+
+    for (const pluginName of config.plugins) {
+      const pluginSourcePath = path.join('src', 'plugins', `${pluginName}.js`);
+      const pluginOutputName = `${pluginName}.js`;
+      const pluginDestPath = path.join(packageDir, pluginOutputName);
+
+      if (!fs.existsSync(pluginSourcePath)) {
+        console.log(
+          `    ${colorize.warning('⚠')} Plugin not found: ${colorize.file(pluginSourcePath)}`
+        );
+        continue;
+      }
+
+      fs.copyFileSync(pluginSourcePath, pluginDestPath);
+      console.log(`    ${colorize.success('✓')} Copied plugin: ${colorize.file(pluginOutputName)}`);
+    }
+  }
+
   // Build ESM
   await esbuild.build({
     ...buildOptions,
@@ -320,7 +348,7 @@ async function buildFrameworkPackage(name, config = {}) {
   await esbuild.build({
     ...buildOptions,
     format: 'cjs',
-    outfile: path.join(packageDir, 'index.cjs.js'),
+    outfile: path.join(packageDir, 'index.cjs'),
   });
   console.log(`  ${colorize.success('✓')} CJS build complete`);
 
@@ -349,18 +377,16 @@ async function buildFrameworkPackage(name, config = {}) {
 
   // Copy TypeScript definitions
   const typeFile =
-    config.types ||
-    (name === 'vanilla' ? `src/types/${PROJECT_NAME}.d.ts` : `src/types/${name}.d.ts`);
+    config.types || (name === 'vanilla' ? `src/${PROJECT_NAME}.d.ts` : `src/types/${name}.d.ts`);
 
-  if (name !== 'vanilla' && fs.existsSync(`src/types/${PROJECT_NAME}.d.ts`)) {
-    fs.copyFileSync(
-      `src/types/${PROJECT_NAME}.d.ts`,
-      path.join(packageDir, `${PROJECT_NAME}.d.ts`)
-    );
+  if (name !== 'vanilla' && fs.existsSync(`src/${PROJECT_NAME}.d.ts`)) {
+    fs.copyFileSync(`src/${PROJECT_NAME}.d.ts`, path.join(packageDir, `${PROJECT_NAME}.d.ts`));
   }
 
   if (fs.existsSync(typeFile)) {
-    fs.copyFileSync(typeFile, path.join(packageDir, 'index.d.ts'));
+    let content = fs.readFileSync(typeFile, 'utf8');
+    content = content.replace(`../${PROJECT_NAME}`, `./${PROJECT_NAME}`);
+    fs.writeFileSync(path.join(packageDir, 'index.d.ts'), content);
     console.log(`  ${colorize.success('✓')} TypeScript definitions copied`);
   }
 

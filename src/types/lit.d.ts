@@ -1,5 +1,5 @@
 import { ReactiveController, ReactiveControllerHost, DirectiveResult } from 'lit';
-import { USALConfig, USALInstance } from '../usal';
+import USAL, { USALConfig, USALInstance } from '../usal';
 
 export class USALController implements ReactiveController {
   constructor(host: ReactiveControllerHost, config?: USALConfig);

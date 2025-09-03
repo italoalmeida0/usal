@@ -1,9 +1,9 @@
 {
   "name": "usal-monorepo",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0-beta.21",
   "private": true,
   "type": "module",
-  "description": "Ultimate Scroll Animation Library - 8KB of pure JavaScript magic",
+  "description": "Ultimate Scroll Animation Library - 9KB of pure JavaScript magic",
   "homepage": "https://italoalmeida0.github.io/usal",
   "repository": {
     "type": "git",
@@ -49,8 +49,16 @@
         "vue": [
           ">=3.0.0",
           false
+        ],
+        "@nuxt/kit": [
+          ">=3.0.0",
+          true
         ]
       },
+      "plugins": [
+        "nuxt",
+        "nuxt-plugin"
+      ],
       "usage": "v-usal=\"'VALUES'\""
     },
     "lit": {
@@ -86,9 +94,11 @@
     "format:doc": "prettier --write --ignore-path .prettierignore *.{json,md} packages/**/*.{json,md}",
     "lint": "eslint src/**/*.{js,ts,jsx,tsx}",
     "lint:fix": "eslint src/**/*.{js,ts,jsx,tsx} --fix",
+    "lint:pkgs": "npx eslint packages/** --no-ignore --rule {no-var:off,no-redeclare:off,prefer-const:off,eqeqeq:off,import/order:off,no-setter-return:off,no-sparse-arrays:off,no-cond-assign:off}",
     "lint:comments": "node scripts/lint-comments.js"
   },
   "devDependencies": {
+    "langdetect": "^0.2.1",
     "@angular/common": ">=12.0.0",
     "@angular/core": ">=12.0.0",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
@@ -104,7 +114,9 @@
     "solid-js": ">=1.0.0",
     "svelte": ">=3.0.0",
     "typescript": "^5.0.0",
-    "vue": ">=3.0.0"
+    "vue": ">=3.0.0",
+    "nuxt": ">=3.0.0",
+    "@nuxt/kit": ">=3.0.0"
   },
   "keywords": [
     "javascript",
@@ -114,9 +126,5 @@
     "scroll-animations",
     "intersection-observer",
     "scroll-lib"
-  ],
-  "dependencies": {
-    "franc": "^6.2.0",
-    "langdetect": "^0.2.1"
-  }
+  ]
 }

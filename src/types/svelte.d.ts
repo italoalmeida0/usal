@@ -1,5 +1,5 @@
 import { ActionReturn } from 'svelte/action';
-import { USALConfig, USALInstance } from '../usal';
+import USAL, { USALConfig, USALInstance } from '../usal';
 
 export interface USALAction {
   (node: HTMLElement, params?: string): ActionReturn<string>;

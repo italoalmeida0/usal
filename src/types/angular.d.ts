@@ -1,5 +1,5 @@
 import { Directive, ElementRef, Input, OnInit, Injectable, NgModule } from '@angular/core';
-import { USALConfig, USALInstance } from '../usal';
+import USAL, { USALConfig, USALInstance } from '../usal';
 
 @Injectable({
   providedIn: 'root',

@@ -2,7 +2,7 @@
 
 ![Logo USAL.js](https://github.com/italoalmeida0/usal/raw/main/assets/logo.png)
 
-**Ultimate Scroll Animation Library - 8KB of pure JavaScript magic ✨**
+**Ultimate Scroll Animation Library - 9KB of pure JavaScript magic ✨**
 
 **Works with React, Solid, Svelte, Vue, Lit, Angular, Vanilla JS and more**
 
@@ -14,9 +14,10 @@
 - 📝 Text animations (split by word/letter)
 - 🔢 Number counters
 - 🎨 Text effects (shimmer, fluid)
-- 📦 Only 8KB minified
+- 📦 Only 9KB minified
 - 🚀 Zero dependencies
 - ⚡ 60fps performance
+- 🪤 Web Components Supported
 - 🔧 Framework agnostic
 
 ## Packages

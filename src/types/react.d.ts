@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import { USALConfig, USALInstance } from '../usal';
+import React, { ReactNode } from 'react';
+import USAL, { USALConfig, USALInstance } from '../usal';
 
 export const USALProvider: React.FC<{
   children: ReactNode;
