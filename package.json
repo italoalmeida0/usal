@@ -1,6 +1,6 @@
 {
   "name": "usal",
-  "version": "1.0.0",
+  "version": "1.0.0-beta.0",
   "type": "module",
   "description": "Ultimate Scroll Animation Library - 8KB of pure JavaScript magic - Works with React, Vue, Svelte, Solid, Lit, Angular Vanilla JS and more",
   "homepage": "https://italoalmeida0.github.io/usal",
