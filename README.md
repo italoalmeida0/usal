@@ -18,7 +18,7 @@
 - 📝 Text animations (split by word/letter)
 - 🔢 Number counters
 - 🎨 Text effects (shimmer, fluid)
-- 📦 Only 9KB minified
+- 📦 Only 9KB minified (5KB Gzipped)
 - 🚀 Zero dependencies
 - ♾ 60fps performance
 - 🪤 Web components supported
