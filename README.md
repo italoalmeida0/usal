@@ -37,7 +37,7 @@
 CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/usal@latest/usal.min.js"></script>
+<script src="https://cdn.usal.dev/latest"></script>
 ```
 
 NPM:
