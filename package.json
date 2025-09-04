@@ -1,6 +1,6 @@
 {
   "name": "usal-monorepo",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "type": "module",
   "description": "Ultimate Scroll Animation Library - 9KB of pure JavaScript magic",
