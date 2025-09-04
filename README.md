@@ -6,6 +6,9 @@
 
 **Works with React, Solid, Svelte, Vue, Lit, Angular, Vanilla JS and more**
 
+[![Powered by Cloudflare](https://img.shields.io/badge/Powered%20by-Cloudflare-orange)](https://cloudflare.com)
+[![Delivered by jsDelivr](https://img.shields.io/badge/Delivered%20by-jsDelivr-blue)](https://jsdelivr.com)
+[![Available on npm](https://img.shields.io/badge/Available%20on-npm-red)](https://npmjs.com/package/usal)
 </div>
 
 ## Features
