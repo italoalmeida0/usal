@@ -16,9 +16,10 @@
 - 🎨 Text effects (shimmer, fluid)
 - 📦 Only 9KB minified
 - 🚀 Zero dependencies
-- ⚡ 60fps performance
+- ♾ 60fps performance
 - 🪤 Web components supported
 - 🔧 Framework agnostic
+- ⚡ CDN powered by jsDelivr & Cloudflare
 
 ## Packages
 
