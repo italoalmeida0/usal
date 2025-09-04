@@ -34,7 +34,7 @@
     <div class="header" data-usal="fade-d duration-1000">
       <img src="https://github.com/italoalmeida0/usal/raw/main/assets/logo.png" alt="USAL.js" />
       <p class="subtitle">Ultimate Scroll Animation Library</p>
-      <div class="version">Version 1.0.0-beta.21</div>
+      <div class="version">Version 1.0.0</div>
       <a href="https://github.com/italoalmeida0/usal" class="version btn-mini"> View on GitHub </a>
     </div>
 
@@ -64,10 +64,33 @@ npm install @usal/angular</code></pre>
           </div>
 
           <div class="card card-compact" data-usal="fade-u delay-200">
-            <h4>Initialize</h4>
-            <pre><code class="javascript">// Basic initialization
-USAL.init();
-</code></pre>
+            <h4>Framework Setup</h4>
+            <pre><code class="javascript">// Installed via CDN, initializes automatically, instance in window.USAL
+
+// React (Next.js)
+import { USALProvider } from &#39;@usal/react&#39;;
+&lt;USALProvider&gt;{children}&lt;/USALProvider&gt;
+
+// Solid (SolidStart)
+import { USALProvider } from &#39;@usal/solid&#39;;
+&lt;USALProvider&gt;{props.children}&lt;/USALProvider&gt;
+
+// Svelte (SvelteKit)
+import { usal, createUSAL } from &#39;@usal/svelte&#39;;
+const usalInstance = createUSAL();
+
+// Vue (Nuxt)
+export default defineNuxtConfig({
+modules: [&#39;@usal/vue/nuxt&#39;]
+
+// Lit
+import { usal, useUSAL } from &#39;@usal/lit&#39;;
+const usalInstance = useUSAL();
+
+// Angular
+import { USALModule } from &#39;@usal/angular&#39;;
+@Component({imports: [USALModule]})
+export class AppComponent</code></pre>
           </div>
         </div>
 
@@ -521,10 +544,16 @@ parent.appendChild(item);</code></pre>
 &lt;div data-usal="flip-r delay-500 blur">Complex&lt;/div>
 
 &lt;!-- Framework-specific usage --&gt;
-&lt;!-- Svelte --&gt;
+&lt;!-- React (Next.js) --&gt;
+&lt;div data-usal=&quot;fade duration-500&quot;&gt;Content&lt;/div&gt;
+&lt;!-- Solid (SolidStart) --&gt;
+&lt;div data-usal=&quot;fade duration-500&quot;&gt;Content&lt;/div&gt;
+&lt;!-- Svelte (SvelteKit) --&gt;
 &lt;div use:usal={&#39;fade duration-500&#39;}&gt;Content&lt;/div&gt;
-&lt;!-- Vue --&gt;
+&lt;!-- Vue (Nuxt) --&gt;
 &lt;div v-usal=&quot;&#39;fade duration-500&#39;&quot;&gt;Content&lt;/div&gt;
+&lt;!-- Lit --&gt;
+&lt;div ${usal(&#39;fade duration-500&#39;)}&gt;Content&lt;/div&gt;
 &lt;!-- Angular --&gt;
 &lt;div [usal]=&quot;&#39;fade duration-500&#39;&quot;&gt;Content&lt;/div&gt;
 </code></pre>
@@ -628,26 +657,25 @@ text-fluid</code></pre>
         <!-- JavaScript API -->
         <div class="card" data-usal="fade-u once threshold-10">
           <h3>JavaScript API</h3>
-
           <div class="animation-item">
-            <div class="animation-name">USAL.init(options)</div>
-            <div class="animation-desc">Initialize with configuration</div>
-            <pre><code class="javascript">USAL.init({
-  maxConcurrent: 100,        // Max concurrent animations
-  defaultDuration: 1000,    // Default duration (ms)
-  defaultDelay: 0,          // Default delay (ms)
-  defaultThreshold: 30,     // Default threshold (%)
-  defaultSplitDelay: 30     // Default split delay (ms)
+            <div class="animation-name">USAL.config(options)</div>
+            <div class="animation-desc">Configure or reconfigure at any time</div>
+            <pre><code class="javascript">// Initial configuration
+USAL.config({
+  maxConcurrent: 100,    // Max concurrent animations
+  duration: 1000,       // Default duration (ms)
+  delay: 0,             // Default delay (ms)
+  threshold: 30,        // Default threshold (%)
+  splitDelay: 30,       // Default split delay (ms)
+  once: false           // Run animation only once
+});
+
+// Can be reconfigured later
+USAL.config({
+  duration: 2000,       // Change duration
+  threshold: 50         // Change threshold
 });</code></pre>
           </div>
-
-          <div class="animation-item">
-            <div class="animation-name">USAL.refresh()</div>
-            <div class="animation-desc">Refresh DOM and detect new elements</div>
-            <pre><code class="javascript">// Refresh after dynamic content changes
-USAL.refresh();</code></pre>
-          </div>
-
           <div class="animation-item">
             <div class="animation-name">USAL.destroy()</div>
             <div class="animation-desc">Clean up and remove all animations</div>

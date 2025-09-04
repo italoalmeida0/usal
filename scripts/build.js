@@ -7,7 +7,6 @@ import { colorize } from './colorize.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Helper function to run commands
 function runCommand(command, args, cwd) {
   return new Promise((resolve, reject) => {
     const proc = spawn(command, args, {
@@ -28,38 +27,52 @@ function runCommand(command, args, cwd) {
   });
 }
 
-// Detect package manager
 function detectPackageManager() {
   if (fs.existsSync('pnpm-lock.yaml')) return 'pnpm';
   if (fs.existsSync('yarn.lock')) return 'yarn';
   return 'npm';
 }
 
-// read package.json root
 let rootPackageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
-
 const PROJECT_NAME = rootPackageJson.name.split('-monorepo')[0];
 
-// Ensure devDependencies exist
 if (!rootPackageJson.devDependencies) {
   rootPackageJson.devDependencies = {};
 }
 
-// Collect and add required devDependencies
+const buildConfig = {
+  bundle: true,
+  sourcemap: true,
+  target: ['es6'],
+  loader: {
+    '.ts': 'ts',
+    '.tsx': 'tsx',
+  },
+};
+
 async function setupDevDependencies() {
   const packagesConfig = rootPackageJson.packages || {};
   let hasChanges = false;
 
   console.log(`\n${colorize.header('[DEPENDENCIES CHECK]')} Scanning required devDependencies...`);
 
-  // Always ensure esbuild is present
   if (!rootPackageJson.devDependencies.esbuild) {
     rootPackageJson.devDependencies.esbuild = '^0.19.0';
     hasChanges = true;
     console.log(`  ${colorize.success('+')} Added ${colorize.package('esbuild')}`);
   }
 
-  // Add TypeScript if we detect .ts files
+  const hasAngularPackage = Object.keys(packagesConfig).some(
+    (pkg) => packagesConfig[pkg].format === 'angular'
+  );
+  if (hasAngularPackage && !rootPackageJson.devDependencies['ng-packagr']) {
+    rootPackageJson.devDependencies['ng-packagr'] = '^18.0.0';
+    hasChanges = true;
+    console.log(
+      `  ${colorize.success('+')} Added ${colorize.package('ng-packagr')} ${colorize.dim('(for Angular builds)')}`
+    );
+  }
+
   const hasTypeScriptFiles =
     fs.existsSync('src') &&
     (fs
@@ -76,16 +89,30 @@ async function setupDevDependencies() {
     );
   }
 
-  // For each framework package, add its dependencies as dev dependencies
+  if (hasAngularPackage) {
+    const angularDeps = {
+      '@angular/compiler': '^20.2.3',
+      '@angular/compiler-cli': '^20.2.3',
+    };
+
+    for (const [dep, version] of Object.entries(angularDeps)) {
+      if (!rootPackageJson.devDependencies[dep]) {
+        rootPackageJson.devDependencies[dep] = version;
+        hasChanges = true;
+        console.log(
+          `  ${colorize.success('+')} Added ${colorize.package(dep)} ${colorize.dim('(required for ng-packagr)')}`
+        );
+      }
+    }
+  }
+
   for (const [framework, config] of Object.entries(packagesConfig)) {
     if (framework === 'vanilla') continue;
 
-    // Process dependencies with new format: { "package": ["version", isOptional] }
     if (config.dependencies) {
       for (const [dep, depConfig] of Object.entries(config.dependencies)) {
         const [version, isOptional] = Array.isArray(depConfig) ? depConfig : [depConfig, false];
 
-        // Add to devDependencies if not present (we need them for building)
         if (!rootPackageJson.devDependencies[dep]) {
           rootPackageJson.devDependencies[dep] = version;
           hasChanges = true;
@@ -97,45 +124,28 @@ async function setupDevDependencies() {
     }
   }
 
-  // Save updated package.json if changes were made
   if (hasChanges) {
     fs.writeFileSync('package.json', JSON.stringify(rootPackageJson, null, 2));
     console.log(
       `\n${colorize.success('[SUCCESS]')} Updated package.json with required devDependencies`
     );
 
-    // Run npm install
     console.log(`\n${colorize.info('[INSTALLING]')} Installing dependencies...`);
     const packageManager = detectPackageManager();
-    await runCommand(packageManager, ['install'], process.cwd());
+    await runCommand(packageManager, ['install', '--legacy-peer-deps'], process.cwd());
     console.log(`${colorize.success('[COMPLETE]')} Dependencies installed\n`);
 
-    // Reload package.json after install
     rootPackageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
   } else {
     console.log(`${colorize.success('[OK]')} All required devDependencies already present`);
   }
 }
 
-// Clean packages directory
 if (fs.existsSync('packages')) {
   fs.rmSync('packages', { recursive: true });
 }
 fs.mkdirSync('packages');
 
-// Config builds
-const buildConfig = {
-  bundle: true,
-  sourcemap: true,
-  target: ['es6'],
-  // Add TypeScript loader support
-  loader: {
-    '.ts': 'ts',
-    '.tsx': 'tsx',
-  },
-};
-
-// README
 function createPackageReadme(framework) {
   const packageName = framework === 'vanilla' ? PROJECT_NAME : `@${PROJECT_NAME}/${framework}`;
   const frameworkCapitalized = framework.charAt(0).toUpperCase() + framework.slice(1);
@@ -160,7 +170,19 @@ Visit [${rootPackageJson.homepage}](${rootPackageJson.homepage})
 `;
 }
 
-// Create sub-package package.json
+const createExportMap = (entryName, baseFileName, config) => {
+  if (config.format === 'angular') {
+    const isMainEntry = entryName === '.';
+    return {
+      types: isMainEntry ? './index.d.ts' : `./${baseFileName}/index.d.ts`,
+      default: `./fesm2022/${baseFileName}.mjs`,
+    };
+  }
+  return entryName === '.'
+    ? { types: './index.d.ts', import: './index.esm.js', require: './index.cjs' }
+    : `./${baseFileName}.js`;
+};
+
 function createSubPackageJson(framework, config = {}) {
   const packageName = framework === 'vanilla' ? PROJECT_NAME : `@${PROJECT_NAME}/${framework}`;
   const description =
@@ -184,13 +206,7 @@ function createSubPackageJson(framework, config = {}) {
     main: './index.cjs',
     module: './index.esm.js',
     types: './index.d.ts',
-    exports: {
-      '.': {
-        types: './index.d.ts',
-        import: './index.esm.js',
-        require: './index.cjs',
-      },
-    },
+    exports: {},
     files: ['*.cjs', '*.js', '*.map', '*.ts', 'README.md', 'LICENSE'],
     keywords: [...rootPackageJson.keywords, framework === 'vanilla' ? null : framework].filter(
       Boolean
@@ -198,33 +214,59 @@ function createSubPackageJson(framework, config = {}) {
     sideEffects: false,
   };
 
+  if (config.format === 'angular') {
+    packageJson.module = `./fesm2022/${PROJECT_NAME}.mjs`;
+    delete packageJson.main;
+    packageJson.files.push('fesm2022/');
+  }
+
+  packageJson.exports['.'] = createExportMap('.', PROJECT_NAME, config);
+
+  if (config.format === 'angular') {
+    packageJson.exports['./core'] = {
+      types: './core/index.d.ts',
+      default: './fesm2022/core.mjs',
+    };
+    packageJson.exports['./package.json'] = {
+      default: './package.json',
+    };
+    packageJson.files.push('core/');
+  }
+
   if (config.plugins && Array.isArray(config.plugins)) {
     for (const pluginName of config.plugins) {
-      packageJson.exports[`./${pluginName}`] = `./${pluginName}.js`;
-      if (!packageJson.files.includes(`${pluginName}.js`)) {
-        packageJson.files.push(`${pluginName}.js`);
+      packageJson.exports[`./${pluginName}`] = createExportMap(
+        `./${pluginName}`,
+        pluginName,
+        config
+      );
+
+      if (config.format === 'angular') {
+        if (!packageJson.files.includes(`${pluginName}/`)) {
+          packageJson.files.push(`${pluginName}/`);
+        }
+      } else {
+        if (!packageJson.files.includes(`${pluginName}.js`)) {
+          packageJson.files.push(`${pluginName}.js`);
+        }
       }
     }
   }
 
-  // Process dependencies with new format
   if (config.dependencies) {
     const peerDeps = {};
     const peerDepsMeta = {};
-
     for (const [dep, depConfig] of Object.entries(config.dependencies)) {
       const [version, isOptional] = Array.isArray(depConfig) ? depConfig : [depConfig, false];
       peerDeps[dep] = version;
       peerDepsMeta[dep] = { optional: isOptional };
     }
-
     if (Object.keys(peerDeps).length > 0) {
       packageJson.peerDependencies = peerDeps;
       packageJson.peerDependenciesMeta = peerDepsMeta;
     }
   }
 
-  // Vanilla builds UMD/IIFE
   if (framework === 'vanilla') {
     packageJson.browser = `./${PROJECT_NAME}.umd.js`;
     packageJson.unpkg = `./${PROJECT_NAME}.min.js`;
@@ -240,7 +282,6 @@ function createSubPackageJson(framework, config = {}) {
   return packageJson;
 }
 
-// Helper function to find entry file with multiple extensions
 function findEntryFile(basePath, extensions) {
   for (const ext of extensions) {
     const filePath = `${basePath}${ext}`;
@@ -251,28 +292,150 @@ function findEntryFile(basePath, extensions) {
   return null;
 }
 
+async function postProcessAngularBuild(packageDir, framework) {
+  console.log(`  ${colorize.info('→')} Post-processing Angular build files...`);
+
+  try {
+    const fesm2022Dir = path.join(packageDir, 'fesm2022');
+    if (fs.existsSync(fesm2022Dir)) {
+      const files = fs.readdirSync(fesm2022Dir);
+
+      for (const file of files) {
+        if (file.includes(rootPackageJson.name)) {
+          const oldPath = path.join(fesm2022Dir, file);
+          const newFileName = file.replace(rootPackageJson.name, PROJECT_NAME);
+          const newPath = path.join(fesm2022Dir, newFileName);
+
+          fs.renameSync(oldPath, newPath);
+          console.log(`    ${colorize.success('✓')} Renamed: ${file} → ${newFileName}`);
+
+          let content = fs.readFileSync(newPath, 'utf-8');
+          if (newFileName.endsWith('.mjs')) {
+            content = content.replace(
+              new RegExp(`from '~/${PROJECT_NAME}'`, 'g'),
+              `from '@${PROJECT_NAME}/${framework}/core'`
+            );
+          } else if (newFileName.endsWith('.map')) {
+            content = content.replace(new RegExp(rootPackageJson.name, 'g'), PROJECT_NAME);
+            let mapObj = JSON.parse(content);
+            mapObj.sources = [`./${PROJECT_NAME}.mjs`, './core.mjs'];
+            content = JSON.stringify(mapObj);
+          }
+          fs.writeFileSync(newPath, content);
+        }
+      }
+    }
+
+    const coreDir = path.join(packageDir, 'core');
+    fs.mkdirSync(coreDir, { recursive: true });
+
+    const vanillaTypesPath = path.join('packages', 'vanilla', 'index.d.ts');
+    if (fs.existsSync(vanillaTypesPath)) {
+      let typesContent = fs.readFileSync(vanillaTypesPath, 'utf-8');
+      fs.writeFileSync(path.join(coreDir, 'index.d.ts'), typesContent);
+      console.log(`    ${colorize.success('✓')} Created core/index.d.ts`);
+    }
+
+    const vanillaEsmPath = path.join('packages', 'vanilla', 'index.esm.js');
+    if (fs.existsSync(vanillaEsmPath)) {
+      let esmContent = fs.readFileSync(vanillaEsmPath, 'utf-8');
+      esmContent = esmContent.replace(
+        new RegExp(`from '~/${PROJECT_NAME}'`, 'g'),
+        `from '@${PROJECT_NAME}/${framework}/core'`
+      );
+
+      // Fix sourceMappingURL
+      esmContent = esmContent.replace(
+        /\/\/# sourceMappingURL=.*\.map/g,
+        '//# sourceMappingURL=core.mjs.map'
+      );
+
+      fs.writeFileSync(path.join(fesm2022Dir, 'core.mjs'), esmContent);
+      console.log(`    ${colorize.success('✓')} Created fesm2022/core.mjs`);
+
+      // Copy and rename the map file
+      const vanillaMapPath = path.join('packages', 'vanilla', 'index.esm.js.map');
+      if (fs.existsSync(vanillaMapPath)) {
+        let mapContent = fs.readFileSync(vanillaMapPath, 'utf-8');
+
+        // Update map content references
+        mapContent = mapContent.replace(/index\.esm\.js/g, 'core.mjs');
+
+        let mapObj = JSON.parse(mapContent);
+        mapObj.sources = [`./core.mjs`];
+        mapContent = JSON.stringify(mapObj);
+
+        fs.writeFileSync(path.join(fesm2022Dir, 'core.mjs.map'), mapContent);
+        console.log(`    ${colorize.success('✓')} Created fesm2022/core.mjs.map`);
+      }
+    }
+
+    const indexDtsPath = path.join(packageDir, 'index.d.ts');
+    if (fs.existsSync(indexDtsPath)) {
+      let content = fs.readFileSync(indexDtsPath, 'utf-8');
+      content = content.replace(
+        new RegExp(`from '~/${PROJECT_NAME}'`, 'g'),
+        `from '@${PROJECT_NAME}/${framework}/core'`
+      );
+      fs.writeFileSync(indexDtsPath, content);
+      console.log(`    ${colorize.success('✓')} Updated index.d.ts imports`);
+    }
+  } catch (error) {
+    console.error(`    ${colorize.error('[ERROR]')} Post-processing failed:`, error.message);
+    throw error;
+  }
+}
+
+async function buildWithNgPackagr(name, config, packageDir) {
+  console.log(`  ${colorize.accent('◆')} Using ng-packagr for Ivy compatibility...`);
+
+  const entryFile = config.entry || findEntryFile(`src/integrations/${name}`, ['.ts']);
+  if (!entryFile) {
+    throw new Error(`No entry file found for Angular package ${name}`);
+  }
+
+  const publicApiContent = `export * from './${path.relative(process.cwd(), entryFile).replace(/\\/g, '/').replace('.ts', '')}';`;
+  fs.writeFileSync('public-api.ts', publicApiContent);
+
+  const ngPackageConfig = {
+    $schema: './node_modules/ng-packagr/ng-package.schema.json',
+    dest: packageDir,
+    lib: {
+      entryFile: 'public-api.ts',
+    },
+  };
+
+  fs.writeFileSync('ng-package.json', JSON.stringify(ngPackageConfig, null, 2));
+
+  try {
+    await runCommand(
+      'npx',
+      ['ng-packagr', '-p', 'ng-package.json', '-c', 'tsconfig.json'],
+      process.cwd()
+    );
+    console.log(`  ${colorize.success('✓')} ng-packagr build complete with Ivy compatibility`);
+
+    await postProcessAngularBuild(packageDir, name);
+  } finally {
+    ['ng-package.json', 'public-api.ts'].forEach((file) => {
+      if (fs.existsSync(file)) fs.unlinkSync(file);
+    });
+  }
+}
+
 async function buildFrameworkPackage(name, config = {}) {
   const packageDir = path.join('packages', name);
   fs.mkdirSync(packageDir, { recursive: true });
 
-  // Adjust name for console
   const displayName = name === 'vanilla' ? PROJECT_NAME : `@${PROJECT_NAME}/${name}`;
   console.log(`\n${colorize.box('BUILDING')} ${colorize.package(displayName)}`);
 
   let entryFile = config.entry;
 
-  // If no entry specified, try to find it
   if (!entryFile) {
     const basePath = `src/integrations/${name}`;
-
-    // Determine which extensions to check based on jsx flag
-    const extensions =
-      config.jsx === true
-        ? ['.tsx', '.ts', '.jsx', '.js'] // Prioritize TSX/JSX when jsx is enabled
-        : ['.ts', '.js']; // Standard extensions
-
+    const extensions = config.jsx === true ? ['.tsx', '.ts', '.jsx', '.js'] : ['.ts', '.js'];
     entryFile = findEntryFile(basePath, extensions);
-
     if (entryFile) {
       console.log(`  ${colorize.info('→')} Found entry: ${colorize.file(entryFile)}`);
     }
@@ -282,120 +445,104 @@ async function buildFrameworkPackage(name, config = {}) {
     console.log(
       `  ${colorize.warning('[!]')} Skipping - no entry file found for ${colorize.package(name)}`
     );
-    if (!config.entry) {
-      const extensions = config.jsx === true ? '.tsx, .ts, .jsx, .js' : '.ts, .js';
-      console.log(`     ${colorize.dim(`Searched: src/integrations/${name}{${extensions}}`)}`);
-    }
     return;
   }
 
-  const buildOptions = {
-    ...buildConfig,
-    entryPoints: [entryFile],
-  };
-
-  // Extract external dependencies from config.dependencies
-  if (config.dependencies) {
-    buildOptions.external = Object.keys(config.dependencies);
-  }
-
-  // Add any additional external from config
-  if (config.external) {
-    buildOptions.external = [...(buildOptions.external || []), ...config.external];
-  }
-
-  // Special handling for JSX/TSX
-  if (config.jsx === true) {
-    buildOptions.loader = {
-      '.js': 'jsx',
-      '.jsx': 'jsx',
-      '.ts': 'tsx', // Treat .ts as .tsx when jsx flag is true
-      '.tsx': 'tsx',
+  if (config.format === 'angular') {
+    await buildWithNgPackagr(name, config, packageDir);
+  } else {
+    const buildOptions = {
+      ...buildConfig,
+      entryPoints: [entryFile],
+      external: config.dependencies ? Object.keys(config.dependencies) : [],
     };
-    buildOptions.jsx = 'automatic';
-    console.log(`  ${colorize.accent('◆')} JSX enabled for this package`);
-  }
 
-  if (config.plugins && Array.isArray(config.plugins)) {
-    console.log(`  ${colorize.info('[PLUGINS]')} Copying plugins...`);
+    if (config.jsx === true) {
+      buildOptions.loader = {
+        '.js': 'jsx',
+        '.jsx': 'jsx',
+        '.ts': 'tsx',
+        '.tsx': 'tsx',
+      };
+      buildOptions.jsx = 'automatic';
+      console.log(`  ${colorize.accent('◆')} JSX enabled for this package`);
+    }
 
-    for (const pluginName of config.plugins) {
-      const pluginSourcePath = path.join('src', 'plugins', `${pluginName}.js`);
-      const pluginOutputName = `${pluginName}.js`;
-      const pluginDestPath = path.join(packageDir, pluginOutputName);
+    const esmOutfile = path.join(packageDir, 'index.esm.js');
+    await esbuild.build({
+      ...buildOptions,
+      format: 'esm',
+      outfile: esmOutfile,
+    });
+    console.log(`  ${colorize.success('✓')} ESM build complete`);
 
-      if (!fs.existsSync(pluginSourcePath)) {
-        console.log(
-          `    ${colorize.warning('⚠')} Plugin not found: ${colorize.file(pluginSourcePath)}`
-        );
-        continue;
+    const cjsOutfile = path.join(packageDir, 'index.cjs');
+    await esbuild.build({
+      ...buildOptions,
+      format: 'cjs',
+      outfile: cjsOutfile,
+    });
+    console.log(`  ${colorize.success('✓')} CJS build complete`);
+
+    if (name === 'vanilla') {
+      const globalName = PROJECT_NAME.toUpperCase();
+      await esbuild.build({
+        ...buildOptions,
+        format: 'iife',
+        globalName: globalName,
+        outfile: path.join(packageDir, `${PROJECT_NAME}.umd.js`),
+      });
+      console.log(`  ${colorize.success('✓')} UMD build complete`);
+      await esbuild.build({
+        ...buildOptions,
+        format: 'iife',
+        globalName: globalName,
+        minify: true,
+        sourcemap: false,
+        outfile: path.join(packageDir, `${PROJECT_NAME}.min.js`),
+      });
+      console.log(`  ${colorize.success('✓')} UMD minified build complete`);
+    }
+
+    if (config.plugins && Array.isArray(config.plugins)) {
+      console.log(`  ${colorize.info('[PLUGINS]')} Copying plugins...`);
+      for (const pluginName of config.plugins) {
+        const pluginSourcePath = path.join('src', 'plugins', `${pluginName}.js`);
+        const pluginDestPath = path.join(packageDir, `${pluginName}.js`);
+        if (fs.existsSync(pluginSourcePath)) {
+          fs.copyFileSync(pluginSourcePath, pluginDestPath);
+          console.log(
+            `    ${colorize.success('✓')} Copied plugin: ${colorize.file(`${pluginName}.js`)}`
+          );
+        } else {
+          console.log(
+            `    ${colorize.warning('⚠')} Plugin not found: ${colorize.file(pluginSourcePath)}`
+          );
+        }
       }
-
-      fs.copyFileSync(pluginSourcePath, pluginDestPath);
-      console.log(`    ${colorize.success('✓')} Copied plugin: ${colorize.file(pluginOutputName)}`);
     }
   }
 
-  // Build ESM
-  await esbuild.build({
-    ...buildOptions,
-    format: 'esm',
-    outfile: path.join(packageDir, 'index.esm.js'),
-  });
-  console.log(`  ${colorize.success('✓')} ESM build complete`);
+  if (config.format !== 'angular') {
+    const typeFile =
+      config.types || (name === 'vanilla' ? `src/${PROJECT_NAME}.d.ts` : `src/types/${name}.d.ts`);
 
-  // Build CJS
-  await esbuild.build({
-    ...buildOptions,
-    format: 'cjs',
-    outfile: path.join(packageDir, 'index.cjs'),
-  });
-  console.log(`  ${colorize.success('✓')} CJS build complete`);
+    if (name !== 'vanilla' && fs.existsSync(`src/${PROJECT_NAME}.d.ts`)) {
+      fs.copyFileSync(`src/${PROJECT_NAME}.d.ts`, path.join(packageDir, `${PROJECT_NAME}.d.ts`));
+    }
 
-  // For vanilla, build UMD formats
-  if (name === 'vanilla') {
-    const globalName = PROJECT_NAME.toUpperCase();
-
-    await esbuild.build({
-      ...buildOptions,
-      format: 'iife',
-      globalName: globalName,
-      outfile: path.join(packageDir, `${PROJECT_NAME}.umd.js`),
-    });
-    console.log(`  ${colorize.success('✓')} UMD build complete`);
-
-    await esbuild.build({
-      ...buildOptions,
-      format: 'iife',
-      globalName: globalName,
-      minify: true,
-      sourcemap: false,
-      outfile: path.join(packageDir, `${PROJECT_NAME}.min.js`),
-    });
-    console.log(`  ${colorize.success('✓')} UMD minified build complete`);
+    if (fs.existsSync(typeFile)) {
+      let content = fs.readFileSync(typeFile, 'utf8');
+      content = content.replace(`../${PROJECT_NAME}`, `./${PROJECT_NAME}`);
+      fs.writeFileSync(path.join(packageDir, 'index.d.ts'), content);
+      console.log(`  ${colorize.success('✓')} TypeScript definitions copied`);
+    }
   }
 
-  // Copy TypeScript definitions
-  const typeFile =
-    config.types || (name === 'vanilla' ? `src/${PROJECT_NAME}.d.ts` : `src/types/${name}.d.ts`);
-
-  if (name !== 'vanilla' && fs.existsSync(`src/${PROJECT_NAME}.d.ts`)) {
-    fs.copyFileSync(`src/${PROJECT_NAME}.d.ts`, path.join(packageDir, `${PROJECT_NAME}.d.ts`));
-  }
-
-  if (fs.existsSync(typeFile)) {
-    let content = fs.readFileSync(typeFile, 'utf8');
-    content = content.replace(`../${PROJECT_NAME}`, `./${PROJECT_NAME}`);
-    fs.writeFileSync(path.join(packageDir, 'index.d.ts'), content);
-    console.log(`  ${colorize.success('✓')} TypeScript definitions copied`);
-  }
-
-  // Create package.json
   const packageJson = createSubPackageJson(name, config);
   fs.writeFileSync(path.join(packageDir, 'package.json'), JSON.stringify(packageJson, null, 2));
   console.log(`  ${colorize.success('✓')} package.json created`);
 
-  // Create README
   if (name === 'vanilla' && fs.existsSync('README.md')) {
     fs.copyFileSync('README.md', path.join(packageDir, 'README.md'));
     console.log(`  ${colorize.success('✓')} README.md copied from root`);
@@ -405,7 +552,6 @@ async function buildFrameworkPackage(name, config = {}) {
     console.log(`  ${colorize.success('✓')} README.md created`);
   }
 
-  // Copy LICENSE
   if (fs.existsSync('LICENSE')) {
     fs.copyFileSync('LICENSE', path.join(packageDir, 'LICENSE'));
     console.log(`  ${colorize.success('✓')} LICENSE copied`);
@@ -424,13 +570,10 @@ async function build() {
   console.log(`${colorize.info('Project:')} ${colorize.accent(PROJECT_NAME)}`);
   console.log(`${colorize.divider('--------------------------------------------------')}\n`);
 
-  // Setup devDependencies and install if needed
   await setupDevDependencies();
 
-  // Track all built packages
   const builtPackages = [];
 
-  // Build vanilla package
   const vanillaConfig = rootPackageJson.packages?.vanilla || {};
   await buildFrameworkPackage('vanilla', {
     entry: `src/${PROJECT_NAME}.js`,
@@ -438,11 +581,10 @@ async function build() {
   });
   builtPackages.push('vanilla');
 
-  // Build framework packages from config
   const packagesConfig = rootPackageJson.packages || {};
 
   for (const [frameworkName, config] of Object.entries(packagesConfig)) {
-    if (frameworkName === 'vanilla') continue; // Already built
+    if (frameworkName === 'vanilla') continue;
     await buildFrameworkPackage(frameworkName, config);
     builtPackages.push(frameworkName);
   }
@@ -458,8 +600,7 @@ async function build() {
   console.log(`  ${colorize.command('cd packages/[framework] && npm publish --tag beta')}`);
   console.log(`${colorize.brightGreen('==================================================')}`);
 
-  // Run postbuild script if exists
-  if (fs.existsSync('postbuild.js')) {
+  if (fs.existsSync('./scripts/postbuild.js')) {
     console.log(`\n${colorize.info('[POSTBUILD]')} Running postbuild.js...`);
     try {
       const postbuildData = {
@@ -471,14 +612,13 @@ async function build() {
 
       await runCommand(
         'node',
-        ['postbuild.js', Buffer.from(jsonString).toString('hex')],
+        ['./scripts/postbuild.js', Buffer.from(jsonString).toString('hex')],
         process.cwd()
       );
 
       console.log(`${colorize.success('[OK]')} Postbuild script completed successfully`);
     } catch (error) {
       console.error(`${colorize.warning('[WARNING]')} Postbuild script error:`, error.message);
-      // Don't fail the build if postbuild script fails
     }
   }
 }

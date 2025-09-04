@@ -23,23 +23,24 @@ if (!fs.existsSync(readmePath)) {
 let readme = fs.readFileSync(readmePath, 'utf-8');
 const originalReadme = readme;
 
+// Read package.json to get usage configs
+const rootPackageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
+const packagesConfig = rootPackageJson.packages || {};
+const frameworkApiItem = generateFrameworkAPIItem();
+
 // 1. Update the "Works with" section
 const frameworkNames = packages.map((pkg) => {
   if (pkg === 'vanilla') return 'Vanilla JS';
-  // Capitalize framework names
   return pkg.charAt(0).toUpperCase() + pkg.slice(1);
 });
 
-// Sort to put Vanilla JS at the end if it exists
 const sortedFrameworks = frameworkNames.filter((f) => f !== 'Vanilla JS');
 if (frameworkNames.includes('Vanilla JS')) {
   sortedFrameworks.push('Vanilla JS');
 }
 
-// Create the "Works with" text
 const worksWithText = `Works with ${sortedFrameworks.join(', ')} and more`;
 
-// Replace the existing "Works with" pattern
 const worksWithRegex = /\*\*Works with[^*]+\*\*/g;
 if (worksWithRegex.test(readme)) {
   readme = readme.replace(worksWithRegex, `**${worksWithText}**`);
@@ -49,7 +50,6 @@ if (worksWithRegex.test(readme)) {
 }
 
 // 2. Update NPM installation section
-// Find the npm install section
 const installSectionRegex = /(NPM\:\n\n```bash\nnpm install )[\s\S]*?(```)/;
 
 if (installSectionRegex.test(readme)) {
@@ -62,23 +62,29 @@ if (installSectionRegex.test(readme)) {
     installCommands.push('# Framework-specific packages:');
     installCommands = installCommands.concat(frameworkPackages);
   }
-  const replacement = `$1${projectName}\n\n${installCommands.join('\n')}\n$2`;
+  let replacement = `$1${projectName}\n\n${installCommands.join('\n')}\n$2`;
   readme = readme.replace(installSectionRegex, replacement);
-  console.log(`  ${colorize.success('✓')} Updated ${colorize.update('NPM installation')} section`);
+
+  const setupSectionRegex = /(Framework Setup\:\n\n```javascript)[\s\S]*?(```)/;
+  if (setupSectionRegex.test(readme)) {
+    replacement = `$1\n${frameworkApiItem}\n$2`;
+    readme = readme.replace(setupSectionRegex, replacement);
+  }
+
+  console.log(
+    `  ${colorize.success('✓')} Updated ${colorize.update('NPM installation and Setup')} section`
+  );
 } else {
   console.log(
     `  ${colorize.warning('[!]')} NPM installation code block not found in expected format`
   );
 }
 
-// 3. Update Package Information section between ## Packages and ## Installation
+// 3. Update Package Information section
 const packageInfoContent = generatePackageInfoContent();
-
-// Look for ## Packages followed by anything until ## Installation
 const packagesSectionRegex = /(## Packages)[\s\S]*?(## Installation)/;
 
 if (packagesSectionRegex.test(readme)) {
-  // Replace everything between ## Packages and ## Installation
   const replacement = `$1\n\n${packageInfoContent}\n$2`;
   readme = readme.replace(packagesSectionRegex, replacement);
   console.log(`  ${colorize.success('✓')} Updated ${colorize.update('Packages')} section content`);
@@ -86,38 +92,16 @@ if (packagesSectionRegex.test(readme)) {
   console.log(`  ${colorize.warning('[!]')} Could not find proper location for Packages section`);
 }
 
-// Function to generate package info content (just the content, not the header)
-function generatePackageInfoContent() {
-  let content = '';
+// 4. Update usage examples with new format
+const frameworkExamples = generateFrameworkExamples();
 
-  // Main package
-  content += `| Package | Description | Version |\n`;
-  content += `|---------|-------------|---------|\n`;
-  content += `| \`${projectName}\` | Core library (Vanilla JS) | ![npm](https://img.shields.io/npm/v/${projectName}) |\n`;
-
-  // Framework packages
-  packages
-    .filter((pkg) => pkg !== 'vanilla')
-    .forEach((pkg) => {
-      const pkgName = `@${projectName}/${pkg}`;
-      const framework = pkg.charAt(0).toUpperCase() + pkg.slice(1);
-      content += `| \`${pkgName}\` | ${framework} integration | ![npm](https://img.shields.io/npm/v/${pkgName}) |\n`;
-    });
-
-  return content;
-}
-
-// 4. Update usage examples in README and index.html
-const rootPackageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
-const frameworkUsages = getFrameworkUsages();
-
-if (frameworkUsages.length > 0) {
-  // Update README
+if (frameworkExamples.length > 0) {
+  // Update README usage section
   const usageRegex = /(### data-usal\n\n> Main animation attribute\n\n```html\n)([\s\S]*?)(```)/;
   const usageMatch = readme.match(usageRegex);
 
   if (usageMatch) {
-    const newContent = buildUsageContent(usageMatch[2], frameworkUsages, false);
+    const newContent = buildUsageContent(usageMatch[2], frameworkExamples, 'readme');
     readme = readme.replace(usageRegex, `$1${newContent}\n$3`);
     console.log(
       `  ${colorize.success('✓')} Updated ${colorize.update('usage examples')} section in README`
@@ -127,7 +111,7 @@ if (frameworkUsages.length > 0) {
   }
 }
 
-// Save README updates before processing HTML
+// Save README updates
 if (readme !== originalReadme) {
   fs.writeFileSync(readmePath, readme);
   console.log(
@@ -145,7 +129,7 @@ if (readme !== originalReadme) {
   console.log(`\n  ${colorize.info('[i]')} No changes made to README.md`);
 }
 
-// 5. Update index.html if it exists
+// 5. Update index.html
 const indexPath = 'index.html';
 if (fs.existsSync(indexPath)) {
   console.log(`\n${colorize.header('[HTML UPDATE]')} Processing index.html...`);
@@ -153,7 +137,7 @@ if (fs.existsSync(indexPath)) {
   let indexHtml = fs.readFileSync(indexPath, 'utf-8');
   const originalIndex = indexHtml;
 
-  // Update installation section (existing code)
+  // Update installation section
   const installRegex = /(<code class="js"># Install[\s\S]*?)<\/code><\/pre>/;
   const match = indexHtml.match(installRegex);
 
@@ -177,17 +161,29 @@ if (fs.existsSync(indexPath)) {
     );
   }
 
-  // Update usage examples
-  if (frameworkUsages.length > 0) {
+  // Update usage examples in HTML
+  if (frameworkExamples.length > 0) {
     const htmlUsageRegex =
       /(<div class="animation-desc">Main animation attribute<\/div>\s*<pre><code class="html">)([\s\S]*?)(<\/code><\/pre>)/;
     const htmlUsageMatch = indexHtml.match(htmlUsageRegex);
 
     if (htmlUsageMatch) {
-      const newContent = buildUsageContent(htmlUsageMatch[2], frameworkUsages, true);
+      const newContent = buildUsageContent(htmlUsageMatch[2], frameworkExamples, 'html');
       indexHtml = indexHtml.replace(htmlUsageRegex, `$1${newContent}\n$3`);
       console.log(
         `  ${colorize.success('✓')} Updated ${colorize.file('index.html')} usage examples`
+      );
+    }
+
+    // Add framework examples to JavaScript API section (before USAL.config)
+    const jsApiRegex =
+      /(Installed via CDN, initializes automatically, instance in window\.USAL\n)[\s\S]*?(<\/code><\/pre>)/;
+    const jsApiMatch = indexHtml.match(jsApiRegex);
+
+    if (jsApiMatch) {
+      indexHtml = indexHtml.replace(jsApiRegex, `$1\n${escapeHtml(frameworkApiItem)}$2`);
+      console.log(
+        `  ${colorize.success('✓')} Added framework examples to ${colorize.file('index.html')} JavaScript API section`
       );
     }
   }
@@ -207,49 +203,128 @@ console.log(`${colorize.highlight('[POSTBUILD COMPLETE]')} All documentation upd
 console.log(`${colorize.success('==================================================')}\n`);
 
 // Helper functions
-function getFrameworkUsages() {
-  const usages = [];
-  const packagesConfig = rootPackageJson.packages || {};
+function generatePackageInfoContent() {
+  let content = '';
+  content += `| Package | Description | Version |\n`;
+  content += `|---------|-------------|---------|\n`;
+  content += `| \`${projectName}\` | Core library (Vanilla JS) | ![npm](https://img.shields.io/npm/v/${projectName}) |\n`;
 
+  packages
+    .filter((pkg) => pkg !== 'vanilla')
+    .forEach((pkg) => {
+      const pkgName = `@${projectName}/${pkg}`;
+      const framework = pkg.charAt(0).toUpperCase() + pkg.slice(1);
+      content += `| \`${pkgName}\` | ${framework} integration | ![npm](https://img.shields.io/npm/v/${pkgName}) |\n`;
+    });
+
+  return content;
+}
+
+function generateFrameworkExamples() {
+  const examples = [];
+
+  // Add vanilla HTML first
+  examples.push({
+    framework: 'HTML',
+    setup: '',
+    example: '<div data-usal="fade duration-500">Content</div>',
+    pseudonyms: [],
+  });
+
+  // Generate framework-specific examples
   for (const [framework, config] of Object.entries(packagesConfig)) {
-    if (config.usage) {
-      usages.push({
-        framework: framework.charAt(0).toUpperCase() + framework.slice(1),
-        pattern: config.usage.replace('VALUES', 'fade duration-500'),
+    if (config.usage && framework !== 'vanilla') {
+      const frameworkName = framework.charAt(0).toUpperCase() + framework.slice(1);
+
+      let setup = '';
+      if (config.usage.import && config.usage.start) {
+        setup = `${config.usage.import}\n${config.usage.start}`;
+      }
+
+      let example = '';
+      if (config.usage.prop) {
+        const prop = config.usage.prop.replace('VALUES', 'fade duration-500');
+        example = `<div ${prop}>Content</div>`;
+      }
+
+      examples.push({
+        framework: frameworkName,
+        setup: setup.trim(),
+        example: example,
+        pseudonyms: config.usage.pseudonym || [],
       });
     }
   }
-  return usages;
+
+  return examples;
 }
 
-function buildUsageContent(originalContent, frameworkUsages, isHtml = false) {
+function buildUsageContent(originalContent, frameworkExamples, format) {
   const lines = originalContent.split('\n');
   let cutIndex = lines.findIndex((line) => line.trim() === '');
   if (cutIndex === -1) cutIndex = Math.min(3, lines.length);
 
   let newContent = lines.slice(0, cutIndex).join('\n');
 
-  if (frameworkUsages.length > 0) {
-    newContent += '\n\n';
+  if (frameworkExamples.length > 0) {
+    newContent += '\n';
 
-    if (isHtml) {
-      newContent += '&lt;!-- Framework-specific usage --&gt;';
-      frameworkUsages.forEach(({ framework, pattern }) => {
-        newContent += `\n&lt;!-- ${framework} --&gt;`;
-        newContent +=
-          '\n' +
-          `&lt;div ${pattern}&gt;Content&lt;/div&gt;`
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+    if (format === 'html') {
+      newContent += '\n&lt;!-- Framework-specific usage --&gt;';
+      frameworkExamples.slice(1).forEach(({ framework, example, pseudonyms }) => {
+        if (example) {
+          // Show framework name with pseudonyms
+          let frameworkLabel = framework;
+          if (pseudonyms && pseudonyms.length > 0) {
+            frameworkLabel += ` (${pseudonyms.join(', ')})`;
+          }
+
+          newContent += `\n&lt;!-- ${frameworkLabel} --&gt;`;
+          newContent += '\n' + escapeHtml(example);
+        }
       });
     } else {
-      newContent += '<!-- Framework-specific usage -->';
-      frameworkUsages.forEach(({ framework, pattern }) => {
-        newContent += `\n<!-- ${framework} -->`;
-        newContent += `\n<div ${pattern}>Content</div>`;
+      newContent += '\n<!-- Framework-specific usage -->';
+      frameworkExamples.slice(1).forEach(({ framework, example, pseudonyms }) => {
+        if (example) {
+          // Show framework name with pseudonyms
+          let frameworkLabel = framework;
+          if (pseudonyms && pseudonyms.length > 0) {
+            frameworkLabel += ` (${pseudonyms.join(', ')})`;
+          }
+
+          newContent += `\n<!-- ${frameworkLabel} -->`;
+          newContent += `\n${example}`;
+        }
       });
     }
   }
 
   return newContent;
+}
+
+function generateFrameworkAPIItem() {
+  const examples = generateFrameworkExamples();
+
+  let setupExamples = '';
+  examples.forEach(({ framework, setup, pseudonyms }) => {
+    if (setup && framework !== 'HTML') {
+      let frameworkLabel = framework;
+      if (pseudonyms && pseudonyms.length > 0) {
+        frameworkLabel += ` (${pseudonyms.join(', ')})`;
+      }
+      setupExamples += `// ${frameworkLabel}\n${setup}\n\n`;
+    }
+  });
+
+  return setupExamples.trim();
+}
+
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

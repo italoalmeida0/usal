@@ -17,7 +17,7 @@
 - 📦 Only 9KB minified
 - 🚀 Zero dependencies
 - ⚡ 60fps performance
-- 🪤 Web Components Supported
+- 🪤 Web components supported
 - 🔧 Framework agnostic
 
 ## Packages
@@ -54,7 +54,36 @@ npm install @usal/lit
 npm install @usal/angular
 ```
 
-[Full documentation and examples](https://italoalmeida0.github.io/usal)
+Framework Setup:
+
+```javascript
+// React (Next.js)
+import { USALProvider } from '@usal/react';
+<USALProvider>{children}</USALProvider>
+
+// Solid (SolidStart)
+import { USALProvider } from '@usal/solid';
+<USALProvider>{props.children}</USALProvider>
+
+// Svelte (SvelteKit)
+import { usal, createUSAL } from '@usal/svelte';
+const usalInstance = createUSAL();
+
+// Vue (Nuxt)
+export default defineNuxtConfig({
+modules: ['@usal/vue/nuxt']
+
+// Lit
+import { usal, useUSAL } from '@usal/lit';
+const usalInstance = useUSAL();
+
+// Angular
+import { USALModule } from '@usal/angular';
+@Component({imports: [USALModule]})
+export class AppComponent
+```
+
+[Full documentation and examples](https://usal.dev/)
 
 # API Documentation
 
@@ -70,10 +99,16 @@ npm install @usal/angular
 <div data-usal="flip-r delay-500 blur">Complex</div>
 
 <!-- Framework-specific usage -->
-<!-- Svelte -->
+<!-- React (Next.js) -->
+<div data-usal="fade duration-500">Content</div>
+<!-- Solid (SolidStart) -->
+<div data-usal="fade duration-500">Content</div>
+<!-- Svelte (SvelteKit) -->
 <div use:usal={'fade duration-500'}>Content</div>
-<!-- Vue -->
+<!-- Vue (Nuxt) -->
 <div v-usal="'fade duration-500'">Content</div>
+<!-- Lit -->
+<div ${usal('fade duration-500')}>Content</div>
 <!-- Angular -->
 <div [usal]="'fade duration-500'">Content</div>
 ```
@@ -174,30 +209,29 @@ text - fluid;
 
 ## JavaScript API
 
-### USAL.init(options)
+## USAL.config(options)
 
-> Initialize with configuration
+> Configure or reconfigure at any time
 
 ```javascript
-USAL.init({
+// Initial configuration
+USAL.config({
   maxConcurrent: 100, // Max concurrent animations
-  defaultDuration: 1000, // Default duration (ms)
-  defaultDelay: 0, // Default delay (ms)
-  defaultThreshold: 30, // Default threshold (%)
-  defaultSplitDelay: 30, // Default split delay (ms)
+  duration: 1000, // Default duration (ms)
+  delay: 0, // Default delay (ms)
+  threshold: 30, // Default threshold (%)
+  splitDelay: 30, // Default split delay (ms)
+  once: false, // Run animation only once
+});
+
+// Can be reconfigured later
+USAL.config({
+  duration: 2000, // Change duration
+  threshold: 50, // Change threshold
 });
 ```
 
-### USAL.refresh()
-
-> Refresh DOM and detect new elements
-
-```javascript
-// Refresh after dynamic content changes
-USAL.refresh();
-```
-
-### USAL.destroy()
+## USAL.destroy()
 
 > Clean up and remove all animations
 

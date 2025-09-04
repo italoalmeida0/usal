@@ -8,10 +8,8 @@ import {
   NgModule,
 } from '@angular/core';
 
-import type { USALInstance, USALConfig } from '../type/angular';
-import USALLib from '../usal.js';
+import USALLib, { type USALInstance, type USALConfig } from '~/usal';
 
-// Service to manage USAL instance
 @Injectable({
   providedIn: 'root',
 })
@@ -40,9 +38,9 @@ export class USALService {
   }
 }
 
-// Directive for [usal] or [data-usal]
 @Directive({
   selector: '[usal], [data-usal]',
+  standalone: false,
 })
 export class USALDirective implements OnInit, OnChanges {
   @Input('usal') usalValue: string = 'fade';
@@ -62,13 +60,11 @@ export class USALDirective implements OnInit, OnChanges {
   }
 
   private updateAttribute() {
-    // Use whichever input was provided
     const value = this.usalValue || this.dataUsalValue || 'fade';
     this.el.nativeElement.setAttribute('data-usal', value);
   }
 }
 
-// Module to export everything
 @NgModule({
   declarations: [USALDirective],
   exports: [USALDirective],
@@ -76,7 +72,6 @@ export class USALDirective implements OnInit, OnChanges {
 })
 export class USALModule {}
 
-// Standalone function for non-service usage
 export const createUSAL = (config: USALConfig = {}) => {
   const instance = USALLib.createInstance();
 

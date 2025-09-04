@@ -1,10 +1,10 @@
 {
   "name": "usal-monorepo",
-  "version": "1.0.0-beta.21",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Ultimate Scroll Animation Library - 9KB of pure JavaScript magic",
-  "homepage": "https://italoalmeida0.github.io/usal",
+  "homepage": "https://usal.dev/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/italoalmeida0/usal.git"
@@ -25,7 +25,16 @@
           false
         ]
       },
-      "jsx": true
+      "jsx": true,
+      "usage": {
+        "pseudonym": [
+          "Next.js"
+        ],
+        "file": "index.js/layout.ts",
+        "import": "import { USALProvider } from '@usal/react';",
+        "start": "<USALProvider>{children}</USALProvider>",
+        "prop": "data-usal=\"VALUES\""
+      }
     },
     "solid": {
       "dependencies": {
@@ -33,6 +42,15 @@
           ">=1.0.0",
           false
         ]
+      },
+      "usage": {
+        "pseudonym": [
+          "SolidStart"
+        ],
+        "file": "app.tsx",
+        "import": "import { USALProvider } from '@usal/solid';",
+        "start": "<USALProvider>{props.children}</USALProvider>",
+        "prop": "data-usal=\"VALUES\""
       }
     },
     "svelte": {
@@ -42,7 +60,15 @@
           false
         ]
       },
-      "usage": "use:usal={'VALUES'}"
+      "usage": {
+        "pseudonym": [
+          "SvelteKit"
+        ],
+        "file": "App.svelte/+layout.svelte",
+        "import": "import { usal, createUSAL } from '@usal/svelte';",
+        "start": "const usalInstance = createUSAL();",
+        "prop": "use:usal={'VALUES'}"
+      }
     },
     "vue": {
       "dependencies": {
@@ -59,7 +85,15 @@
         "nuxt",
         "nuxt-plugin"
       ],
-      "usage": "v-usal=\"'VALUES'\""
+      "usage": {
+        "pseudonym": [
+          "Nuxt"
+        ],
+        "file": "nuxt.config.ts",
+        "import": "export default defineNuxtConfig({",
+        "start": "modules: ['@usal/vue/nuxt']",
+        "prop": "v-usal=\"'VALUES'\""
+      }
     },
     "lit": {
       "dependencies": {
@@ -67,9 +101,17 @@
           ">=2.0.0",
           false
         ]
+      },
+      "usage": {
+        "pseudonym": [],
+        "file": "main.ts",
+        "import": "import { usal, useUSAL } from '@usal/lit';",
+        "start": "const usalInstance = useUSAL();",
+        "prop": "${usal('VALUES')}"
       }
     },
     "angular": {
+      "format": "angular",
       "dependencies": {
         "@angular/core": [
           ">=12.0.0",
@@ -80,7 +122,13 @@
           false
         ]
       },
-      "usage": "[usal]=\"'VALUES'\""
+      "usage": {
+        "pseudonym": [],
+        "file": "app.component.ts",
+        "import": "import { USALModule } from '@usal/angular';",
+        "start": "@Component({imports: [USALModule]})\nexport class AppComponent",
+        "prop": "[usal]=\"'VALUES'\""
+      }
     }
   },
   "scripts": {
@@ -90,6 +138,8 @@
     "update:tags": "node scripts/update-tags.js",
     "publish:pkgs-beta": "npm run build && npm publish --workspaces --tag beta --access public",
     "publish:all-beta": "npm run publish:pkgs-beta && npm run update:tags",
+    "publish:pkgs-stable": "npm run build && npm publish --workspaces --access public",
+    "publish:all-stable": "npm run publish:pkgs-stable && npm run update:tags",
     "format": "prettier --write --ignore-path .gitignore **/*.{js,ts,jsx,tsx,html,css} && npm run format:doc",
     "format:doc": "prettier --write --ignore-path .prettierignore *.{json,md} packages/**/*.{json,md}",
     "lint": "eslint src/**/*.{js,ts,jsx,tsx}",
@@ -98,9 +148,11 @@
     "lint:comments": "node scripts/lint-comments.js"
   },
   "devDependencies": {
-    "langdetect": "^0.2.1",
     "@angular/common": ">=12.0.0",
+    "@angular/compiler": "^20.2.3",
+    "@angular/compiler-cli": "^20.2.3",
     "@angular/core": ">=12.0.0",
+    "@nuxt/kit": ">=3.0.0",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
     "@typescript-eslint/parser": "^8.42.0",
     "esbuild": "^0.25.9",
@@ -108,15 +160,16 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "globals": "^16.3.0",
+    "langdetect": "^0.2.1",
     "lit": ">=2.0.0",
+    "ng-packagr": "^20.2.0",
+    "nuxt": ">=3.0.0",
     "prettier": "^3.6.2",
     "react": ">=16.8.0",
     "solid-js": ">=1.0.0",
     "svelte": ">=3.0.0",
     "typescript": "^5.0.0",
-    "vue": ">=3.0.0",
-    "nuxt": ">=3.0.0",
-    "@nuxt/kit": ">=3.0.0"
+    "vue": ">=3.0.0"
   },
   "keywords": [
     "javascript",
