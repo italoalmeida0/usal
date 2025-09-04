@@ -501,11 +501,7 @@ async function buildFrameworkPackage(name, config = {}) {
         sourcemap: false,
         outfile: path.join(packageDir, `${PROJECT_NAME}.min.js`),
         footer: {
-          js: `;(function(){
-              var exported = __temp.default || __temp;
-              if (typeof window !== 'undefined') window.${globalName} = exported;
-              if (typeof global !== 'undefined') global.${globalName} = exported;
-            })();`,
+          js: `;!function(){var L=__temp.default||__temp;"undefined"!=typeof window&&(window.${globalName}=L),"undefined"!=typeof global&&(global.${globalName}=L)}();`,
         },
       });
       console.log(`  ${colorize.success('✓')} UMD minified build complete`);
