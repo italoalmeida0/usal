@@ -24,7 +24,15 @@ export const useUSAL = () => {
 
   return {
     getInstance: () => globalInstance,
-    config: (v) => globalInstance && globalInstance.config(v),
+    config: (config) => {
+      if (!globalInstance) return config === undefined ? null : undefined;
+
+      if (config === undefined) {
+        return globalInstance.config();
+      }
+
+      globalInstance.config(config);
+    },
     destroy: () => {
       if (globalInstance) {
         globalInstance.destroy();
@@ -35,16 +43,16 @@ export const useUSAL = () => {
 };
 
 export const createUSAL = (configInit = {}) => {
-  let instance = USALLib.createInstance();
+  let instance = USALLib.createInstance(configInit);
 
-  if (configInit && Object.keys(configInit).length > 0) {
-    instance.config(configInit);
-  }
+  const config = (config) => {
+    if (!instance) return config === undefined ? null : undefined;
 
-  const config = (v) => {
-    if (instance && Object.keys(v).length > 0) {
-      instance.config(v);
+    if (config === undefined) {
+      return instance.config();
     }
+
+    instance.config(config);
   };
 
   const destroy = () => {

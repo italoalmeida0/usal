@@ -1,7 +1,11 @@
 const USAL = (() => {
+  if (typeof window !== 'undefined' && window.USAL && window.USAL.__usalInitialized) {
+    return window.USAL;
+  }
+
   // Handle server-side rendering
   if (typeof window === 'undefined') {
-    const noop = () => ({});
+    const noop = () => ({ config: noop, destroy: noop });
     return {
       config: noop,
       destroy: noop,
@@ -50,21 +54,7 @@ const USAL = (() => {
 
   const parseClasses = (str) => {
     const tokens = str.trim().split(/\s+/);
-    const config = [
-      0,
-      0,
-      defaults.duration,
-      defaults.delay,
-      defaults.threshold,
-      defaults.splitDelay,
-      0,
-      0,
-      0,
-      null,
-      null,
-      null,
-      null,
-    ];
+    const config = [0, 0, null, null, null, null, 0, 0, null, null, null, null, null];
 
     tokens.forEach((token) => {
       const parts = token.split('-');
@@ -109,7 +99,7 @@ const USAL = (() => {
       } else if (token === 'blur') {
         config[BLUR] = 1;
       } else if (token === 'once') {
-        config[ONCE] = 1;
+        config[ONCE] = true;
       } else if (token === 'linear') {
         config[EASING] = 1;
       } else if (token === 'ease') {
@@ -326,7 +316,7 @@ const USAL = (() => {
   const animate = (ratio, data, instance) => {
     const threshold = Math.max(
       0,
-      Math.min(1, (data.config[THRESHOLD] || defaults.threshold) / 100)
+      Math.min(1, (data.config[THRESHOLD] ?? instance.config.threshold) / 100)
     );
 
     if (
@@ -343,7 +333,11 @@ const USAL = (() => {
 
     // Text animation effects
     if (config[TEXT]) {
-      data.rafId = animateText(targets || [element], config[TEXT], config[DURATION]);
+      data.rafId = animateText(
+        targets || [element],
+        config[TEXT],
+        config[DURATION] ?? instance.config.duration
+      );
       data.animated = 1;
       return;
     }
@@ -359,14 +353,14 @@ const USAL = (() => {
       });
     }
 
-    const start = performance.now() + config[DELAY];
+    const start = performance.now() + (config[DELAY] ?? instance.config.delay);
     const easing = easings[config[EASING]];
     const splitConfig = data.splitConfig || config;
 
     // Main animation loop
     const tick = () => {
       const elapsed = Math.max(0, performance.now() - start);
-      const progress = Math.min(elapsed / config[DURATION], 1);
+      const progress = Math.min(elapsed / (config[DURATION] ?? instance.config.duration), 1);
       const eased = easing(progress);
 
       if (countSpan && countData) {
@@ -389,13 +383,16 @@ const USAL = (() => {
       if (targets) {
         let done = true;
         targets.forEach((target, index) => {
-          const targetDelay = index * config[SPLIT_DELAY];
+          const targetDelay = index * (config[SPLIT_DELAY] ?? instance.config.splitDelay);
           const targetElapsed = elapsed - targetDelay;
           if (targetElapsed < 0) {
             done = false;
             return;
           }
-          const targetProgress = Math.min(targetElapsed / config[DURATION], 1);
+          const targetProgress = Math.min(
+            targetElapsed / (config[DURATION] ?? instance.config.duration),
+            1
+          );
           applyAnimation(target, easing(targetProgress), splitConfig);
           if (targetProgress < 1) done = false;
         });
@@ -439,7 +436,7 @@ const USAL = (() => {
     if (countSpan) countSpan.textContent = '0';
     if (targets) targets.forEach((target) => $(target, resetStyles));
 
-    if (!config[ONCE] && !instance.config.once) data.animated = 0;
+    if (!(config[ONCE] ?? instance.config.once)) data.animated = 0;
     instance.animating.delete(element);
   };
 
@@ -517,7 +514,7 @@ const USAL = (() => {
           if (
             entry.intersectionRatio === 0 &&
             data.animated &&
-            !data.config[ONCE] &&
+            !(data.config[ONCE] ?? instance.config.once) &&
             !instance.animating.has(data.element)
           ) {
             reset(data, instance);
@@ -605,12 +602,28 @@ const USAL = (() => {
       config: { ...defaults, ...config },
     };
 
-    return {
-      init(newConfig = {}) {
-        if (instance.initialized) return;
+    const autoInit = () => {
+      if (!instance.initialized) {
         instance.initialized = true;
-        Object.assign(instance.config, newConfig);
         setupObservers(instance);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', autoInit);
+      } else {
+        requestAnimationFrame(autoInit);
+      }
+    }
+
+    return {
+      config(newConfig = {}) {
+        if (arguments.length === 0) {
+          return { ...instance.config };
+        }
+        Object.assign(instance.config, newConfig);
+        return this;
       },
 
       destroy() {
@@ -618,7 +631,6 @@ const USAL = (() => {
         destroyTimeout = setTimeout(() => {
           instance.observer?.disconnect();
           instance.mutationObservers?.forEach((obs) => obs.disconnect());
-
           instance.elements.forEach((data) => {
             if (data.rafId) cancelAnimationFrame(data.rafId);
             if (data.element?.parentNode) {
@@ -626,7 +638,6 @@ const USAL = (() => {
               data.element.removeAttribute('data-usal-id');
             }
           });
-
           instance.elements.clear();
           instance.animating.clear();
           instance.initialized = false;
@@ -635,23 +646,24 @@ const USAL = (() => {
         }, 0);
       },
 
-      createInstance: () => createInstance(config),
+      createInstance: (newConfig) => createInstance(newConfig),
     };
   };
 
   const globalInstance = createInstance();
-  return { ...globalInstance, createInstance };
+  const usalWithFlag = {
+    ...globalInstance,
+    createInstance,
+    __usalInitialized: true,
+  };
+
+  return usalWithFlag;
 })();
 
-// Auto-initialize on page load
-if (typeof window !== 'undefined' && !window.USAL) {
-  window.USAL = USAL;
-  const init = () => USAL.init();
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    requestAnimationFrame(init);
+if (typeof window !== 'undefined') {
+  if (!window.USAL || !window.USAL.__usalInitialized) {
+    window.USAL = USAL;
   }
 }
 
-export default (typeof window !== 'undefined' && window.USAL) || USAL;
+export default USAL;

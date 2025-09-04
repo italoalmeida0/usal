@@ -13,10 +13,7 @@ export class USALController {
 
   hostConnected() {
     if (!this.instance) {
-      this.instance = USALLib.createInstance();
-      if (this.initialConfig && Object.keys(this.initialConfig).length > 0) {
-        this.instance.config(this.initialConfig);
-      }
+      this.instance = USALLib.createInstance(this.initialConfig);
     }
   }
 
@@ -32,9 +29,13 @@ export class USALController {
   }
 
   config(config) {
-    if (this.instance && config) {
-      this.instance.config(config);
+    if (!this.instance) return config === undefined ? null : undefined;
+
+    if (config === undefined) {
+      return this.instance.config();
     }
+
+    this.instance.config(config);
   }
 
   destroy() {
@@ -55,7 +56,12 @@ export const useUSAL = () => {
 
   return {
     getInstance: () => globalInstance,
-    config: (v) => globalInstance?.config(v),
+    config: (config) => {
+      if (config === undefined) {
+        return globalInstance?.config();
+      }
+      globalInstance?.config(config);
+    },
     destroy: () => {
       if (globalInstance) {
         globalInstance.destroy();
@@ -70,21 +76,27 @@ export const useUSALController = (host, config = {}) => {
 
   return {
     getInstance: () => controller.getInstance(),
-    config: (v) => controller.config(v),
+    config: (config) => {
+      if (config === undefined) {
+        return controller.config();
+      }
+      controller.config(config);
+    },
     destroy: () => controller.destroy(),
   };
 };
 
 // Standalone creation
 export const createUSAL = (config = {}) => {
-  const instance = USALLib.createInstance();
-
-  if (config && Object.keys(config).length > 0) {
-    instance.config(config);
-  }
+  const instance = USALLib.createInstance(config);
 
   return {
-    config: (v) => instance.config(v),
+    config: (config) => {
+      if (config === undefined) {
+        return instance.config();
+      }
+      instance.config(config);
+    },
     destroy: () => instance.destroy(),
     getInstance: () => instance,
   };

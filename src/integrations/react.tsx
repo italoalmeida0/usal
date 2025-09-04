@@ -9,10 +9,7 @@ export const USALProvider = ({ children, config = {} }) => {
 
   useEffect(() => {
     if (!instanceRef.current) {
-      instanceRef.current = USALLib.createInstance();
-      if (Object.keys(config).length > 0) {
-        instanceRef.current.config(config);
-      }
+      instanceRef.current = USALLib.createInstance(config);
     }
 
     return () => {
@@ -45,20 +42,26 @@ export const useUSAL = () => {
 
   return {
     getInstance: () => instanceRef.current,
-    config: (v) => instanceRef.current?.config(v),
+    config: (config) => {
+      if (config === undefined) {
+        return instanceRef.current?.config();
+      }
+      instanceRef.current?.config(config);
+    },
     destroy: () => instanceRef.current?.destroy(),
   };
 };
 
 export const createUSAL = (config = {}) => {
-  const instance = USALLib.createInstance();
-
-  if (config && Object.keys(config).length > 0) {
-    instance.config(config);
-  }
+  const instance = USALLib.createInstance(config);
 
   return {
-    config: (v) => instance.config(v),
+    config: (config) => {
+      if (config === undefined) {
+        return instance.config();
+      }
+      instance.config(config);
+    },
     destroy: () => instance.destroy(),
     getInstance: () => instance,
   };

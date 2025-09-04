@@ -24,10 +24,14 @@ export class USALService {
     return this.instance;
   }
 
-  config(configOptions: USALConfig) {
-    if (this.instance && configOptions && Object.keys(configOptions).length > 0) {
-      this.instance.config(configOptions);
+  config(configOptions?: USALConfig): USALConfig | null | void {
+    if (!this.instance) return null;
+
+    if (configOptions === undefined) {
+      return this.instance.config();
     }
+
+    this.instance.config(configOptions);
   }
 
   destroy() {
@@ -73,16 +77,32 @@ export class USALDirective implements OnInit, OnChanges {
 export class USALModule {}
 
 export const createUSAL = (config: USALConfig = {}) => {
-  const instance = USALLib.createInstance();
-
-  if (config && Object.keys(config).length > 0) {
-    instance.config(config);
-  }
+  const instance = USALLib.createInstance(config);
 
   return {
-    config: (v: USALConfig) => instance.config(v),
+    config(configOptions?: USALConfig): USALConfig | void {
+      if (configOptions === undefined) {
+        return instance.config();
+      }
+      instance.config(configOptions);
+    },
     destroy: () => instance.destroy(),
     getInstance: () => instance,
+  };
+};
+
+export const useUSAL = () => {
+  const instance = USALLib.createInstance();
+
+  return {
+    getInstance: () => instance,
+    config(configOptions?: USALConfig): USALConfig | void {
+      if (configOptions === undefined) {
+        return instance.config();
+      }
+      instance.config(configOptions);
+    },
+    destroy: () => instance.destroy(),
   };
 };
 

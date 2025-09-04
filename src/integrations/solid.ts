@@ -8,8 +8,7 @@ export const USALProvider = (props) => {
   const [instance, setInstance] = createSignal(null);
 
   onMount(() => {
-    const inst = USALLib.createInstance();
-    if (props.config) inst.config(props.config);
+    const inst = USALLib.createInstance(props.config || {});
     setInstance(inst);
   });
 
@@ -49,20 +48,30 @@ export const useUSAL = () => {
 
   return {
     getInstance: () => instance(),
-    config: (v) => instance() && instance().config(v),
+    config: (config) => {
+      const inst = instance();
+      if (!inst) return config === undefined ? null : undefined;
+
+      if (config === undefined) {
+        return inst.config();
+      }
+
+      inst.config(config);
+    },
     destroy: () => instance() && instance().destroy(),
   };
 };
 
 export const createUSAL = (config = {}) => {
-  const instance = USALLib.createInstance();
-
-  if (config && Object.keys(config).length > 0) {
-    instance.config(config);
-  }
+  const instance = USALLib.createInstance(config);
 
   return {
-    config: (v) => instance.config(v),
+    config: (config) => {
+      if (config === undefined) {
+        return instance.config();
+      }
+      instance.config(config);
+    },
     destroy: () => instance.destroy(),
     getInstance: () => instance,
   };

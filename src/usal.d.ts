@@ -8,19 +8,18 @@ export interface USALConfig {
 }
 
 export interface USALInstance {
-  config(config?: USALConfig): void;
+  config(): USALConfig;
+  config(config: USALConfig): USALInstance;
   destroy(): void;
   createInstance(config?: USALConfig): USALInstance;
 }
 
-declare const USAL: USALInstance & {
-  createInstance(config?: USALConfig): USALInstance;
-};
+declare const USAL: USALInstance;
 
 export default USAL;
 
 declare global {
   interface Window {
-    USAL: typeof USAL;
+    USAL: USALInstance;
   }
 }

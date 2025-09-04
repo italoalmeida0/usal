@@ -4,6 +4,7 @@ import USAL, { USALConfig, USALInstance } from '../usal';
 export class USALController implements ReactiveController {
   constructor(host: ReactiveControllerHost, config?: USALConfig);
   getInstance(): USALInstance | null;
+  config(): USALConfig;
   config(config: USALConfig): void;
   destroy(): void;
   hostConnected(): void;
@@ -12,7 +13,8 @@ export class USALController implements ReactiveController {
 
 export const useUSAL: () => {
   getInstance: () => USALInstance | null;
-  config: (config: USALConfig) => void;
+  config(): USALConfig;
+  config(config: USALConfig): void;
   destroy: () => void;
 };
 
@@ -21,12 +23,14 @@ export const useUSALController: (
   config?: USALConfig
 ) => {
   getInstance: () => USALInstance | null;
-  config: (config: USALConfig) => void;
+  config(): USALConfig;
+  config(config: USALConfig): void;
   destroy: () => void;
 };
 
 export const createUSAL: (config?: USALConfig) => {
-  config: (config: USALConfig) => void;
+  config(): USALConfig;
+  config(config: USALConfig): void;
   destroy: () => void;
   getInstance: () => USALInstance | null;
 };
