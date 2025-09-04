@@ -655,6 +655,7 @@ const USAL = (() => {
     ...globalInstance,
     createInstance,
     __usalInitialized: true,
+    version: '{%%VERSION%%}',
   };
 
   return usalWithFlag;

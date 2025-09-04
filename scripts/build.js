@@ -496,10 +496,17 @@ async function buildFrameworkPackage(name, config = {}) {
       await esbuild.build({
         ...buildOptions,
         format: 'iife',
-        globalName: globalName,
+        globalName: '__temp',
         minify: true,
         sourcemap: false,
         outfile: path.join(packageDir, `${PROJECT_NAME}.min.js`),
+        footer: {
+          js: `;(function(){
+              var exported = __temp.default || __temp;
+              if (typeof window !== 'undefined') window.${globalName} = exported;
+              if (typeof global !== 'undefined') global.${globalName} = exported;
+            })();`,
+        },
       });
       console.log(`  ${colorize.success('✓')} UMD minified build complete`);
     }
@@ -589,8 +596,50 @@ async function build() {
     builtPackages.push(frameworkName);
   }
 
+  function replaceVersionInAllFiles(directory, version) {
+    const files = fs.readdirSync(directory, { recursive: true, withFileTypes: true });
+    let replacedCount = 0;
+    const modifiedFiles = [];
+    for (const file of files) {
+      if (file.isFile()) {
+        const filePath = path.join(file.path, file.name);
+        if (
+          file.name.endsWith('.map') ||
+          file.name.match(/\.(png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot)$/)
+        ) {
+          continue;
+        }
+        try {
+          let content = fs.readFileSync(filePath, 'utf-8');
+          const originalContent = content;
+          content = content.replace(/{%%VERSION%%}/g, version);
+
+          if (content !== originalContent) {
+            fs.writeFileSync(filePath, content, 'utf-8');
+            replacedCount++;
+            modifiedFiles.push(path.relative('packages', filePath));
+          }
+        } catch (error) {}
+      }
+    }
+    return { count: replacedCount, files: modifiedFiles };
+  }
+
   console.log(`\n${colorize.brightGreen('==================================================')}`);
-  console.log(`${colorize.success('[SUCCESS]')} All builds complete!`);
+
+  console.log(
+    `\n${colorize.info('[VERSION]')} Replacing {%%VERSION%%} with ${colorize.accent(rootPackageJson.version)}...`
+  );
+  const versionReplace = replaceVersionInAllFiles('packages', rootPackageJson.version);
+  if (versionReplace.count > 0) {
+    console.log(
+      `  ${colorize.success('[OK]')} Updated ${versionReplace.count} file(s) with version ${colorize.accent(rootPackageJson.version)}`
+    );
+  } else {
+    console.log(`  ${colorize.dim('→')} No version placeholders found`);
+  }
+
+  console.log(`\n${colorize.success('[SUCCESS]')} All builds complete!`);
   console.log(
     `${colorize.header('[LOCATION]')} Packages ready in ${colorize.file('./packages')} directory`
   );

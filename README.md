@@ -214,13 +214,13 @@ text - fluid;
 
 ## JavaScript API
 
-## USAL.config(options)
+## window.USAL.config(options)
 
 > Configure or reconfigure at any time
 
 ```javascript
 // Initial configuration
-USAL.config({
+window.USAL.config({
   maxConcurrent: 100, // Max concurrent animations
   duration: 1000, // Default duration (ms)
   delay: 0, // Default delay (ms)
@@ -230,19 +230,19 @@ USAL.config({
 });
 
 // Can be reconfigured later
-USAL.config({
+window.USAL.config({
   duration: 2000, // Change duration
   threshold: 50, // Change threshold
 });
 ```
 
-## USAL.destroy()
+## window.USAL.destroy()
 
 > Clean up and remove all animations
 
 ```javascript
 // Clean up when done
-USAL.destroy();
+window.USAL.destroy();
 ```
 
 ## Inspirations & Acknowledgments
