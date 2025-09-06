@@ -1,17 +1,29 @@
 const USAL = (() => {
+  const EMPTY_STR = '';
+  const SPACE_STR = ' ';
+  const NONE_STR = 'none';
+  const DOT_STR = '.';
+  const SPAN_STR = 'span';
+  const ASTERISK_STR = '*';
+
   if (typeof window !== 'undefined' && window.USAL && window.USAL.__usalInitialized) {
     return window.USAL;
   }
 
   // Handle server-side rendering
+  const noop = () => ({ config: noop, destroy: noop });
   if (typeof window === 'undefined') {
-    const noop = () => ({ config: noop, destroy: noop });
     return {
       config: noop,
       destroy: noop,
       createInstance: () => ({ config: noop, destroy: noop }),
     };
   }
+
+  const DATA_USAL = 'data-usal';
+  const DATA_USAL_ID = DATA_USAL + '-id';
+  const DATA_USAL_FRAGMENT = DATA_USAL + '-fragment';
+  const DATA_USAL_SELECTOR = '[' + DATA_USAL + ']';
 
   // Config array indices
   const ANIMATION = 0;
@@ -28,7 +40,9 @@ const USAL = (() => {
   const COUNT = 11;
   const TEXT = 12;
 
-  const animationMap = { fade: 0, zoomin: 1, zoomout: 2, flip: 3 };
+  const INTERSECTION_THRESHOLDS = Array.from({ length: 11 }, (_, i) => i / 10);
+
+  const animationMap = ['fade', 'zoomin', 'zoomout', 'flip'];
 
   // Bitwise flags for directions
   const DIRECTION_UP = 1;
@@ -36,8 +50,14 @@ const USAL = (() => {
   const DIRECTION_LEFT = 4;
   const DIRECTION_RIGHT = 8;
 
+  // State constants
+  const IDLE = 0;
+  const ANIMATING = 1;
+  const COMPLETED = 2;
+
+  const THROTTLE_DELAY = 50;
+
   const defaults = {
-    maxConcurrent: 100,
     duration: 1000,
     delay: 0,
     threshold: 30,
@@ -45,11 +65,15 @@ const USAL = (() => {
     once: false,
   };
 
-  // Utility to apply styles - now filters out null/undefined
-  const $ = (element, styles) => {
+  // Utility to apply styles
+  const $ = (element, styles, clean = false) => {
     for (const key in styles) {
       if (styles[key] != null) element.style[key] = styles[key];
     }
+
+    clean
+      ? element.removeAttribute(DATA_USAL_FRAGMENT)
+      : element.setAttribute(DATA_USAL_FRAGMENT, EMPTY_STR);
   };
 
   const parseClasses = (str) => {
@@ -60,52 +84,97 @@ const USAL = (() => {
       const parts = token.split('-');
       const first = parts[0];
 
-      if (animationMap[first] !== undefined) {
-        config[ANIMATION] = animationMap[first];
+      if (animationMap.indexOf(first) !== -1) {
+        config[ANIMATION] = animationMap.indexOf(first);
         if (parts[1]) {
           let dir = 0;
           for (const char of parts[1]) {
-            dir |=
-              char === 'u'
-                ? DIRECTION_UP
-                : char === 'd'
-                  ? DIRECTION_DOWN
-                  : char === 'l'
-                    ? DIRECTION_LEFT
-                    : char === 'r'
-                      ? DIRECTION_RIGHT
-                      : 0;
+            switch (char) {
+              case 'u':
+                dir |= DIRECTION_UP;
+                break;
+              case 'd':
+                dir |= DIRECTION_DOWN;
+                break;
+              case 'l':
+                dir |= DIRECTION_LEFT;
+                break;
+              case 'r':
+                dir |= DIRECTION_RIGHT;
+                break;
+            }
           }
           config[DIRECTION] = dir;
         }
-      } else if (first === 'split') {
-        const second = parts[1];
-        if (['word', 'letter', 'item'].includes(second)) {
-          config[SPLIT] = second;
-        } else if (second === 'delay' && parts[2]) {
-          config[SPLIT_DELAY] = +parts[2];
-        } else {
-          config[SPLIT_ANIMATION] = token.substring(6);
-        }
-      } else if (first === 'text' && ['shimmer', 'fluid'].includes(parts[1])) {
-        config[TEXT] = parts[1];
-      } else if (token.startsWith('count-[') && token.endsWith(']')) {
-        config[COUNT] = token.slice(7, -1);
-      } else if (parts[1] && !isNaN(+parts[1])) {
-        const value = +parts[1];
-        if (first === 'duration') config[DURATION] = value;
-        else if (first === 'delay') config[DELAY] = value;
-        else if (first === 'threshold') config[THRESHOLD] = value;
-      } else if (token === 'blur') {
-        config[BLUR] = 1;
-      } else if (token === 'once') {
-        config[ONCE] = true;
-      } else if (token === 'linear') {
-        config[EASING] = 1;
-      } else if (token === 'ease') {
-        config[EASING] = 2;
-      } else if (token === 'ease-in') {
-        config[EASING] = 3;
+        return;
+      }
+
+      let numberIndex = null;
+      switch (token) {
+        case 'blur':
+          config[BLUR] = 1;
+          break;
+        case 'once':
+          config[ONCE] = true;
+          break;
+        case 'linear':
+          config[EASING] = 1;
+          break;
+        case 'ease':
+          config[EASING] = 2;
+          break;
+        case 'ease-in':
+          config[EASING] = 3;
+          break;
+
+        default:
+          switch (first) {
+            case 'count':
+              if (parts[1]?.startsWith('[') && token.endsWith(']'))
+                config[COUNT] = token.slice(7, -1);
+              break;
+
+            case 'split':
+              if (!parts[1]) break;
+              switch (parts[1]) {
+                case 'word':
+                case 'letter':
+                case 'item':
+                  config[SPLIT] = parts[1];
+                  break;
+                case 'delay':
+                  if (parts[2]) config[SPLIT_DELAY] = +parts[2];
+                  break;
+                default:
+                  if (parts[1]) config[SPLIT_ANIMATION] = token.substring(6);
+              }
+              break;
+
+            case 'text':
+              switch (parts[1]) {
+                case 'shimmer':
+                case 'fluid':
+                  config[TEXT] = parts[1];
+                  break;
+              }
+              break;
+
+            case 'duration':
+              numberIndex = DURATION;
+              break;
+
+            case 'delay':
+              numberIndex = DELAY;
+              break;
+
+            case 'threshold':
+              numberIndex = THRESHOLD;
+              break;
+          }
+      }
+      if (numberIndex !== null) {
+        const val = +parts[1];
+        if (!isNaN(val)) config[numberIndex] = val;
       }
     });
 
@@ -128,7 +197,7 @@ const USAL = (() => {
 
   const getTransform = (animation, direction, progress) => {
     const inverse = 1 - progress;
-    let transform = transformFns[animation]?.(progress) || '';
+    let transform = transformFns[animation]?.(progress) || EMPTY_STR;
 
     if (animation === 3) {
       // flip
@@ -147,7 +216,7 @@ const USAL = (() => {
       if (direction & (DIRECTION_LEFT | DIRECTION_RIGHT))
         parts.push(`rotateY(${direction & DIRECTION_LEFT ? -value : value}deg)`);
       if (!parts.length) parts.push(`rotateY(${inverse * 90}deg)`);
-      transform = `perspective(400px) ${parts.join(' ')}`;
+      transform = 'perspective(400px) ' + parts.join(SPACE_STR);
     }
 
     if (animation !== 3 && direction) {
@@ -157,37 +226,37 @@ const USAL = (() => {
       if (x || y) transform += ` translate(${x}px, ${y}px)`;
     }
 
-    return transform || 'none';
+    return transform || NONE_STR;
   };
 
   const setupCount = (element, config, data) => {
-    const text = element.textContent || '';
+    const text = element.textContent || EMPTY_STR;
     const parts = text.split(config[COUNT]);
     if (parts.length !== 2) return false;
 
-    const clean = config[COUNT].replace(/[^\d\s,.]/g, '');
+    const clean = config[COUNT].replace(/[^\d\s,.]/g, EMPTY_STR);
     let decimals = 0,
       value = 0;
 
-    const nums = clean.replace(/[^\d.]/g, '.');
-    const lastDot = nums.lastIndexOf('.');
+    const nums = clean.replace(/[^\d.]/g, DOT_STR);
+    const lastDot = nums.lastIndexOf(DOT_STR);
     if (lastDot > -1) {
       const after = nums.substring(lastDot + 1);
       if (after.length <= 2) {
         decimals = after.length;
         value = parseFloat(nums);
       } else {
-        value = parseFloat(nums.replace(/\./g, ''));
+        value = parseFloat(nums.replace(/\./g, EMPTY_STR));
       }
     } else {
-      value = parseFloat(clean.replace(/\D/g, ''));
+      value = parseFloat(clean.replace(/\D/g, EMPTY_STR));
     }
 
-    const span = document.createElement('span');
+    const span = document.createElement(SPAN_STR);
     span.textContent = '0';
-    span.style.cssText = 'display:inline;visibility:visible';
+    $(span, { display: 'inline', visibility: 'visible' });
 
-    element.innerHTML = '';
+    element.innerHTML = EMPTY_STR;
     element.appendChild(document.createTextNode(parts[0]));
     element.appendChild(span);
     element.appendChild(document.createTextNode(parts[1]));
@@ -199,10 +268,24 @@ const USAL = (() => {
 
   const formatNumber = (value, original, decimals) => {
     let formatted = decimals > 0 ? value.toFixed(decimals) : Math.floor(value).toString();
-    if (original.includes(' ') || original.includes(',')) {
-      const parts = formatted.split('.');
-      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, original.includes(' ') ? ' ' : ',');
-      formatted = parts.join(decimals > 0 ? '.' : '');
+    if (original.includes(SPACE_STR) || original.includes(',')) {
+      const parts = formatted.split(DOT_STR);
+
+      const separator = original.includes(SPACE_STR) ? SPACE_STR : ',';
+      let result = EMPTY_STR;
+      let count = 0;
+
+      for (let i = parts[0].length - 1; i >= 0; i--) {
+        if (count === 3) {
+          result = separator + result;
+          count = 0;
+        }
+        result = parts[0][i] + result;
+        count++;
+      }
+
+      parts[0] = result;
+      formatted = parts.join(decimals > 0 ? DOT_STR : EMPTY_STR);
     }
     return formatted;
   };
@@ -212,75 +295,56 @@ const USAL = (() => {
     const targets = [];
     const opacity = config[TEXT] ? '1' : '0';
 
-    if (config[SPLIT] === 'item') {
-      Array.from(element.children).forEach((child) => {
-        child.style.opacity = opacity;
-        targets.push(child);
-      });
-    } else {
-      const text = element.textContent || '';
-      const parts = config[SPLIT] === 'word' ? text.split(/(\s+)/) : text.split('');
-      element.innerHTML = '';
-
-      parts.forEach((part) => {
-        if (!part) return;
-        if (/\s/.test(part)) {
-          element.appendChild(document.createTextNode(part));
-        } else {
-          const span = document.createElement('span');
-          span.textContent = part;
-          span.style.cssText = `display:inline-block;opacity:${opacity}`;
-          element.appendChild(span);
-          targets.push(span);
-        }
-      });
-    }
-    return targets;
-  };
-
-  const processElement = (element, instance) => {
-    let id = element.getAttribute('data-usal-id');
-    if (!id) {
-      id = `u${Date.now()}${Math.random().toString(36).substr(2, 5)}`;
-      element.setAttribute('data-usal-id', id);
-    }
-
-    // Cancel existing animation
-    const existing = instance.elements.get(id);
-    if (existing?.rafId) {
-      cancelAnimationFrame(existing.rafId);
-      instance.animating.delete(element);
-    }
-
-    const classes = element.getAttribute('data-usal') || '';
-    const config = parseClasses(classes);
-
-    const data = {
-      element,
-      config,
-      configString: classes,
-      original: {
-        opacity: element.style.opacity || '',
-        transform: element.style.transform || '',
-        filter: element.style.filter || '',
-      },
-      targets: null,
-      animated: 0,
-      rafId: null,
+    const createStyledSpan = (content) => {
+      const span = document.createElement(SPAN_STR);
+      span.textContent = content;
+      $(span, { display: 'inline-block', opacity });
+      return span;
     };
 
-    if (config[COUNT]) setupCount(element, config, data);
-    if (config[SPLIT]) {
-      data.targets = setupSplit(element, config);
-      if (config[SPLIT_ANIMATION]) data.splitConfig = parseClasses(config[SPLIT_ANIMATION]);
+    const processWord = (word) => {
+      const wordContainer = document.createElement(SPAN_STR);
+      $(wordContainer, { display: 'inline-block', whiteSpace: 'nowrap' });
+      let contents = [word];
+      if (config[SPLIT] === 'letter') {
+        if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+          const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+          contents = Array.from(segmenter.segment(word), (s) => s.segment);
+        } else {
+          contents = Array.from(word);
+        }
+      }
+      contents.forEach((content) => {
+        const span = createStyledSpan(content);
+        wordContainer.appendChild(span);
+        targets.push(span);
+      });
+      return wordContainer;
+    };
+
+    if (config[SPLIT] === 'item') {
+      Array.from(element.children).forEach((child) => {
+        $(child, { opacity });
+        targets.push(child);
+      });
+      return targets;
     }
 
-    if (!config[TEXT] && !data.countSpan && !data.targets) {
-      element.style.opacity = '0';
-    }
+    const text = element.textContent || EMPTY_STR;
+    const words = text.split(/(\s+)/);
+    element.innerHTML = EMPTY_STR;
 
-    instance.elements.set(id, data);
-    return data;
+    words.forEach((word) => {
+      if (!word) return;
+
+      if (/\s/.test(word)) {
+        element.appendChild(document.createTextNode(word));
+      } else {
+        element.appendChild(processWord(word));
+      }
+    });
+
+    return targets;
   };
 
   // Unified text effect function
@@ -313,21 +377,8 @@ const USAL = (() => {
     return animate();
   };
 
-  const animate = (ratio, data, instance) => {
-    const threshold = Math.max(
-      0,
-      Math.min(1, (data.config[THRESHOLD] ?? instance.config.threshold) / 100)
-    );
-
-    if (
-      data.animated ||
-      ratio < threshold ||
-      instance.animating.has(data.element) ||
-      instance.animating.size >= instance.config.maxConcurrent
-    )
-      return;
-
-    instance.animating.add(data.element);
+  const animate = (data, instance) => {
+    data.state = ANIMATING;
 
     const { config, element, targets, countSpan, countData } = data;
 
@@ -338,7 +389,7 @@ const USAL = (() => {
         config[TEXT],
         config[DURATION] ?? instance.config.duration
       );
-      data.animated = 1;
+      data.state = COMPLETED;
       return;
     }
 
@@ -347,20 +398,21 @@ const USAL = (() => {
       const transform = getTransform(config[ANIMATION], config[DIRECTION], 0);
       $(element, {
         opacity: '0',
-        transform: transform !== 'none' ? transform : 'translateZ(0)',
+        transform: transform !== NONE_STR ? transform : 'translateZ(0)',
         filter: config[BLUR] ? 'blur(10px)' : null,
         willChange: 'transform,opacity',
       });
     }
 
     const start = performance.now() + (config[DELAY] ?? instance.config.delay);
-    const easing = easings[config[EASING]];
+    const easing = easings[config[EASING]] || easings[0];
     const splitConfig = data.splitConfig || config;
+    const duration = config[DURATION] ?? instance.config.duration;
 
     // Main animation loop
     const tick = () => {
       const elapsed = Math.max(0, performance.now() - start);
-      const progress = Math.min(elapsed / (config[DURATION] ?? instance.config.duration), 1);
+      const progress = Math.min(elapsed / duration, 1);
       const eased = easing(progress);
 
       if (countSpan && countData) {
@@ -374,14 +426,16 @@ const USAL = (() => {
         const transform = getTransform(animConfig[ANIMATION], animConfig[DIRECTION], animProgress);
         $(el, {
           opacity: animProgress.toString(),
-          transform: transform !== 'none' ? transform : 'translateZ(0)',
+          transform: transform !== NONE_STR ? transform : 'translateZ(0)',
           filter: config[BLUR] && animProgress < 1 ? `blur(${(1 - animProgress) * 10}px)` : null,
           willChange: animProgress < 1 ? 'transform,opacity' : 'auto',
         });
       };
 
+      // Unified completion check
+      let done = true;
+
       if (targets) {
-        let done = true;
         targets.forEach((target, index) => {
           const targetDelay = index * (config[SPLIT_DELAY] ?? instance.config.splitDelay);
           const targetElapsed = elapsed - targetDelay;
@@ -389,223 +443,286 @@ const USAL = (() => {
             done = false;
             return;
           }
-          const targetProgress = Math.min(
-            targetElapsed / (config[DURATION] ?? instance.config.duration),
-            1
-          );
+          const targetProgress = Math.min(targetElapsed / duration, 1);
           applyAnimation(target, easing(targetProgress), splitConfig);
           if (targetProgress < 1) done = false;
         });
-
-        if (!done) {
-          data.rafId = requestAnimationFrame(tick);
-        } else {
-          instance.animating.delete(element);
-          data.animated = 1;
-        }
       } else {
         applyAnimation(element, eased, config);
-        if (progress < 1) {
-          data.rafId = requestAnimationFrame(tick);
-        } else {
-          instance.animating.delete(element);
-          data.animated = 1;
-        }
+        done = progress >= 1;
+      }
+
+      if (!done) {
+        data.rafId = requestAnimationFrame(tick);
+      } else {
+        data.state = COMPLETED;
       }
     };
+
     data.rafId = requestAnimationFrame(tick);
+  };
+
+  const animateIfVisible = (data, instance) => {
+    // Skip if already animating
+    if (data.state === ANIMATING) return;
+
+    // Handle completed animations
+    if (data.state === COMPLETED) {
+      const isOnce = data.config[ONCE] ?? instance.config.once;
+      if (data.visibilityRatio < 0.01 && !isOnce) {
+        reset(data, instance);
+      }
+      return;
+    }
+
+    // Check threshold and concurrency limits
+    const threshold = Math.max(
+      0,
+      Math.min(1, (data.config[THRESHOLD] ?? instance.config.threshold) / 100)
+    );
+
+    if (data.visibilityRatio < threshold) {
+      return;
+    }
+
+    animate(data, instance);
   };
 
   const reset = (data, instance) => {
     if (data.rafId) {
       cancelAnimationFrame(data.rafId);
-      data.rafId = null;
     }
 
     const { element, targets, countSpan, original, config } = data;
 
     // Reset styles
-    const resetStyles = { opacity: '0', transform: '', filter: '' };
+    const resetStyles = { opacity: '0', transform: EMPTY_STR, filter: EMPTY_STR };
 
     if (!config[TEXT] && !countSpan && !targets) {
       $(element, resetStyles);
     } else {
-      $(element, original);
+      $(element, original, true);
     }
 
     if (countSpan) countSpan.textContent = '0';
     if (targets) targets.forEach((target) => $(target, resetStyles));
 
-    if (!(config[ONCE] ?? instance.config.once)) data.animated = 0;
-    instance.animating.delete(element);
+    // Reset state based on 'once'
+    if (!(config[ONCE] ?? instance.config.once)) {
+      data.state = IDLE;
+    } else {
+      data.state = COMPLETED;
+    }
   };
 
-  const handleElement = (element, instance, action = 'add') => {
-    const id = element.getAttribute('data-usal-id');
-
-    if (action === 'remove') {
-      if (!id) return;
-      const data = instance.elements.get(id);
-      if (!data) return;
-      if (data.rafId) cancelAnimationFrame(data.rafId);
-      if (instance.observer) instance.observer.unobserve(element);
-      instance.elements.delete(id);
-      instance.animating.delete(element);
-      return;
+  const processElement = (element, instance, elementObserver) => {
+    let id = element.getAttribute(DATA_USAL_ID);
+    if (!id) {
+      id = 'u' + Date.now() + Math.random().toString(36).substr(2, 5);
+      element.setAttribute(DATA_USAL_ID, id);
     }
 
-    if (action === 'update') {
-      const newClasses = element.getAttribute('data-usal');
-      if (!newClasses) {
-        handleElement(element, instance, 'remove');
-        return;
-      }
-      if (id && instance.elements.has(id)) {
-        const data = instance.elements.get(id);
-        if (newClasses !== data.configString) {
-          reset(data, instance);
-          instance.elements.delete(id);
-          element.removeAttribute('data-usal-id');
-          newElement(element, instance);
-        }
+    // Check if already processed
+    const existing = instance.elements.get(id);
+    if (existing) {
+      const newClasses = element.getAttribute(DATA_USAL) || EMPTY_STR;
+      if (newClasses !== existing.configString && existing.state !== ANIMATING) {
+        // Config changed, reset and reprocess
+        reset(existing, instance);
+        elementObserver.unobserve(element);
       } else {
-        handleElement(element, instance, 'add');
-      }
-      return;
-    }
-
-    if (id && instance.elements.has(id)) return;
-    newElement(element, instance);
-  };
-
-  const newElement = (element, instance) => {
-    const data = processElement(element, instance);
-    if (instance.observer) {
-      instance.observer.observe(element);
-      const rect = element.getBoundingClientRect();
-      const visible =
-        rect.top < window.innerHeight &&
-        rect.bottom > 0 &&
-        rect.left < window.innerWidth &&
-        rect.right > 0;
-
-      if (visible) {
-        const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
-        const visibleWidth = Math.min(rect.right, window.innerWidth) - Math.max(rect.left, 0);
-        const ratio = (visibleHeight * visibleWidth) / (rect.height * rect.width);
-        animate(ratio, data, instance);
+        // Already processed and no changes
+        return existing;
       }
     }
+
+    const classes = element.getAttribute(DATA_USAL) || EMPTY_STR;
+    const config = parseClasses(classes);
+
+    const data = {
+      element,
+      config,
+      configString: classes,
+      original: {
+        opacity: element.style.opacity || EMPTY_STR,
+        transform: element.style.transform || EMPTY_STR,
+        filter: element.style.filter || EMPTY_STR,
+      },
+      targets: null,
+      state: IDLE,
+      rafId: null,
+      visibilityRatio: 0,
+    };
+
+    if (config[COUNT]) setupCount(element, config, data);
+    if (config[SPLIT]) {
+      data.targets = setupSplit(element, config);
+      if (config[SPLIT_ANIMATION]) data.splitConfig = parseClasses(config[SPLIT_ANIMATION]);
+    }
+
+    if (!config[TEXT] && !data.countSpan && !data.targets) {
+      $(element, { opacity: '0' });
+    }
+
+    instance.elements.set(id, data);
+
+    // Add IntersectionObserver for this specific element
+    elementObserver.observe(element);
+
+    return data;
   };
 
   const setupObservers = (instance) => {
-    // Disconnect any previous observers
-    if (instance.observer) instance.observer.disconnect();
-    instance.mutationObservers?.forEach((obs) => obs.disconnect());
-    instance.mutationObservers = new Map(); // Use the plural version
+    // Local state - specific to this observer setup
+    const domObservers = new Set();
+    const resizeObservers = new Set();
+    const observedDOMs = new Set();
+    let lastScan = 0;
+    let debounceTimer = null;
 
-    // IntersectionObserver for viewport visibility
-    instance.observer = new IntersectionObserver(
+    // Create IntersectionObserver for visibility tracking
+    const elementObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          const data = instance.elements.get(entry.target.getAttribute('data-usal-id'));
-          if (!data) return;
-
-          if (
-            entry.intersectionRatio === 0 &&
-            data.animated &&
-            !(data.config[ONCE] ?? instance.config.once) &&
-            !instance.animating.has(data.element)
-          ) {
-            reset(data, instance);
-          } else {
-            animate(entry.intersectionRatio, data, instance);
+          const data = instance.elements.get(entry.target.getAttribute(DATA_USAL_ID));
+          if (data) {
+            data.visibilityRatio = entry.intersectionRatio;
+            animateIfVisible(data, instance);
           }
         });
       },
-      { threshold: Array.from({ length: 11 }, (_, i) => i / 10) }
+      { threshold: INTERSECTION_THRESHOLDS }
     );
 
-    // Re-observe all known elements
-    instance.elements.forEach((data) => instance.observer.observe(data.element));
-
-    // Start the new, robust observation process
-    walkAndObserveRoots(document.body, instance);
-  };
-
-  const walkAndObserveRoots = (root, instance) => {
-    // 1. Process elements in the current root
-    const processRoot = (currentRoot) => {
-      if (currentRoot.hasAttribute?.('data-usal')) {
-        handleElement(currentRoot, instance);
-      }
-      currentRoot.querySelectorAll?.('[data-usal]').forEach((el) => handleElement(el, instance));
+    // Recursively collect all DOM nodes including shadow roots
+    const collectAllDOMs = (root = document.body, collected = new Set()) => {
+      if (collected.has(root)) return collected;
+      collected.add(root);
+      root.querySelectorAll(ASTERISK_STR).forEach((el) => {
+        if (el.shadowRoot && !collected.has(el.shadowRoot)) {
+          collectAllDOMs(el.shadowRoot, collected);
+        }
+      });
+      return collected;
     };
 
-    processRoot(root);
-
-    // 2. Set up a dedicated MutationObserver for this root
-    if (!instance.mutationObservers.has(root)) {
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === 'childList') {
-            mutation.addedNodes.forEach((node) => {
-              if (node.nodeType === 1) {
-                processRoot(node); // Process the new node and its children
-                if (node.shadowRoot) {
-                  walkAndObserveRoots(node.shadowRoot, instance); // Recursively observe new shadow roots
-                }
-                node.querySelectorAll?.('*').forEach((el) => {
-                  if (el.shadowRoot) walkAndObserveRoots(el.shadowRoot, instance);
-                });
-              }
-            });
-            mutation.removedNodes.forEach((node) => {
-              if (node.nodeType === 1) {
-                if (node.hasAttribute?.('data-usal')) handleElement(node, instance, 'remove');
-                node
-                  .querySelectorAll?.('[data-usal]')
-                  .forEach((el) => handleElement(el, instance, 'remove'));
-              }
-            });
-          } else if (mutation.type === 'attributes' && mutation.attributeName === 'data-usal') {
-            handleElement(mutation.target, instance, 'update');
-          }
-        });
-      });
-
-      observer.observe(root, {
+    // Set up mutation and resize observers for a DOM node
+    const observeDOM = (dom) => {
+      const mutationObs = new MutationObserver(handleObserverEvents);
+      mutationObs.observe(dom, {
         childList: true,
         subtree: true,
         attributes: true,
-        attributeFilter: ['data-usal'],
       });
-      instance.mutationObservers.set(root, observer);
-    }
+      domObservers.add(mutationObs);
 
-    // 3. Find and recurse into any existing shadow roots
-    root.querySelectorAll('*').forEach((el) => {
-      if (el.shadowRoot) {
-        walkAndObserveRoots(el.shadowRoot, instance);
+      const resizeObs = new ResizeObserver(handleObserverEvents);
+      if (dom === document.body || dom.host) {
+        resizeObs.observe(dom === document.body ? dom : dom.host);
+        resizeObservers.add(resizeObs);
       }
-    });
+    };
+
+    // Main function to scan all DOMs and process elements
+    const scanAllDOMs = () => {
+      const allDOMs = collectAllDOMs();
+
+      allDOMs.forEach((dom) => {
+        if (!observedDOMs.has(dom)) {
+          observeDOM(dom);
+          observedDOMs.add(dom);
+        }
+        dom.querySelectorAll?.(DATA_USAL_SELECTOR).forEach((element) => {
+          processElement(element, instance, elementObserver);
+        });
+      });
+
+      // Clean up removed elements
+      const toRemove = [];
+      instance.elements.forEach((data, id) => {
+        if (!data.element.isConnected) {
+          if (data.rafId) cancelAnimationFrame(data.rafId);
+          elementObserver?.unobserve(data.element);
+          toRemove.push(id);
+        } else animateIfVisible(data, instance);
+      });
+      toRemove.forEach((id) => instance.elements.delete(id));
+      lastScan = Date.now();
+    };
+
+    // Event handler with debouncing logic
+    const handleObserverEvents = (events) => {
+      const items = Array.isArray(events) ? events : [events];
+      const hasUsalFragment = (target) => {
+        if (!target || !target.getAttribute) return false;
+        return target.hasAttribute(DATA_USAL_FRAGMENT);
+      };
+
+      let cancel = null;
+      for (const item of items) {
+        if (item.type === 'attributes') {
+          const attrName = item.attributeName;
+          if (attrName === DATA_USAL || attrName === DATA_USAL_ID) {
+            scanAllDOMs();
+            return;
+          }
+        }
+        if (cancel === null) {
+          if (hasUsalFragment(item.target)) cancel = true;
+          if (item.type === 'childList') {
+            const hasUsalFragmentChild = [...item.addedNodes, ...item.removedNodes].some(
+              hasUsalFragment
+            );
+            if (hasUsalFragmentChild) cancel = true;
+          }
+        }
+      }
+      if (cancel) return;
+
+      const timeSinceLastScan = Date.now() - lastScan;
+      if (timeSinceLastScan >= THROTTLE_DELAY) {
+        scanAllDOMs();
+      } else {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          scanAllDOMs();
+        }, THROTTLE_DELAY - timeSinceLastScan);
+      }
+    };
+
+    // Start initial scan
+    scanAllDOMs();
+
+    // Return cleanup function and elementObserver
+    return () => {
+      // Clear debounce timer
+      if (debounceTimer) clearTimeout(debounceTimer);
+
+      // Disconnect all observers
+      domObservers.forEach((observer) => observer.disconnect());
+      resizeObservers.forEach((observer) => observer.disconnect());
+      elementObserver.disconnect();
+
+      // Clear sets
+      domObservers.clear();
+      resizeObservers.clear();
+      observedDOMs.clear();
+    };
   };
 
   const createInstance = (config = {}) => {
     let destroyTimeout;
     const instance = {
       initialized: false,
-      observer: null,
-      mutationObservers: null,
+      observers: noop,
       elements: new Map(),
-      animating: new Set(),
       config: { ...defaults, ...config },
     };
 
     const autoInit = () => {
       if (!instance.initialized) {
         instance.initialized = true;
-        setupObservers(instance);
+        instance.observers = setupObservers(instance);
       }
     };
 
@@ -629,20 +746,21 @@ const USAL = (() => {
       destroy() {
         clearTimeout(destroyTimeout);
         destroyTimeout = setTimeout(() => {
-          instance.observer?.disconnect();
-          instance.mutationObservers?.forEach((obs) => obs.disconnect());
+          // Disconnect all observers
+          instance.observers();
+
+          // Clean up elements
           instance.elements.forEach((data) => {
             if (data.rafId) cancelAnimationFrame(data.rafId);
             if (data.element?.parentNode) {
-              $(data.element, data.original);
-              data.element.removeAttribute('data-usal-id');
+              $(data.element, data.original, true);
+              data.element.removeAttribute(DATA_USAL_ID);
             }
           });
+
           instance.elements.clear();
-          instance.animating.clear();
+          instance.observers = noop;
           instance.initialized = false;
-          instance.observer = null;
-          instance.mutationObservers = null;
         }, 0);
       },
 
@@ -651,20 +769,16 @@ const USAL = (() => {
   };
 
   const globalInstance = createInstance();
-  const usalWithFlag = {
+  return {
     ...globalInstance,
     createInstance,
     __usalInitialized: true,
     version: '{%%VERSION%%}',
   };
-
-  return usalWithFlag;
 })();
 
-if (typeof window !== 'undefined') {
-  if (!window.USAL || !window.USAL.__usalInitialized) {
-    window.USAL = USAL;
-  }
+if (typeof window !== 'undefined' && (!window.USAL || !window.USAL.__usalInitialized)) {
+  window.USAL = USAL;
 }
 
 export default USAL;

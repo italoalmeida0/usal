@@ -18,10 +18,8 @@ export class USALController {
   }
 
   hostDisconnected() {
-    if (this.instance) {
-      this.instance.destroy();
-      this.instance = null;
-    }
+    // Delegate to the destroy method to avoid code duplication
+    this.destroy();
   }
 
   getInstance() {

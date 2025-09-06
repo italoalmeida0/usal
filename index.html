@@ -13,7 +13,7 @@
     <meta property="og:url" content="https://italoalmeida0.github.io/usal" />
 
     <link rel="stylesheet" href="style.css" />
-    <script src="https://cdn.usal.dev/latest"></script>
+    <script src="./packages/vanilla/usal.min.js"></script>
 
     <!-- Highlight.js -->
     <link
@@ -25,33 +25,164 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
   </head>
   <body>
-    <!-- Header -->
-    <div class="header" data-usal="fade-d duration-1000">
-      <img src="https://github.com/italoalmeida0/usal/raw/main/assets/logo.png" alt="USAL.js" />
-      <p class="subtitle">Ultimate Scroll Animation Library</p>
-      <div class="version">Version 1.0.3</div>
-      <a href="https://github.com/italoalmeida0/usal" class="version btn-mini"> View on GitHub </a>
-    </div>
-
-    <div class="container">
-      <!-- Quick Start -->
-      <section class="section">
-        <h2 data-usal="fade-r duration-800 once delay-400 blur">Quick Start</h2>
-
-        <div class="install-options">
-          <div class="card card-compact" data-usal="fade-u">
-            <h4>CDN</h4>
-            <pre><code class="html">&lt;script src="https://cdn.usal.dev/latest">&lt;/script></code></pre>
+    <div class="docs-layout">
+      <!-- Sidebar -->
+      <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <img
+            src="https://github.com/italoalmeida0/usal/raw/main/assets/logo.png"
+            alt="USAL.js"
+            class="sidebar-logo"
+          />
+          <div class="sidebar-version">
+            <img
+              src="https://badge.usal.dev/?ps=%40usal%2Freact%2C%40usal%2Fsolid%2C%40usal%2Fsvelte%2C%40usal%2Fvue%2C%40usal%2Flit%2C%40usal%2Fangular"
+              alt="usal npm package"
+            />
           </div>
+        </div>
 
-          <div class="card card-compact" data-usal="fade-u delay-100">
-            <h4>NPM</h4>
-            <pre><code class="js"># Install
+        <div class="nav-section">
+          <div class="nav-section-title">Getting Started</div>
+          <a href="#home" class="nav-item active" data-section="home">Home</a>
+          <a href="#quickstart" class="nav-item" data-section="quickstart">Quick Start</a>
+          <a href="#installation" class="nav-item" data-section="installation">Installation</a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Animations</div>
+          <a href="#basic" class="nav-item" data-section="basic">Basic Animations</a>
+          <a href="#zoom" class="nav-item" data-section="zoom">Zoom Animations</a>
+          <a href="#flip" class="nav-item" data-section="flip">Flip Animations</a>
+          <a href="#text" class="nav-item" data-section="text">Text Animations</a>
+          <a href="#counter" class="nav-item" data-section="counter">Counter Animations</a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Advanced</div>
+          <a href="#modifiers" class="nav-item" data-section="modifiers">Modifiers & Options</a>
+          <a href="#timing" class="nav-item" data-section="timing">Timing & Delays</a>
+          <a href="#split" class="nav-item" data-section="split">Split Animations</a>
+          <a href="#dynamic" class="nav-item" data-section="dynamic">Dynamic Content</a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Reference</div>
+          <a href="#api" class="nav-item" data-section="api">API Documentation</a>
+          <a href="#comparison" class="nav-item" data-section="comparison">Framework Comparison</a>
+        </div>
+      </nav>
+
+      <!-- Sidebar Overlay for Mobile -->
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+          <button class="mobile-menu-toggle" id="mobileMenuToggle">☰</button>
+          <div class="top-bar-actions">
+            <a href="https://github.com/italoalmeida0/usal" class="github-link" target="_blank">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+                />
+              </svg>
+              View on GitHub
+            </a>
+          </div>
+        </div>
+
+        <div class="content-wrapper">
+          <!-- Home Section -->
+          <section id="home" class="docs-section active">
+            <div class="hero-section" data-usal="fade-d duration-1000">
+              <h1
+                class="hero-title"
+                data-usal="text-fluid split-letter duration-3000"
+                style="font-family: 'Montserrat', serif"
+              >
+                USAL.js
+              </h1>
+              <p class="hero-subtitle" data-usal="text-shimmer split-letter duration-2000">
+                Ultimate Scroll Animation Library
+              </p>
+              <div class="badges">
+                <img
+                  src="https://badge.usal.dev/?p=%40usal%2Freact&color=grey"
+                  alt="@usal/react npm package"
+                />
+                <img
+                  src="https://badge.usal.dev/?p=%40usal%2Fsolid&color=blue"
+                  alt="@usal/solid npm package"
+                />
+                <img
+                  src="https://badge.usal.dev/?p=%40usal%2Fsvelte&color=orange"
+                  alt="@usal/svelte npm package"
+                />
+                <img
+                  src="https://badge.usal.dev/?p=%40usal%2Fvue&color=green"
+                  alt="@usal/vue npm package"
+                />
+                <img
+                  src="https://badge.usal.dev/?p=%40usal%2Flit&color=cyan"
+                  alt="@usal/lit npm package"
+                />
+                <img
+                  src="https://badge.usal.dev/?p=%40usal%2Fangular&color=red"
+                  alt="@usal/angular npm package"
+                />
+              </div>
+              <div class="quick-nav">
+                <a href="#quickstart" class="quick-nav-item" data-section="quickstart"
+                  >Get Started →</a
+                >
+                <a href="#basic" class="quick-nav-item" data-section="basic">View Examples</a>
+                <a href="#api" class="quick-nav-item" data-section="api">Documentation</a>
+              </div>
+
+              <div class="specs" data-usal="fade-d split-item split-delay-300">
+                <div class="spec-item">
+                  <div class="spec-value" data-usal="count-[9] duration-2000 linear">9KB</div>
+                  <div class="spec-label">Minified Size</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-value" data-usal="count-[60] duration-2000 linear">60FPS</div>
+                  <div class="spec-label">Performance</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-value" data-usal="fade duration-2000 linear">Zero</div>
+                  <div class="spec-label">Dependencies</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-value" data-usal="count-[40] duration-2000 linear">40+</div>
+                  <div class="spec-label">Animations</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Quick Start Section -->
+          <section id="quickstart" class="docs-section">
+            <div class="section">
+              <h2 class="section-title" data-usal="fade-dl duration-800 delay-400 blur">
+                Quick Start
+              </h2>
+
+              <div class="install-options">
+                <div class="card card-compact" data-usal="fade-u">
+                  <h4>CDN</h4>
+                  <pre><code class="html">&lt;script src="https://cdn.usal.dev/latest">&lt;/script></code></pre>
+                </div>
+
+                <div class="card card-compact" data-usal="fade-u delay-100">
+                  <h4>NPM</h4>
+                  <pre><code class="js"># Install
 npm install usal
 
 # Framework-specific packages:
@@ -61,11 +192,19 @@ npm install @usal/svelte
 npm install @usal/vue
 npm install @usal/lit
 npm install @usal/angular</code></pre>
-          </div>
+                </div>
+              </div>
+            </div>
+          </section>
 
-          <div class="card card-compact" data-usal="fade-u delay-200">
-            <h4>Framework Setup</h4>
-            <pre><code class="javascript">// Installed via CDN, initializes automatically, instance in window.USAL
+          <!-- Installation Section -->
+          <section id="installation" class="docs-section">
+            <div class="section">
+              <h2 class="section-title" data-usal="fade-dr duration-800 delay-400 blur">
+                Framework Setup
+              </h2>
+              <div class="card card-compact" data-usal="fade-u delay-200">
+                <pre><code class="javascript">// Installed via CDN, initializes automatically, instance in window.USAL
 
 // React (Next.js)
 import { USALProvider } from &#39;@usal/react&#39;;
@@ -91,497 +230,428 @@ const usalInstance = useUSAL();
 import { USALModule } from &#39;@usal/angular&#39;;
 @Component({imports: [USALModule]})
 export class AppComponent</code></pre>
-          </div>
-        </div>
+              </div>
+            </div>
+          </section>
 
-        <div class="specs" data-usal="fade-d split-item split-delay-300">
-          <div class="spec-item">
-            <div class="spec-value" data-usal="count-[9] duration-2000 linear">9KB</div>
-            <div class="spec-label">Minified Size</div>
-          </div>
-          <div class="spec-item">
-            <div class="spec-value" data-usal="count-[60] duration-2000 linear">60FPS</div>
-            <div class="spec-label">Performance</div>
-          </div>
-          <div class="spec-item">
-            <div class="spec-value" data-usal="fade duration-2000 linear">Zero</div>
-            <div class="spec-label">Dependencies</div>
-          </div>
-          <div class="spec-item">
-            <div class="spec-value" data-usal="count-[40] duration-2000 linear">40+</div>
-            <div class="spec-label">Animations</div>
-          </div>
-        </div>
-      </section>
+          <!-- Basic Animations Section -->
+          <section id="basic" class="docs-section">
+            <div class="section">
+              <h2 class="section-title" data-usal="fade-d duration-800 delay-400 blur">
+                Basic Animations
+              </h2>
 
-      <!-- Basic Animations -->
-      <section class="section">
-        <h2 class="section-title" data-usal="fade-r duration-800 once delay-400 blur">
-          Basic Animations
-        </h2>
+              <div class="grid">
+                <div class="box" data-usal="fade">
+                  Fade Center <br /><span style="opacity: 50%">fade</span>
+                </div>
+                <div class="box" data-usal="fade-u">
+                  Fade Up <br /><span style="opacity: 50%">fade-u</span>
+                </div>
+                <div class="box" data-usal="fade-d">
+                  Fade Down <br /><span style="opacity: 50%">fade-d</span>
+                </div>
+                <div class="box" data-usal="fade-l">
+                  Fade Left <br /><span style="opacity: 50%">fade-l</span>
+                </div>
+                <div class="box" data-usal="fade-r">
+                  Fade Right <br /><span style="opacity: 50%">fade-r</span>
+                </div>
+                <div class="box" data-usal="fade-ul">
+                  Fade Up-Left <br /><span style="opacity: 50%">fade-ul</span>
+                </div>
+                <div class="box" data-usal="fade-ur">
+                  Fade Up-Right <br /><span style="opacity: 50%">fade-ur</span>
+                </div>
+                <div class="box" data-usal="fade-dl">
+                  Fade Down-Left <br /><span style="opacity: 50%">fade-dl</span>
+                </div>
+                <div class="box" data-usal="fade-dr">
+                  Fade Down-Right <br /><span style="opacity: 50%">fade-dr</span>
+                </div>
+              </div>
 
-        <div class="grid">
-          <div class="box" data-usal="fade">
-            Fade Center <br /><span style="opacity: 50%">fade</span>
-          </div>
-          <div class="box" data-usal="fade-u">
-            Fade Up <br /><span style="opacity: 50%">fade-u</span>
-          </div>
-          <div class="box" data-usal="fade-d">
-            Fade Down <br /><span style="opacity: 50%">fade-d</span>
-          </div>
-          <div class="box" data-usal="fade-l">
-            Fade Left <br /><span style="opacity: 50%">fade-l</span>
-          </div>
-          <div class="box" data-usal="fade-r">
-            Fade Right <br /><span style="opacity: 50%">fade-r</span>
-          </div>
-          <div class="box" data-usal="fade-ul">
-            Fade Up-Left <br /><span style="opacity: 50%">fade-ul</span>
-          </div>
-          <div class="box" data-usal="fade-ur">
-            Fade Up-Right <br /><span style="opacity: 50%">fade-ur</span>
-          </div>
-          <div class="box" data-usal="fade-dl">
-            Fade Down-Left <br /><span style="opacity: 50%">fade-dl</span>
-          </div>
-          <div class="box" data-usal="fade-dr">
-            Fade Down-Right <br /><span style="opacity: 50%">fade-dr</span>
-          </div>
-        </div>
-
-        <pre><code class="html">&lt;div data-usal="fade-u">Fade Up&lt;/div>
+              <pre><code class="html">&lt;div data-usal="fade-u">Fade Up&lt;/div>
 &lt;div data-usal="fade-dr duration-800">Fade Down-Right&lt;/div></code></pre>
-      </section>
+            </div>
+          </section>
 
-      <!-- Zoom Animations -->
-      <section class="section">
-        <h2 class="section-title" data-usal="zoomin duration-800 once delay-400 blur">
-          Zoom Animations
-        </h2>
+          <!-- Zoom Animations Section -->
+          <section id="zoom" class="docs-section">
+            <div class="section">
+              <h2 class="section-title" data-usal="zoomin duration-800 delay-400 blur">
+                Zoom Animations
+              </h2>
 
-        <div class="grid">
-          <div class="box" data-usal="zoomin">
-            ZoomIn Center <br /><span style="opacity: 50%">zoomin</span>
-          </div>
-          <div class="box" data-usal="zoomin-u">
-            ZoomIn Up <br /><span style="opacity: 50%">zoomin-u</span>
-          </div>
-          <div class="box" data-usal="zoomin-d">
-            ZoomIn Down <br /><span style="opacity: 50%">zoomin-d</span>
-          </div>
-          <div class="box" data-usal="zoomin-l">
-            ZoomIn Left <br /><span style="opacity: 50%">zoomin-l</span>
-          </div>
-          <div class="box" data-usal="zoomin-r">
-            ZoomIn Right <br /><span style="opacity: 50%">zoomin-r</span>
-          </div>
-          <div class="box" data-usal="zoomin-ul">
-            ZoomIn Up-Left <br /><span style="opacity: 50%">zoomin-ul</span>
-          </div>
-          <div class="box" data-usal="zoomin-ur">
-            ZoomIn Up-Right <br /><span style="opacity: 50%">zoomin-ur</span>
-          </div>
-          <div class="box" data-usal="zoomin-dl">
-            ZoomIn Down-Left <br /><span style="opacity: 50%">zoomin-dl</span>
-          </div>
-          <div class="box" data-usal="zoomin-dr">
-            ZoomIn Down-Right <br /><span style="opacity: 50%">zoomin-dr</span>
-          </div>
-          <div class="box" data-usal="zoomout">
-            ZoomOut Center <br /><span style="opacity: 50%">zoomout</span>
-          </div>
-          <div class="box" data-usal="zoomout-u">
-            ZoomOut Up <br /><span style="opacity: 50%">zoomout-u</span>
-          </div>
-          <div class="box" data-usal="zoomout-d">
-            ZoomOut Down <br /><span style="opacity: 50%">zoomout-d</span>
-          </div>
-          <div class="box" data-usal="zoomout-l">
-            ZoomOut Left <br /><span style="opacity: 50%">zoomout-l</span>
-          </div>
-          <div class="box" data-usal="zoomout-r">
-            ZoomOut Right <br /><span style="opacity: 50%">zoomout-r</span>
-          </div>
-          <div class="box" data-usal="zoomout-ul">
-            ZoomOut Up-Left <br /><span style="opacity: 50%">zoomout-ul</span>
-          </div>
-          <div class="box" data-usal="zoomout-ur">
-            ZoomOut Up-Right <br /><span style="opacity: 50%">zoomout-ur</span>
-          </div>
-          <div class="box" data-usal="zoomout-dl">
-            ZoomOut Down-Left <br /><span style="opacity: 50%">zoomout-dl</span>
-          </div>
-          <div class="box" data-usal="zoomout-dr">
-            ZoomOut Down-Right <br /><span style="opacity: 50%">zoomout-dr</span>
-          </div>
-        </div>
+              <div class="grid">
+                <div class="box" data-usal="zoomin">
+                  ZoomIn Center <br /><span style="opacity: 50%">zoomin</span>
+                </div>
+                <div class="box" data-usal="zoomin-u">
+                  ZoomIn Up <br /><span style="opacity: 50%">zoomin-u</span>
+                </div>
+                <div class="box" data-usal="zoomin-d">
+                  ZoomIn Down <br /><span style="opacity: 50%">zoomin-d</span>
+                </div>
+                <div class="box" data-usal="zoomin-l">
+                  ZoomIn Left <br /><span style="opacity: 50%">zoomin-l</span>
+                </div>
+                <div class="box" data-usal="zoomin-r">
+                  ZoomIn Right <br /><span style="opacity: 50%">zoomin-r</span>
+                </div>
+                <div class="box" data-usal="zoomin-ul">
+                  ZoomIn Up-Left <br /><span style="opacity: 50%">zoomin-ul</span>
+                </div>
+                <div class="box" data-usal="zoomin-ur">
+                  ZoomIn Up-Right <br /><span style="opacity: 50%">zoomin-ur</span>
+                </div>
+                <div class="box" data-usal="zoomin-dl">
+                  ZoomIn Down-Left <br /><span style="opacity: 50%">zoomin-dl</span>
+                </div>
+                <div class="box" data-usal="zoomin-dr">
+                  ZoomIn Down-Right <br /><span style="opacity: 50%">zoomin-dr</span>
+                </div>
+                <div class="box" data-usal="zoomout">
+                  ZoomOut Center <br /><span style="opacity: 50%">zoomout</span>
+                </div>
+                <div class="box" data-usal="zoomout-u">
+                  ZoomOut Up <br /><span style="opacity: 50%">zoomout-u</span>
+                </div>
+                <div class="box" data-usal="zoomout-d">
+                  ZoomOut Down <br /><span style="opacity: 50%">zoomout-d</span>
+                </div>
+                <div class="box" data-usal="zoomout-l">
+                  ZoomOut Left <br /><span style="opacity: 50%">zoomout-l</span>
+                </div>
+                <div class="box" data-usal="zoomout-r">
+                  ZoomOut Right <br /><span style="opacity: 50%">zoomout-r</span>
+                </div>
+                <div class="box" data-usal="zoomout-ul">
+                  ZoomOut Up-Left <br /><span style="opacity: 50%">zoomout-ul</span>
+                </div>
+                <div class="box" data-usal="zoomout-ur">
+                  ZoomOut Up-Right <br /><span style="opacity: 50%">zoomout-ur</span>
+                </div>
+                <div class="box" data-usal="zoomout-dl">
+                  ZoomOut Down-Left <br /><span style="opacity: 50%">zoomout-dl</span>
+                </div>
+                <div class="box" data-usal="zoomout-dr">
+                  ZoomOut Down-Right <br /><span style="opacity: 50%">zoomout-dr</span>
+                </div>
+              </div>
 
-        <pre><code class="html">&lt;div data-usal="zoomin">Scale from 60% to 100%&lt;/div>
+              <pre><code class="html">&lt;div data-usal="zoomin">Scale from 60% to 100%&lt;/div>
 &lt;div data-usal="zoomout-ur blur duration-1200">Complex zoom&lt;/div></code></pre>
-      </section>
+            </div>
+          </section>
 
-      <!-- Flip Animations -->
-      <section class="section">
-        <h2 class="section-title" data-usal="flip-r duration-800 once delay-500 blur threshold-10">
-          Flip Animations
-        </h2>
+          <!-- Flip Animations Section -->
+          <section id="flip" class="docs-section">
+            <div class="section">
+              <h2 class="section-title" data-usal="flip-d duration-800 delay-500 blur threshold-10">
+                Flip Animations
+              </h2>
 
-        <div class="grid">
-          <div class="box" data-usal="flip">
-            Flip Default <br /><span style="opacity: 50%">flip</span>
-          </div>
-          <div class="box" data-usal="flip-u">
-            Flip Up <br /><span style="opacity: 50%">flip-u</span>
-          </div>
-          <div class="box" data-usal="flip-d">
-            Flip Down <br /><span style="opacity: 50%">flip-d</span>
-          </div>
-          <div class="box" data-usal="flip-l">
-            Flip Left <br /><span style="opacity: 50%">flip-l</span>
-          </div>
-          <div class="box" data-usal="flip-r">
-            Flip Right <br /><span style="opacity: 50%">flip-r</span>
-          </div>
-          <div class="box" data-usal="flip-ul">
-            Flip Up-Left <br /><span style="opacity: 50%">flip-ul</span>
-          </div>
-          <div class="box" data-usal="flip-ur">
-            Flip Up-Right <br /><span style="opacity: 50%">flip-ur</span>
-          </div>
-          <div class="box" data-usal="flip-dl">
-            Flip Down-Left <br /><span style="opacity: 50%">flip-dl</span>
-          </div>
-          <div class="box" data-usal="flip-dr">
-            Flip Down-Right <br /><span style="opacity: 50%">flip-dr</span>
-          </div>
-        </div>
+              <div class="grid">
+                <div class="box" data-usal="flip">
+                  Flip Default <br /><span style="opacity: 50%">flip</span>
+                </div>
+                <div class="box" data-usal="flip-u">
+                  Flip Up <br /><span style="opacity: 50%">flip-u</span>
+                </div>
+                <div class="box" data-usal="flip-d">
+                  Flip Down <br /><span style="opacity: 50%">flip-d</span>
+                </div>
+                <div class="box" data-usal="flip-l">
+                  Flip Left <br /><span style="opacity: 50%">flip-l</span>
+                </div>
+                <div class="box" data-usal="flip-r">
+                  Flip Right <br /><span style="opacity: 50%">flip-r</span>
+                </div>
+                <div class="box" data-usal="flip-ul">
+                  Flip Up-Left <br /><span style="opacity: 50%">flip-ul</span>
+                </div>
+                <div class="box" data-usal="flip-ur">
+                  Flip Up-Right <br /><span style="opacity: 50%">flip-ur</span>
+                </div>
+                <div class="box" data-usal="flip-dl">
+                  Flip Down-Left <br /><span style="opacity: 50%">flip-dl</span>
+                </div>
+                <div class="box" data-usal="flip-dr">
+                  Flip Down-Right <br /><span style="opacity: 50%">flip-dr</span>
+                </div>
+              </div>
 
-        <pre><code class="html">&lt;div data-usal="flip-u">3D flip from top&lt;/div>
+              <pre><code class="html">&lt;div data-usal="flip-u">3D flip from top&lt;/div>
 &lt;div data-usal="flip-dr duration-1500">Diagonal flip&lt;/div></code></pre>
-      </section>
+            </div>
+          </section>
 
-      <!-- Text Split Animations -->
-      <section class="section">
-        <h2 class="section-title" data-usal="fade-u duration-800 once delay-400 blur">
-          Text Split Animations
-        </h2>
+          <!-- Text Animations Section -->
+          <section id="text" class="docs-section">
+            <div class="section">
+              <h2
+                class="section-title"
+                data-usal="flip-d split-letter split-delay-100 duration-800 delay-100 blur"
+              >
+                Text Split Animations
+              </h2>
 
-        <p class="split-demo" data-usal="fade-u split-word split-delay-200">
-          Each Word Appears Separately
-        </p>
+              <p class="split-demo" data-usal="fade-u split-word split-delay-200">
+                Each Word Appears Separately
+              </p>
 
-        <p class="split-demo" data-usal="fade-u split-letter split-delay-50">
-          Each Letter Appears Separately
-        </p>
+              <p class="split-demo" data-usal="fade-u split-letter split-delay-50">
+                Each Letter Appears Separately
+              </p>
 
-        <p class="split-demo" data-usal="split-word split-zoomout-u split-delay-200 blur">
-          Zoom Out With Blur Per Word
-        </p>
+              <p class="split-demo" data-usal="split-word split-zoomout-u split-delay-200 blur">
+                Zoom Out With Blur Per Word
+              </p>
 
-        <p class="text-demo" data-usal="split-word split-flip-r split-delay-200">
-          Modern web development is all about smooth user experiences. Dream big, code bigger,
-          animate everything in between.
-        </p>
+              <p class="text-demo" data-usal="split-word split-flip-r split-delay-200">
+                Modern web development is all about smooth user experiences. Dream big, code bigger,
+                animate everything in between.
+              </p>
 
-        <pre><code class="html">&lt;p data-usal="fade-u split-word split-delay-200"&gt;Each Word Appears Separately&lt;/p&gt;
-&lt;p data-usal="fade-u split-letter split-delay-50"&gt;Each Letter Appears Separately&lt;/p&gt;
-&lt;p data-usal="split-word split-zoomout-u split-delay-200 blur"&gt;Zoom Out With Blur Per Word&lt;/p&gt;
-&lt;p data-usal="split-word split-flip-r split-delay-200"&gt;Modern web development is all about smooth...&lt;/p&gt;</code></pre>
-      </section>
+              <h3
+                data-usal="text-fluid split-letter duration-2500"
+                style="
+                  font-family: 'Raleway', serif;
+                  font-size: 2.5rem;
+                  text-align: center;
+                  margin: 2rem 0;
+                "
+              >
+                Fluid Weight Animation
+              </h3>
 
-      <!-- Text Effects -->
-      <section class="section">
-        <h2 class="section-title" data-usal="fade-r duration-800 once delay-400 blur">
-          Text Effects
-        </h2>
+              <p
+                data-usal="text-shimmer split-letter duration-1000"
+                style="font-size: 1.5rem; text-align: center"
+              >
+                SHIMMER LETTER BY LETTER
+              </p>
 
-        <h3
-          data-usal="text-fluid split-letter duration-2500"
-          style="
-            font-family: 'Montserrat', serif;
-            font-size: 2.5rem;
-            text-align: center;
-            margin: 2rem 0;
-          "
-        >
-          Fluid Weight Animation
-        </h3>
-
-        <p
-          data-usal="text-shimmer split-letter duration-1000"
-          style="font-size: 1.5rem; text-align: center"
-        >
-          SHIMMER LETTER BY LETTER
-        </p>
-
-        <pre><code class="html">
-&lt;!-- Note: Text effects (shimmer/fluid) are continuous animations that loop indefinitely. -->
+              <pre><code class="html">&lt;p data-usal="fade-u split-word split-delay-200">Each Word&lt;/p>
+&lt;p data-usal="fade-u split-letter split-delay-50">Each Letter&lt;/p>
 &lt;h2 data-usal="text-fluid split-letter duration-2500">Fluid Weight&lt;/h2>
-&lt;p data-usal="text-shimmer split-letter duration-1000">Shimmer Letter&lt;/p></code></pre>
-      </section>
-
-      <!-- Counters -->
-      <section class="section">
-        <h2 class="section-title" data-usal="fade-u duration-800 once delay-400 blur">
-          Count Animations
-        </h2>
-
-        <div class="counter-section">
-          <div class="counter-box" data-usal="fade-u delay-200">
-            <div class="number" data-usal="count-[1234] duration-2000">1234</div>
-            <div class="label">Users</div>
-          </div>
-
-          <div class="counter-box" data-usal="fade-u delay-400">
-            <div class="number" data-usal="count-[98.5] duration-2500">98.5%</div>
-            <div class="label">Success Rate</div>
-          </div>
-
-          <div class="counter-box" data-usal="fade-u delay-600">
-            <div class="number" data-usal="count-[42,350] duration-3000">$42,350</div>
-            <div class="label">Revenue</div>
-          </div>
-
-          <div class="counter-box" data-usal="fade-u delay-800">
-            <div class="number" data-usal="count-[4.9] duration-2000">4.9/5</div>
-            <div class="label">Rating</div>
-          </div>
-        </div>
-
-        <pre><code class="html">&lt;div data-usal="count-[1234] duration-2000">1234&lt;/div>
-&lt;div data-usal="count-[98.5] duration-2500">98.5%&lt;/div>
-&lt;div data-usal="count-[42,350] duration-3000">$42,350&lt;/div>
-&lt;div data-usal="count-[4.9] duration-2000">4.9/5&lt;/div>
-</code></pre>
-      </section>
-
-      <!-- Cards with Different Timings -->
-      <section class="section">
-        <h2 class="section-title" data-usal="fade-r duration-800 once delay-400 blur">
-          Cards & Timing
-        </h2>
-
-        <div class="grid-cards">
-          <div class="card" data-usal="fade-u delay-0 duration-800">
-            <div
-              style="height: 120px; background: #1a1a1a; border-radius: 6px; margin-bottom: 16px"
-            ></div>
-            <h3>Instant Animation</h3>
-            <p>fade-u delay-0 duration-800</p>
-          </div>
-
-          <div class="card" data-usal="zoomin delay-200 duration-1000">
-            <div
-              style="height: 120px; background: #1a1a1a; border-radius: 6px; margin-bottom: 16px"
-            ></div>
-            <h3>200ms Delay</h3>
-            <p>zoomin delay-200 duration-1000</p>
-          </div>
-
-          <div class="card" data-usal="flip-r delay-400 duration-1200">
-            <div
-              style="height: 120px; background: #1a1a1a; border-radius: 6px; margin-bottom: 16px"
-            ></div>
-            <h3>400ms Delay</h3>
-            <p>flip-r delay-400 duration-1200</p>
-          </div>
-
-          <div class="card" data-usal="fade-ur delay-600 duration-1500 blur">
-            <div
-              style="height: 120px; background: #1a1a1a; border-radius: 6px; margin-bottom: 16px"
-            ></div>
-            <h3>600ms Delay + Blur</h3>
-            <p>fade-ur delay-600 duration-1500 blur</p>
-          </div>
-        </div>
-
-        <pre><code class="html">&lt;div data-usal="fade-u delay-0 duration-800">Instant&lt;/div>
-&lt;div data-usal="zoomin delay-200 duration-1000">Delayed&lt;/div>
-&lt;div data-usal="fade-ur delay-600 blur">Complex&lt;/div></code></pre>
-      </section>
-
-      <!-- Timeline -->
-      <section class="section">
-        <h2 class="section-title" data-usal="fade-d duration-800 once delay-400 blur">
-          Timeline with Stagger
-        </h2>
-
-        <div class="timeline">
-          <div class="timeline-item">
-            <div class="timeline-content" data-usal="fade-l duration-800">
-              <h3>2022</h3>
-              <p>Twenty twenty-two</p>
+&lt;p data-usal="text-shimmer split-letter duration-1000">Shimmer&lt;/p></code></pre>
             </div>
-          </div>
+          </section>
 
-          <div class="timeline-item">
-            <div class="timeline-content" data-usal="fade-r duration-800">
-              <h3>2023</h3>
-              <p>Twenty twenty-three</p>
+          <!-- Counter Section -->
+          <section id="counter" class="docs-section">
+            <div class="section">
+              <h2 class="section-title" data-usal="fade-ul duration-800 delay-400 blur">
+                Count Animations
+              </h2>
+
+              <div class="counter-section">
+                <div class="counter-box" data-usal="fade-u delay-200">
+                  <div class="number" data-usal="count-[1234] duration-2000">1234</div>
+                  <div class="label">Users</div>
+                </div>
+
+                <div class="counter-box" data-usal="fade-u delay-400">
+                  <div class="number" data-usal="count-[98.5] duration-2500">98.5%</div>
+                  <div class="label">Success Rate</div>
+                </div>
+
+                <div class="counter-box" data-usal="fade-u delay-600">
+                  <div class="number" data-usal="count-[42,350] duration-3000">$42,350</div>
+                  <div class="label">Revenue</div>
+                </div>
+
+                <div class="counter-box" data-usal="fade-u delay-800">
+                  <div class="number" data-usal="count-[4.9] duration-2000">4.9/5</div>
+                  <div class="label">Rating</div>
+                </div>
+              </div>
+
+              <pre><code class="html">&lt;div data-usal="count-[1234] duration-2000">1234&lt;/div>
+&lt;div data-usal="count-[98.5] duration-2500">98.5%&lt;/div></code></pre>
             </div>
-          </div>
+          </section>
 
-          <div class="timeline-item">
-            <div class="timeline-content" data-usal="fade-l duration-800">
-              <h3>2024</h3>
-              <p>Twenty twenty-four</p>
+          <!-- Modifiers Section -->
+          <section id="modifiers" class="docs-section">
+            <div class="section">
+              <h2
+                class="section-title"
+                data-usal="fade-d split-word split-delay-200 duration-800 delay-400 blur"
+              >
+                Modifiers & Options
+              </h2>
+
+              <div class="grid">
+                <div class="box" data-usal="fade-u once">
+                  Once (no repeat) <br /><span style="opacity: 50%">fade-u once</span>
+                </div>
+                <div class="box" data-usal="zoomin linear">
+                  Linear easing <br /><span style="opacity: 50%">zoomin linear</span>
+                </div>
+                <div class="box" data-usal="flip-r ease">
+                  Ease easing <br /><span style="opacity: 50%">flip-r ease</span>
+                </div>
+                <div class="box" data-usal="fade-d ease-in">
+                  Ease-in easing <br /><span style="opacity: 50%">fade-d ease-in</span>
+                </div>
+                <div class="box" data-usal="zoomout ease-out">
+                  Ease-out easing <br /><span style="opacity: 50%">zoomout ease-out</span>
+                </div>
+                <div class="box" data-usal="fade-ul blur duration-2000">
+                  2s + Blur <br /><span style="opacity: 50%">fade-ul blur duration-2000</span>
+                </div>
+                <div class="box" data-usal="flip-d delay-1000">
+                  1s delay <br /><span style="opacity: 50%">flip-d delay-1000</span>
+                </div>
+                <div class="box" data-usal="zoomin-r threshold-50">
+                  50% threshold <br /><span style="opacity: 50%">zoomin-r threshold-50</span>
+                </div>
+              </div>
+
+              <pre><code class="html">&lt;div data-usal="fade-u once">Animate only once&lt;/div>
+&lt;div data-usal="zoomin linear">Linear easing&lt;/div>
+&lt;div data-usal="fade-ul blur duration-2000">With blur&lt;/div></code></pre>
             </div>
-          </div>
+          </section>
 
-          <div class="timeline-item">
-            <div class="timeline-content" data-usal="fade-r duration-800">
-              <h3>2025</h3>
-              <p>Twenty twenty-five</p>
+          <!-- Timing Section -->
+          <section id="timing" class="docs-section">
+            <div class="section">
+              <h2
+                class="section-title"
+                data-usal="fade-u split-word split-delay-200 duration-800 delay-400 blur"
+              >
+                Cards & Timing
+              </h2>
+
+              <div class="grid-cards">
+                <div class="card" data-usal="fade-u delay-0 duration-800">
+                  <div
+                    style="
+                      height: 120px;
+                      background: #1a1a1a;
+                      border-radius: 6px;
+                      margin-bottom: 16px;
+                    "
+                  ></div>
+                  <h3>Instant Animation</h3>
+                  <p>fade-u delay-0 duration-800</p>
+                </div>
+
+                <div class="card" data-usal="zoomin delay-200 duration-1000">
+                  <div
+                    style="
+                      height: 120px;
+                      background: #1a1a1a;
+                      border-radius: 6px;
+                      margin-bottom: 16px;
+                    "
+                  ></div>
+                  <h3>200ms Delay</h3>
+                  <p>zoomin delay-200 duration-1000</p>
+                </div>
+
+                <div class="card" data-usal="flip-r delay-400 duration-1200">
+                  <div
+                    style="
+                      height: 120px;
+                      background: #1a1a1a;
+                      border-radius: 6px;
+                      margin-bottom: 16px;
+                    "
+                  ></div>
+                  <h3>400ms Delay</h3>
+                  <p>flip-r delay-400 duration-1200</p>
+                </div>
+
+                <div class="card" data-usal="fade-ur delay-600 duration-1500 blur">
+                  <div
+                    style="
+                      height: 120px;
+                      background: #1a1a1a;
+                      border-radius: 6px;
+                      margin-bottom: 16px;
+                    "
+                  ></div>
+                  <h3>600ms Delay + Blur</h3>
+                  <p>fade-ur delay-600 duration-1500 blur</p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </section>
 
-        <pre><code class="html">&lt;div data-usal="fade-l">Item 1&lt;/div>
-&lt;div data-usal="fade-r">Item 2&lt;/div>
-&lt;div data-usal="fade-l">Item 3&lt;/div></code></pre>
-      </section>
+          <!-- Split Items Section -->
+          <section id="split" class="docs-section">
+            <div class="section">
+              <h2
+                class="section-title"
+                data-usal="fade-d split-word split-delay-100 duration-800 delay-400 blur"
+              >
+                Split Items Animation
+              </h2>
 
-      <!-- Split Items -->
-      <section class="section">
-        <h2 class="section-title" data-usal="fade-u duration-800 once delay-400 blur">
-          Split Items Animation
-        </h2>
+              <ul class="feature-list" data-usal="split-item split-fade-r split-delay-100">
+                <li>Item A</li>
+                <li>Item B</li>
+                <li>Item C</li>
+                <li>Item D</li>
+                <li>Item E</li>
+                <li>Item F</li>
+                <li>Item G</li>
+                <li>Item H</li>
+              </ul>
 
-        <ul class="feature-list" data-usal="split-item split-fade-r split-delay-100">
-          <li>Item A</li>
-          <li>Item B</li>
-          <li>Item C</li>
-          <li>Item D</li>
-          <li>Item E</li>
-          <li>Item F</li>
-          <li>Item G</li>
-          <li>Item H</li>
-        </ul>
-
-        <pre><code class="html">&lt;ul data-usal="split-item split-fade-r split-delay-100">
+              <pre><code class="html">&lt;ul data-usal="split-item split-fade-r split-delay-100">
   &lt;li>First item&lt;/li>
   &lt;li>Second item&lt;/li>
   &lt;li>Third item&lt;/li>
 &lt;/ul></code></pre>
-      </section>
+            </div>
+          </section>
 
-      <!-- Modifiers Test -->
-      <section class="section">
-        <h2 class="section-title" data-usal="fade-r duration-800 once delay-400 blur">
-          Modifiers & Options
-        </h2>
+          <!-- Dynamic Content Section -->
+          <section id="dynamic" class="docs-section">
+            <div class="section">
+              <h2 class="section-title" data-usal="flip-u duration-800 delay-400 blur">
+                Dynamic Content Test
+              </h2>
 
-        <div class="grid">
-          <div class="box" data-usal="fade-u once">
-            Once (no repeat) <br /><span style="opacity: 50%">fade-u once</span>
-          </div>
-          <div class="box" data-usal="zoomin linear">
-            Linear easing <br /><span style="opacity: 50%">zoomin linear</span>
-          </div>
-          <div class="box" data-usal="flip-r ease">
-            Ease easing <br /><span style="opacity: 50%">flip-r ease</span>
-          </div>
-          <div class="box" data-usal="fade-d ease-in">
-            Ease-in easing <br /><span style="opacity: 50%">fade-d ease-in</span>
-          </div>
-          <div class="box" data-usal="zoomout ease-out">
-            Ease-out easing <br /><span style="opacity: 50%">zoomout ease-out</span>
-          </div>
-          <div class="box" data-usal="fade-ul blur duration-2000">
-            2s + Blur <br /><span style="opacity: 50%">fade-ul blur duration-2000</span>
-          </div>
-          <div class="box" data-usal="flip-d delay-1000">
-            1s delay <br /><span style="opacity: 50%">flip-d delay-1000</span>
-          </div>
-          <div class="box" data-usal="zoomin-r threshold-50">
-            50% threshold <br /><span style="opacity: 50%">zoomin-r threshold-50</span>
-          </div>
-        </div>
+              <div class="button-group">
+                <button class="btn" onclick="addDynamicItem()">Add Item</button>
+                <button class="btn" onclick="clearDynamic()">Clear All</button>
+                <button class="btn" onclick="changeDynamicAnimations()">Change Animations</button>
+              </div>
 
-        <pre><code class="html">&lt;div data-usal="fade-u once">Animate only once&lt;/div>
-&lt;div data-usal="zoomin linear">Linear easing&lt;/div>
-&lt;div data-usal="fade-ul blur duration-2000">With blur&lt;/div>
-&lt;div data-usal="flip-d threshold-50">50% threshold&lt;/div></code></pre>
-      </section>
+              <div id="dynamic-section"></div>
 
-      <!-- Dynamic Content Test -->
-      <section class="section">
-        <h2 class="section-title" data-usal="fade-u duration-800 once delay-400 blur">
-          Dynamic Content Test
-        </h2>
-
-        <div class="button-group">
-          <button class="btn" onclick="addDynamicItem()">Add Item</button>
-          <button class="btn" onclick="clearDynamic()">Clear All</button>
-          <button class="btn" onclick="changeDynamicAnimations()">Change Animations</button>
-        </div>
-
-        <div id="dynamic-section"></div>
-
-        <pre><code class="javascript">// Add items dynamically
+              <pre><code class="javascript">// Add items dynamically
 const item = document.createElement('div');
 item.textContent = 'New Item';
 item.setAttribute('data-usal', 'fade-u duration-800');
 parent.appendChild(item);</code></pre>
-      </section>
-
-      <!-- API Documentation -->
-      <section class="section">
-        <h2 class="section-title" data-usal="fade-u duration-800 once delay-400 blur">
-          API Documentation
-        </h2>
-        <div class="grid-2">
-          <!-- Properties -->
-          <div class="card" data-usal="fade-u once threshold-10">
-            <h3>Property Names</h3>
-
-            <div class="animation-item">
-              <div class="animation-name">data-usal</div>
-              <div class="animation-desc">Main animation attribute</div>
-              <pre><code class="html">&lt;div data-usal="fade-u">Content&lt;/div>
-&lt;div data-usal="zoomin duration-800">With duration&lt;/div>
-&lt;div data-usal="flip-r delay-500 blur">Complex&lt;/div>
-
-&lt;!-- Framework-specific usage --&gt;
-&lt;!-- React (Next.js) --&gt;
-&lt;div data-usal=&quot;fade duration-500&quot;&gt;Content&lt;/div&gt;
-&lt;!-- Solid (SolidStart) --&gt;
-&lt;div data-usal=&quot;fade duration-500&quot;&gt;Content&lt;/div&gt;
-&lt;!-- Svelte (SvelteKit) --&gt;
-&lt;div use:usal={&#39;fade duration-500&#39;}&gt;Content&lt;/div&gt;
-&lt;!-- Vue (Nuxt) --&gt;
-&lt;div v-usal=&quot;&#39;fade duration-500&#39;&quot;&gt;Content&lt;/div&gt;
-&lt;!-- Lit --&gt;
-&lt;div ${usal(&#39;fade duration-500&#39;)}&gt;Content&lt;/div&gt;
-&lt;!-- Angular --&gt;
-&lt;div [usal]=&quot;&#39;fade duration-500&#39;&quot;&gt;Content&lt;/div&gt;
-</code></pre>
             </div>
+          </section>
 
-            <div class="animation-item">
-              <div class="animation-name">data-usal-id</div>
-              <div class="animation-desc">Unique identifiers control animation reactivity</div>
-              <pre><code class="html">&lt!-- Automatic ID (re-animates when element is recreated) -->
-&lt;div data-usal="fade-u">Auto ID&lt;/div>
+          <!-- API Section -->
+          <section id="api" class="docs-section">
+            <div class="section">
+              <h2 class="section-title" data-usal="fade-dr duration-800 delay-400 blur">
+                API Documentation
+              </h2>
 
-&lt!-- Custom ID (prevents re-animation) -->
-&lt;div data-usal="fade-u" data-usal-id="unique-element">Fixed ID&lt;/div></code></pre>
-            </div>
+              <div class="grid-2">
+                <!-- Properties -->
 
-            <div class="tip">
-              <strong>Tip:</strong> For large elements (>100vh), use lower thresholds like
-              threshold-5 or threshold-10 to ensure animations trigger properly.
-            </div>
-          </div>
+                <div class="card" data-usal="fade-u threshold-10">
+                  <h3>Property Values</h3>
 
-          <div class="card" data-usal="fade-u once threshold-10">
-            <h3>Property Values</h3>
-
-            <div class="animation-item">
-              <div class="animation-name">Available Animations</div>
-              <div class="animation-desc">Core animation types</div>
-              <pre><code class="javascript">// Basic animations
+                  <div class="animation-item">
+                    <div class="animation-name">Available Animations</div>
+                    <div class="animation-desc">Core animation types</div>
+                    <pre><code class="javascript">// Basic animations
 fade, fade-u, fade-d, fade-l, fade-r
 fade-ul, fade-ur, fade-dl, fade-dr
 
@@ -596,12 +666,12 @@ zoomout-ul, zoomout-ur, zoomout-dl, zoomout-dr
 // Flip animations
 flip, flip-u, flip-d, flip-l, flip-r
 flip-ul, flip-ur, flip-dl, flip-dr</code></pre>
-            </div>
+                  </div>
 
-            <div class="animation-item">
-              <div class="animation-name">Split Animations</div>
-              <div class="animation-desc">Animate text parts individually</div>
-              <pre><code class="javascript">// Split by words
+                  <div class="animation-item">
+                    <div class="animation-name">Split Animations</div>
+                    <div class="animation-desc">Animate text parts individually</div>
+                    <pre><code class="javascript">// Split by words
 split-word
 
 // Split by letters
@@ -615,19 +685,19 @@ split-fade-r, split-fade-u, split-zoomin
 
 // Split delay in milliseconds
 split-delay-50, split-delay-100</code></pre>
-            </div>
+                  </div>
 
-            <div class="animation-item">
-              <div class="animation-name">Count Animation</div>
-              <div class="animation-desc">Animate numbers from 0 to target</div>
-              <pre><code class="javascript">// count-[1234], count-[98.5], count-[42,350]
+                  <div class="animation-item">
+                    <div class="animation-name">Count Animation</div>
+                    <div class="animation-desc">Animate numbers from 0 to target</div>
+                    <pre><code class="javascript">// count-[1234], count-[98.5], count-[42,350]
 count-[number]</code></pre>
-            </div>
+                  </div>
 
-            <div class="animation-item">
-              <div class="animation-name">Modifiers</div>
-              <div class="animation-desc">Animation behavior modifiers</div>
-              <pre><code class="javascript">// Duration in milliseconds
+                  <div class="animation-item">
+                    <div class="animation-name">Modifiers</div>
+                    <div class="animation-desc">Animation behavior modifiers</div>
+                    <pre><code class="javascript">// Duration in milliseconds
 duration-500, duration-1000, duration-2000
 
 // Delay in milliseconds
@@ -638,29 +708,76 @@ linear, ease, ease-in, ease-out
 
 // Other modifiers
 blur, once, threshold-50</code></pre>
-            </div>
+                  </div>
 
-            <div class="animation-item">
-              <div class="animation-name">Text Effects</div>
-              <div class="animation-desc">
-                Special text animations (for letters, use with split-letter)
-              </div>
-              <pre><code class="javascript">// Shimmer effect
+                  <div class="animation-item">
+                    <div class="animation-name">Text Effects</div>
+                    <div class="animation-desc">
+                      Special text animations (for letters, use with split-letter)
+                    </div>
+                    <pre><code class="javascript">// Shimmer effect
 text-shimmer
 
 // Fluid weight animation
 text-fluid</code></pre>
-            </div>
-          </div>
-        </div>
+                  </div>
+                </div>
 
-        <!-- JavaScript API -->
-        <div class="card" data-usal="fade-u once threshold-10">
-          <h3>JavaScript API</h3>
-          <div class="animation-item">
-            <div class="animation-name">window.USAL.config(options)</div>
-            <div class="animation-desc">Configure or reconfigure at any time</div>
-            <pre><code class="javascript">// Initial configuration
+                <div class="card" data-usal="fade-u threshold-10">
+                  <h3>Property Names</h3>
+
+                  <div class="animation-item">
+                    <div class="animation-name">data-usal</div>
+                    <div class="animation-desc">Main animation attribute</div>
+                    <pre><code class="html">&lt;!-- Vanilla JS --&gt;
+&lt;div data-usal=&quot;fade duration-500&quot;&gt;Content&lt;/div&gt;
+
+&lt;!-- React/Next.js --&gt;
+&lt;div data-usal=&quot;fade duration-500&quot;&gt;Content&lt;/div&gt;
+
+&lt;!-- Solid/SolidStart --&gt;
+&lt;div data-usal=&quot;fade duration-500&quot;&gt;Content&lt;/div&gt;
+
+&lt;!-- Svelte/SvelteKit --&gt;
+&lt;div use:usal={&#39;fade duration-500&#39;}&gt;Content&lt;/div&gt;
+
+&lt;!-- Vue/Nuxt --&gt;
+&lt;div v-usal=&quot;&#39;fade duration-500&#39;&quot;&gt;Content&lt;/div&gt;
+
+&lt;!-- Lit --&gt;
+&lt;div ${usal(&#39;fade duration-500&#39;)}&gt;Content&lt;/div&gt;
+
+&lt;!-- Angular --&gt;
+&lt;div [usal]=&quot;&#39;fade duration-500&#39;&quot;&gt;Content&lt;/div&gt;
+</code></pre>
+                  </div>
+
+                  <div class="animation-item">
+                    <div class="animation-name">data-usal-id</div>
+                    <div class="animation-desc">
+                      Unique identifiers control animation reactivity
+                    </div>
+                    <pre><code class="html">&lt!-- Automatic ID (re-animates when element is recreated) -->
+&lt;div data-usal="fade-u">Auto ID&lt;/div>
+
+&lt!-- Custom ID (prevents re-animation) -->
+&lt;div data-usal="fade-u" data-usal-id="unique-element">Fixed ID&lt;/div></code></pre>
+                  </div>
+
+                  <div class="tip">
+                    <strong>Tip:</strong> For large elements (>100vh), use lower thresholds like
+                    threshold-5 or threshold-10 to ensure animations trigger properly.
+                  </div>
+                </div>
+              </div>
+
+              <!-- JavaScript API -->
+              <div class="card" data-usal="fade-u threshold-10">
+                <h3>JavaScript API</h3>
+                <div class="animation-item">
+                  <div class="animation-name">window.USAL.config(options)</div>
+                  <div class="animation-desc">Configure or reconfigure at any time</div>
+                  <pre><code class="javascript">// Initial configuration
 window.USAL.config({
   maxConcurrent: 100,    // Max concurrent animations
   duration: 1000,       // Default duration (ms)
@@ -675,17 +792,95 @@ window.USAL.config({
   duration: 2000,       // Change duration
   threshold: 50         // Change threshold
 });</code></pre>
-          </div>
-          <div class="animation-item">
-            <div class="animation-name">window.USAL.destroy()</div>
-            <div class="animation-desc">Clean up and remove all animations</div>
-            <pre><code class="javascript">// Clean up when done
+                </div>
+                <div class="animation-item">
+                  <div class="animation-name">window.USAL.destroy()</div>
+                  <div class="animation-desc">Clean up and remove all animations</div>
+                  <pre><code class="javascript">// Clean up when done
 window.USAL.destroy();</code></pre>
-          </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Comparison Section -->
+          <section id="comparison" class="docs-section">
+            <div class="section">
+              <h2 class="section-title" data-usal="fade-dl duration-800 delay-400 blur">
+                Framework Comparison
+              </h2>
+              <div id="comparison-container" data-usal="fade-u threshold-2"></div>
+            </div>
+          </section>
         </div>
-      </section>
+      </main>
     </div>
+
     <script>
+      window.USAL.config({ threshold: 10, delay: 100 });
+      // Navigation functionality
+      const navItems = document.querySelectorAll('.nav-item, .quick-nav-item');
+      const sections = document.querySelectorAll('.docs-section');
+      const sidebar = document.getElementById('sidebar');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+
+      // Section navigation
+      function showSection(sectionId) {
+        sections.forEach((section) => section.classList.remove('active'));
+        navItems.forEach((item) => item.classList.remove('active'));
+
+        const targetSection = document.getElementById(sectionId);
+        const targetNavItem = document.querySelector(`[data-section="${sectionId}"]`);
+
+        if (targetSection) {
+          targetSection.classList.add('active');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        if (targetNavItem) {
+          targetNavItem.classList.add('active');
+        }
+
+        // Close mobile menu on section change
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('open');
+          sidebarOverlay.classList.remove('show');
+        }
+
+        // Update URL hash
+        history.pushState(null, null, '#' + sectionId);
+      }
+
+      // Handle navigation clicks
+      navItems.forEach((item) => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          const sectionId = item.getAttribute('data-section');
+          if (sectionId) {
+            showSection(sectionId);
+          }
+        });
+      });
+
+      // Mobile menu toggle
+      mobileMenuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('show');
+      });
+
+      sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('show');
+      });
+
+      // Handle initial hash
+      const initialHash = window.location.hash.substring(1);
+      if (initialHash && document.getElementById(initialHash)) {
+        showSection(initialHash);
+      }
+
+      // Dynamic content functions (from original)
       let dynamicCount = 0;
       const animations = ['fade-u', 'zoomin', 'flip-r', 'fade-dr', 'zoomout-l'];
 
@@ -714,14 +909,185 @@ window.USAL.destroy();</code></pre>
         });
       }
 
+      // Add initial dynamic items
       setTimeout(() => {
-        for (let i = 0; i < 5; i++) {
-          setTimeout(() => addDynamicItem(), i * 200);
+        const dynamicSection = document.getElementById('dynamic-section');
+        if (dynamicSection) {
+          for (let i = 0; i < 5; i++) {
+            setTimeout(() => addDynamicItem(), i * 200);
+          }
         }
       }, 1000);
 
+      // Generate comparison tables dynamically
+      function generateComparisonTables() {
+        const container = document.getElementById('comparison-container');
+        if (!container) return;
+
+        const comparisonData = {
+          performance: {
+            title: 'Performance & Size Comparison',
+            headers: [
+              'Framework',
+              'Bundle Size (min/gzip)',
+              'React',
+              'Vue',
+              'Angular',
+              'Svelte',
+              'Solid',
+              'Lit',
+              'Vanilla',
+            ],
+            rows: [
+              [
+                'USAL.js',
+                '~9KB / ~5KB',
+                '✅ Native',
+                '✅ Native',
+                '✅ Native',
+                '✅ Native',
+                '✅ Native',
+                '✅ Native',
+                '✅',
+              ],
+              ['Motion One', 'Variable (~small)', '✅', '✅', '❌', '❌', '❌', '❌', '✅'],
+              ['GSAP', '~60KB+', '✅', '✅', '✅', '✅', '✅', '✅', '✅'],
+              ['Anime.js v4', '~27KB / ~27KB', '✅', '✅', '✅', '✅', '✅', '✅', '✅'],
+              ['Lottie', '~237KB / ~60KB', '⚠️', '⚠️', '⚠️', '⚠️', '⚠️', '⚠️', '✅'],
+              ['AOS', '~75KB / ~18KB', '⚠️', '⚠️', '⚠️', '❌', '❌', '❌', '✅'],
+              ['SAL.js', '~2.5KB / ~1.2KB', '❌', '❌', '❌', '❌', '❌', '❌', '✅'],
+            ],
+          },
+          features: {
+            title: 'Feature Comparison',
+            headers: [
+              'Framework',
+              'Split Text',
+              'Counters',
+              'Scroll Trigger',
+              'Timeline',
+              'SVG',
+              'Learning Curve',
+            ],
+            rows: [
+              ['USAL.js', '✅ Core', '✅ Core', '✅ Core', '❌', '❌', 'Very Easy'],
+              ['Motion One', '❌', '❌', '✅ Core', '⚠️ Variants', '✅ Core', 'Medium'],
+              [
+                'GSAP',
+                '⚠️ Plugin',
+                '⚠️ Plugin',
+                '✅ Plugin',
+                '✅ Advanced',
+                '⚠️ Plugin',
+                'Complex',
+              ],
+              ['Anime.js v4', '✅ Core', '✅ Core', '✅ Core', '✅ Core', '✅ Core', 'Medium'],
+              ['Lottie', '⚠️ via AE', '⚠️ via AE', '❌', '✅ Core', '✅ Core', 'Complex'],
+              ['AOS', '❌', '❌', '✅ Core', '❌', '❌', 'Very Easy'],
+              ['SAL.js', '❌', '❌', '✅ Core', '❌', '❌', 'Very Easy'],
+            ],
+          },
+        };
+
+        let html = '';
+
+        Object.values(comparisonData).forEach((table) => {
+          html += `
+            <div class="card" style="margin-bottom: 2rem;">
+              <h3>${table.title}</h3>
+              <div class="comparison-table">
+                <table>
+                  <thead>
+                    <tr>
+                      ${table.headers.map((h) => `<th>${h}</th>`).join('')}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${table.rows
+                      .map(
+                        (row, i) => `
+                      <tr>
+                        ${row
+                          .map((cell, j) => {
+                            let className = '';
+                            if (cell.includes('✅ Native')) className = 'status-native';
+                            else if (cell.includes('✅')) className = 'status-yes';
+                            else if (cell.includes('⚠️')) className = 'status-partial';
+                            else if (cell.includes('❌')) className = 'status-no';
+                            else if (cell === '~9KB / ~5KB' && i === 0)
+                              className = 'highlight-value';
+                            else if (j === 1) className = 'size-value';
+                            else if (cell === 'Very Easy' && i === 0)
+                              className = 'highlight-value2';
+
+                            return `<td class="${className}">${j === 0 && i === 0 ? '<strong>' + cell + '</strong>' : cell}</td>`;
+                          })
+                          .join('')}
+                      </tr>
+                    `
+                      )
+                      .join('')}
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Mobile Cards -->
+              <div class="mobile-cards">
+                ${table.rows
+                  .map(
+                    (row, i) => `
+                  <div class="framework-card ${i === 0 ? 'featured' : ''}">
+                    <div class="framework-name">${row[0]}</div>
+                    <div class="framework-details">
+                      ${row
+                        .slice(1)
+                        .map(
+                          (cell, j) => `
+                        <div class="detail-row">
+                          <span class="detail-label">${table.headers[j + 1]}</span>
+                          <span class="detail-value ${cell.includes('✅ Native') ? 'status-native' : cell.includes('✅') ? 'status-yes' : cell.includes('⚠️') ? 'status-partial' : cell.includes('❌') ? 'status-no' : ''}">${cell}</span>
+                        </div>
+                      `
+                        )
+                        .join('')}
+                    </div>
+                  </div>
+                `
+                  )
+                  .join('')}
+              </div>
+            </div>
+          `;
+        });
+
+        html += `
+          <div class="legend">
+            <div class="legend-item">
+              <span class="status-native">✅ Native/Core</span>
+              <span>Built-in support</span>
+            </div>
+            <div class="legend-item">
+              <span class="status-partial">⚠️ Plugin/Wrapper</span>
+              <span>Requires additional setup</span>
+            </div>
+            <div class="legend-item">
+              <span class="status-no">❌ Not supported</span>
+              <span>Feature not available</span>
+            </div>
+          </div>
+        `;
+
+        container.innerHTML = html;
+      }
+
+      // Initialize comparison tables
+      generateComparisonTables();
+
+      // Initialize highlight.js
       document.addEventListener('DOMContentLoaded', function () {
-        hljs.highlightAll();
+        if (typeof hljs !== 'undefined') {
+          hljs.highlightAll();
+        }
       });
     </script>
   </body>

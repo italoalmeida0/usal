@@ -63,48 +63,6 @@ function getCommandOutput(command, args) {
   });
 }
 
-// Function to update version in HTML file
-function updateHTMLVersion(version) {
-  const htmlPath = 'index.html';
-
-  if (fs.existsSync(htmlPath)) {
-    try {
-      let htmlContent = fs.readFileSync(htmlPath, 'utf-8');
-
-      // Pattern to match <div class="version">Version X.X.X</div>
-      const versionPattern = /(<div class="version">Version\s+)[^<]+(<\/div>)/g;
-
-      if (versionPattern.test(htmlContent)) {
-        // Reset regex state
-        versionPattern.lastIndex = 0;
-
-        // Replace version
-        htmlContent = htmlContent.replace(versionPattern, `$1${version}$2`);
-
-        // Save updated HTML
-        fs.writeFileSync(htmlPath, htmlContent, 'utf-8');
-        console.log(
-          `${colorize.success('✓')} Updated ${colorize.file('index.html')} with version ${colorize.version(version)}`
-        );
-        return true;
-      } else {
-        console.log(
-          `${colorize.warning('[!]')} Version div not found in ${colorize.file('index.html')}`
-        );
-        return false;
-      }
-    } catch (error) {
-      console.error(`${colorize.error('[X]')} Failed to update HTML: ${error.message}`);
-      return false;
-    }
-  } else {
-    console.log(
-      `${colorize.info('[i]')} ${colorize.file('index.html')} not found, skipping HTML update`
-    );
-    return false;
-  }
-}
-
 // Function to check if git tag exists
 function gitTagExists(tagName) {
   try {
@@ -253,10 +211,6 @@ ${colorize.info('Examples:')}
   if (noPushFlag && !noGitFlag) {
     console.log(`${colorize.info('[MODE]')} Git push disabled - tags will be created locally only`);
   }
-  console.log('');
-
-  // Update HTML version first
-  updateHTMLVersion(version);
   console.log('');
 
   // Create Git tag before NPM updates

@@ -1,6 +1,6 @@
 {
   "name": "usal-monorepo",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": true,
   "type": "module",
   "description": "Ultimate Scroll Animation Library - 9KB of pure JavaScript magic",
@@ -27,6 +27,7 @@
       },
       "jsx": true,
       "usage": {
+        "color": "grey",
         "pseudonym": [
           "Next.js"
         ],
@@ -44,6 +45,7 @@
         ]
       },
       "usage": {
+        "color": "blue",
         "pseudonym": [
           "SolidStart"
         ],
@@ -61,6 +63,7 @@
         ]
       },
       "usage": {
+        "color": "orange",
         "pseudonym": [
           "SvelteKit"
         ],
@@ -86,6 +89,7 @@
         "nuxt-plugin"
       ],
       "usage": {
+        "color": "green",
         "pseudonym": [
           "Nuxt"
         ],
@@ -103,6 +107,7 @@
         ]
       },
       "usage": {
+        "color": "cyan",
         "pseudonym": [],
         "file": "main.ts",
         "import": "import { usal, useUSAL } from '@usal/lit';",
@@ -123,6 +128,7 @@
         ]
       },
       "usage": {
+        "color": "red",
         "pseudonym": [],
         "file": "app.component.ts",
         "import": "import { USALModule } from '@usal/angular';",
@@ -133,7 +139,7 @@
   },
   "scripts": {
     "dev": "npm run build -- --watch",
-    "build": "npm run lint:fix && node scripts/build.js && npm run format:doc",
+    "build": "npm run lint:fix && node scripts/build.js",
     "version:all": "npm version --workspaces",
     "update:tags": "node scripts/update-tags.js",
     "publish:pkgs-beta": "npm run build && npm publish --workspaces --tag beta --access public",
@@ -159,6 +165,7 @@
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-sonarjs": "^3.0.5",
     "globals": "^16.3.0",
     "langdetect": "^0.2.1",
     "lit": ">=2.0.0",

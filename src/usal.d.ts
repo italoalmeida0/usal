@@ -12,6 +12,8 @@ export interface USALInstance {
   config(config: USALConfig): USALInstance;
   destroy(): void;
   createInstance(config?: USALConfig): USALInstance;
+  readonly version?: string;
+  readonly __usalInitialized?: boolean;
 }
 
 declare const USAL: USALInstance;
