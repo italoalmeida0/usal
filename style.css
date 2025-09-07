@@ -2,7 +2,15 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
+
+button,
+a {
+  touch-action: manipulation;
+}
+
 html {
   background: #0a0a0a;
 }

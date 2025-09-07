@@ -593,10 +593,10 @@ export class AppComponent</code></pre>
                 Dynamic Content Test
               </h2>
 
-              <div class="button-group">
-                <button class="btn" onclick="addDynamicItem()">Add Item</button>
-                <button class="btn" onclick="clearDynamic()">Clear All</button>
-                <button class="btn" onclick="changeDynamicAnimations()">Change Animations</button>
+              <div class="button-group" data-usal="fade-d split-item split-delay-500">
+                <button class="btn" id="addDynamicItem">Add Item</button>
+                <button class="btn" id="clearDynamic">Clear All</button>
+                <button class="btn" id="changeDynamicAnimations">Change Animations</button>
               </div>
 
               <div id="dynamic-section"></div>
@@ -918,396 +918,403 @@ console.log(window.USAL.version); // string</code></pre>
     </div>
 
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
-      window.USAL.config({ threshold: 10, delay: 100 });
+      document.addEventListener('DOMContentLoaded', function () {
+        window.USAL.config({ threshold: 10, delay: 100 });
 
-      const navItems = document.querySelectorAll('.nav-item, .quick-nav-item');
-      const sections = document.querySelectorAll('.docs-section');
-      const sidebar = document.getElementById('sidebar');
-      const sidebarOverlay = document.getElementById('sidebarOverlay');
-      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const navItems = document.querySelectorAll('.nav-item, .quick-nav-item');
+        const sections = document.querySelectorAll('.docs-section');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 
-      let dynamicCount = 0;
-      const animations = ['fade-u', 'zoomin', 'flip-r', 'fade-dr', 'zoomout-l'];
+        let dynamicCount = 0;
+        const animations = ['fade-u', 'zoomin', 'flip-r', 'fade-dr', 'zoomout-l'];
 
-      function showSection(sectionId) {
-        sections.forEach((section) => section.classList.remove('active'));
+        function showSection(sectionId) {
+          sections.forEach((section) => section.classList.remove('active'));
 
-        document.querySelectorAll('.sidebar .nav-item').forEach((item) => {
-          item.classList.remove('active');
-        });
+          document.querySelectorAll('.sidebar .nav-item').forEach((item) => {
+            item.classList.remove('active');
+          });
 
-        const targetSection = document.getElementById(sectionId);
+          const targetSection = document.getElementById(sectionId);
 
-        const targetNavItem = document.querySelector(`.sidebar .nav-item[data-section="${sectionId}"]`);
+          const targetNavItem = document.querySelector(
+            `.sidebar .nav-item[data-section="${sectionId}"]`
+          );
 
-        if (targetSection) {
-          targetSection.classList.add('active');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          if (targetSection) {
+            targetSection.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+
+          if (targetNavItem) {
+            targetNavItem.classList.add('active');
+          }
+
+          if (window.innerWidth <= 768) {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('show');
+          }
+
+          history.pushState(null, null, '#' + sectionId);
         }
-
-        if (targetNavItem) {
-          targetNavItem.classList.add('active');
-        }
-
-        if (window.innerWidth <= 768) {
-          sidebar.classList.remove('open');
-          sidebarOverlay.classList.remove('show');
-        }
-
-        history.pushState(null, null, '#' + sectionId);
-      }
-
-      function addDynamicItem() {
-        const section = document.getElementById('dynamic-section');
-        const item = document.createElement('span');
-        item.className = 'dynamic-item';
-        item.textContent = `Item ${++dynamicCount}`;
-        item.setAttribute(
-          'data-usal',
-          animations[Math.floor(Math.random() * animations.length)] + ' duration-800'
-        );
-        section.appendChild(item);
-      }
-
-      function clearDynamic() {
-        document.getElementById('dynamic-section').innerHTML = '';
-        dynamicCount = 0;
-      }
-
-      function changeDynamicAnimations() {
-        const items = document.querySelectorAll('#dynamic-section .dynamic-item');
-        items.forEach((item) => {
-          const currentData = item.getAttribute('data-usal') || '';
-          let newAnimation;
-
-          do {
-            newAnimation = animations[Math.floor(Math.random() * animations.length)];
-          } while (currentData.includes(newAnimation));
-
-          item.setAttribute('data-usal', newAnimation + ' duration-800');
-        });
-      }
-
-      function generateComparisonTables() {
-        const container = document.getElementById('comparison-container');
-        if (!container) return;
-
-        const comparisonData = {
-          performance: {
-            title: 'Performance & Size Comparison',
-            headers: [
-              'Framework',
-              'Bundle Size (min/gzip)',
-              'React',
-              'Vue',
-              'Angular',
-              'Svelte',
-              'Solid',
-              'Lit',
-              'Vanilla',
-            ],
-            rows: [
-              [
-                'USAL.js',
-                '~10KB / ~5KB',
-                '✅ Native',
-                '✅ Native',
-                '✅ Native',
-                '✅ Native',
-                '✅ Native',
-                '✅ Native',
-                '✅',
-              ],
-              ['Motion One', 'Variable (~small)', '✅', '✅', '❌', '❌', '❌', '❌', '✅'],
-              ['GSAP', '~60KB+', '✅', '✅', '✅', '✅', '✅', '✅', '✅'],
-              ['Anime.js v4', '~27KB / ~27KB', '✅', '✅', '✅', '✅', '✅', '✅', '✅'],
-              ['Lottie', '~237KB / ~60KB', '⚠️', '⚠️', '⚠️', '⚠️', '⚠️', '⚠️', '✅'],
-              ['AOS', '~75KB / ~18KB', '⚠️', '⚠️', '⚠️', '❌', '❌', '❌', '✅'],
-              ['SAL.js', '~2.5KB / ~1.2KB', '❌', '❌', '❌', '❌', '❌', '❌', '✅'],
-            ],
-          },
-          features: {
-            title: 'Feature Comparison',
-            headers: [
-              'Framework',
-              'Split Text',
-              'Counters',
-              'Scroll Trigger',
-              'Timeline',
-              'SVG',
-              'Learning Curve',
-            ],
-            rows: [
-              ['USAL.js', '✅ Core', '✅ Core', '✅ Core', '❌', '❌', 'Very Easy'],
-              ['Motion One', '❌', '❌', '✅ Core', '⚠️ Variants', '✅ Core', 'Medium'],
-              [
-                'GSAP',
-                '⚠️ Plugin',
-                '⚠️ Plugin',
-                '✅ Plugin',
-                '✅ Advanced',
-                '⚠️ Plugin',
-                'Complex',
-              ],
-              ['Anime.js v4', '✅ Core', '✅ Core', '✅ Core', '✅ Core', '✅ Core', 'Medium'],
-              ['Lottie', '⚠️ via AE', '⚠️ via AE', '❌', '✅ Core', '✅ Core', 'Complex'],
-              ['AOS', '❌', '❌', '✅ Core', '❌', '❌', 'Very Easy'],
-              ['SAL.js', '❌', '❌', '✅ Core', '❌', '❌', 'Very Easy'],
-            ],
-          },
+        const addDynamicItem = () => {
+          const section = document.getElementById('dynamic-section');
+          const item = document.createElement('span');
+          item.className = 'dynamic-item';
+          item.textContent = `Item ${++dynamicCount}`;
+          item.setAttribute(
+            'data-usal',
+            animations[Math.floor(Math.random() * animations.length)] + ' duration-800'
+          );
+          section.appendChild(item);
         };
 
-        container.innerHTML = '';
+        document.getElementById('addDynamicItem').onclick = addDynamicItem;
 
-        Object.values(comparisonData).forEach((tableData) => {
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.style.marginBottom = '2rem';
+        document.getElementById('clearDynamic').onclick = () => {
+          document.getElementById('dynamic-section').innerHTML = '';
+          dynamicCount = 0;
+        };
 
-          const title = document.createElement('h3');
-          title.textContent = tableData.title;
-          card.appendChild(title);
+        document.getElementById('changeDynamicAnimations').onclick = () => {
+          const items = document.querySelectorAll('#dynamic-section .dynamic-item');
+          items.forEach((item) => {
+            const currentData = item.getAttribute('data-usal') || '';
+            let newAnimation;
 
-          const tableWrapper = document.createElement('div');
-          tableWrapper.className = 'comparison-table';
+            do {
+              newAnimation = animations[Math.floor(Math.random() * animations.length)];
+            } while (currentData.includes(newAnimation));
 
-          const table = document.createElement('table');
-          const thead = document.createElement('thead');
-          const tbody = document.createElement('tbody');
-
-          const headerRow = document.createElement('tr');
-          tableData.headers.forEach((header) => {
-            const th = document.createElement('th');
-            th.textContent = header;
-            headerRow.appendChild(th);
+            item.setAttribute('data-usal', newAnimation + ' duration-800');
           });
-          thead.appendChild(headerRow);
+        };
 
-          tableData.rows.forEach((row, rowIndex) => {
-            const tr = document.createElement('tr');
-            row.forEach((cell, cellIndex) => {
-              const td = document.createElement('td');
+        function generateComparisonTables() {
+          const container = document.getElementById('comparison-container');
+          if (!container) return;
 
-              if (cell.includes('✅ Native')) td.className = 'status-native';
-              else if (cell.includes('✅')) td.className = 'status-yes';
-              else if (cell.includes('⚠️')) td.className = 'status-partial';
-              else if (cell.includes('❌')) td.className = 'status-no';
-              else if (cell === '~10KB / ~5KB' && rowIndex === 0) td.className = 'highlight-value';
-              else if (cellIndex === 1) td.className = 'size-value';
-              else if (cell === 'Very Easy' && rowIndex === 0) td.className = 'highlight-value2';
+          const comparisonData = {
+            performance: {
+              title: 'Performance & Size Comparison',
+              headers: [
+                'Framework',
+                'Bundle Size (min/gzip)',
+                'React',
+                'Vue',
+                'Angular',
+                'Svelte',
+                'Solid',
+                'Lit',
+                'Vanilla',
+              ],
+              rows: [
+                [
+                  'USAL.js',
+                  '~10KB / ~5KB',
+                  '✅ Native',
+                  '✅ Native',
+                  '✅ Native',
+                  '✅ Native',
+                  '✅ Native',
+                  '✅ Native',
+                  '✅',
+                ],
+                ['Motion One', 'Variable (~small)', '✅', '✅', '❌', '❌', '❌', '❌', '✅'],
+                ['GSAP', '~60KB+', '✅', '✅', '✅', '✅', '✅', '✅', '✅'],
+                ['Anime.js v4', '~27KB / ~27KB', '✅', '✅', '✅', '✅', '✅', '✅', '✅'],
+                ['Lottie', '~237KB / ~60KB', '⚠️', '⚠️', '⚠️', '⚠️', '⚠️', '⚠️', '✅'],
+                ['AOS', '~75KB / ~18KB', '⚠️', '⚠️', '⚠️', '❌', '❌', '❌', '✅'],
+                ['SAL.js', '~2.5KB / ~1.2KB', '❌', '❌', '❌', '❌', '❌', '❌', '✅'],
+              ],
+            },
+            features: {
+              title: 'Feature Comparison',
+              headers: [
+                'Framework',
+                'Split Text',
+                'Counters',
+                'Scroll Trigger',
+                'Timeline',
+                'SVG',
+                'Learning Curve',
+              ],
+              rows: [
+                ['USAL.js', '✅ Core', '✅ Core', '✅ Core', '❌', '❌', 'Very Easy'],
+                ['Motion One', '❌', '❌', '✅ Core', '⚠️ Variants', '✅ Core', 'Medium'],
+                [
+                  'GSAP',
+                  '⚠️ Plugin',
+                  '⚠️ Plugin',
+                  '✅ Plugin',
+                  '✅ Advanced',
+                  '⚠️ Plugin',
+                  'Complex',
+                ],
+                ['Anime.js v4', '✅ Core', '✅ Core', '✅ Core', '✅ Core', '✅ Core', 'Medium'],
+                ['Lottie', '⚠️ via AE', '⚠️ via AE', '❌', '✅ Core', '✅ Core', 'Complex'],
+                ['AOS', '❌', '❌', '✅ Core', '❌', '❌', 'Very Easy'],
+                ['SAL.js', '❌', '❌', '✅ Core', '❌', '❌', 'Very Easy'],
+              ],
+            },
+          };
 
-              if (cellIndex === 0 && rowIndex === 0) {
-                const strong = document.createElement('strong');
-                strong.textContent = cell;
-                td.appendChild(strong);
-              } else {
-                td.textContent = cell;
-              }
+          container.innerHTML = '';
 
-              tr.appendChild(td);
+          Object.values(comparisonData).forEach((tableData) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.marginBottom = '2rem';
+
+            const title = document.createElement('h3');
+            title.textContent = tableData.title;
+            card.appendChild(title);
+
+            const tableWrapper = document.createElement('div');
+            tableWrapper.className = 'comparison-table';
+
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            const headerRow = document.createElement('tr');
+            tableData.headers.forEach((header) => {
+              const th = document.createElement('th');
+              th.textContent = header;
+              headerRow.appendChild(th);
             });
-            tbody.appendChild(tr);
-          });
+            thead.appendChild(headerRow);
 
-          table.appendChild(thead);
-          table.appendChild(tbody);
-          tableWrapper.appendChild(table);
-          card.appendChild(tableWrapper);
+            tableData.rows.forEach((row, rowIndex) => {
+              const tr = document.createElement('tr');
+              row.forEach((cell, cellIndex) => {
+                const td = document.createElement('td');
 
-          const mobileCards = document.createElement('div');
-          mobileCards.className = 'mobile-cards';
+                if (cell.includes('✅ Native')) td.className = 'status-native';
+                else if (cell.includes('✅')) td.className = 'status-yes';
+                else if (cell.includes('⚠️')) td.className = 'status-partial';
+                else if (cell.includes('❌')) td.className = 'status-no';
+                else if (cell === '~10KB / ~5KB' && rowIndex === 0)
+                  td.className = 'highlight-value';
+                else if (cellIndex === 1) td.className = 'size-value';
+                else if (cell === 'Very Easy' && rowIndex === 0) td.className = 'highlight-value2';
 
-          tableData.rows.forEach((row, rowIndex) => {
-            const frameworkCard = document.createElement('div');
-            frameworkCard.className = 'framework-card';
-            if (rowIndex === 0) frameworkCard.classList.add('featured');
+                if (cellIndex === 0 && rowIndex === 0) {
+                  const strong = document.createElement('strong');
+                  strong.textContent = cell;
+                  td.appendChild(strong);
+                } else {
+                  td.textContent = cell;
+                }
 
-            const frameworkName = document.createElement('div');
-            frameworkName.className = 'framework-name';
-            frameworkName.textContent = row[0];
-            frameworkCard.appendChild(frameworkName);
-
-            const frameworkDetails = document.createElement('div');
-            frameworkDetails.className = 'framework-details';
-
-            row.slice(1).forEach((cell, index) => {
-              const detailRow = document.createElement('div');
-              detailRow.className = 'detail-row';
-
-              const label = document.createElement('span');
-              label.className = 'detail-label';
-              label.textContent = tableData.headers[index + 1];
-
-              const value = document.createElement('span');
-              value.className = 'detail-value';
-
-              if (cell.includes('✅ Native')) value.classList.add('status-native');
-              else if (cell.includes('✅')) value.classList.add('status-yes');
-              else if (cell.includes('⚠️')) value.classList.add('status-partial');
-              else if (cell.includes('❌')) value.classList.add('status-no');
-
-              value.textContent = cell;
-
-              detailRow.appendChild(label);
-              detailRow.appendChild(value);
-              frameworkDetails.appendChild(detailRow);
+                tr.appendChild(td);
+              });
+              tbody.appendChild(tr);
             });
 
-            frameworkCard.appendChild(frameworkDetails);
-            mobileCards.appendChild(frameworkCard);
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            tableWrapper.appendChild(table);
+            card.appendChild(tableWrapper);
+
+            const mobileCards = document.createElement('div');
+            mobileCards.className = 'mobile-cards';
+
+            tableData.rows.forEach((row, rowIndex) => {
+              const frameworkCard = document.createElement('div');
+              frameworkCard.className = 'framework-card';
+              if (rowIndex === 0) frameworkCard.classList.add('featured');
+
+              const frameworkName = document.createElement('div');
+              frameworkName.className = 'framework-name';
+              frameworkName.textContent = row[0];
+              frameworkCard.appendChild(frameworkName);
+
+              const frameworkDetails = document.createElement('div');
+              frameworkDetails.className = 'framework-details';
+
+              row.slice(1).forEach((cell, index) => {
+                const detailRow = document.createElement('div');
+                detailRow.className = 'detail-row';
+
+                const label = document.createElement('span');
+                label.className = 'detail-label';
+                label.textContent = tableData.headers[index + 1];
+
+                const value = document.createElement('span');
+                value.className = 'detail-value';
+
+                if (cell.includes('✅ Native')) value.classList.add('status-native');
+                else if (cell.includes('✅')) value.classList.add('status-yes');
+                else if (cell.includes('⚠️')) value.classList.add('status-partial');
+                else if (cell.includes('❌')) value.classList.add('status-no');
+
+                value.textContent = cell;
+
+                detailRow.appendChild(label);
+                detailRow.appendChild(value);
+                frameworkDetails.appendChild(detailRow);
+              });
+
+              frameworkCard.appendChild(frameworkDetails);
+              mobileCards.appendChild(frameworkCard);
+            });
+
+            card.appendChild(mobileCards);
+            container.appendChild(card);
           });
 
-          card.appendChild(mobileCards);
-          container.appendChild(card);
-        });
+          const legend = document.createElement('div');
+          legend.className = 'legend';
 
-        const legend = document.createElement('div');
-        legend.className = 'legend';
+          const legendItems = [
+            { icon: '✅ Native/Core', text: 'Built-in support', class: 'status-native' },
+            {
+              icon: '⚠️ Plugin/Wrapper',
+              text: 'Requires additional setup',
+              class: 'status-partial',
+            },
+            { icon: '❌ Not supported', text: 'Feature not available', class: 'status-no' },
+          ];
 
-        const legendItems = [
-          { icon: '✅ Native/Core', text: 'Built-in support', class: 'status-native' },
-          { icon: '⚠️ Plugin/Wrapper', text: 'Requires additional setup', class: 'status-partial' },
-          { icon: '❌ Not supported', text: 'Feature not available', class: 'status-no' },
-        ];
+          legendItems.forEach((item) => {
+            const legendItem = document.createElement('div');
+            legendItem.className = 'legend-item';
 
-        legendItems.forEach((item) => {
-          const legendItem = document.createElement('div');
-          legendItem.className = 'legend-item';
+            const icon = document.createElement('span');
+            icon.className = item.class;
+            icon.textContent = item.icon;
 
-          const icon = document.createElement('span');
-          icon.className = item.class;
-          icon.textContent = item.icon;
+            const text = document.createElement('span');
+            text.textContent = item.text;
 
-          const text = document.createElement('span');
-          text.textContent = item.text;
+            legendItem.appendChild(icon);
+            legendItem.appendChild(text);
+            legend.appendChild(legendItem);
+          });
 
-          legendItem.appendChild(icon);
-          legendItem.appendChild(text);
-          legend.appendChild(legendItem);
-        });
+          container.appendChild(legend);
+        }
 
-        container.appendChild(legend);
-      }
+        function getSectionInfo() {
+          const sidebar = document.getElementById('sidebar');
+          if (!sidebar) return { order: [], names: {} };
 
-      function getSectionInfo() {
-        const sidebar = document.getElementById('sidebar');
-        if (!sidebar) return { order: [], names: {} };
+          const navItems = sidebar.querySelectorAll('.nav-item');
+          const sectionOrder = [];
+          const sectionNames = {};
 
-        const navItems = sidebar.querySelectorAll('.nav-item');
-        const sectionOrder = [];
-        const sectionNames = {};
+          navItems.forEach((item) => {
+            const sectionId = item.getAttribute('data-section');
+            if (sectionId) {
+              sectionOrder.push(sectionId);
+              sectionNames[sectionId] = item.textContent.trim();
+            }
+          });
+
+          return { order: sectionOrder, names: sectionNames };
+        }
+
+        function createSectionNavigationButtons() {
+          const { order: sectionOrder, names: sectionNames } = getSectionInfo();
+
+          sectionOrder.forEach((sectionId, index) => {
+            if (index >= sectionOrder.length - 1) return;
+
+            const currentSection = document.getElementById(sectionId);
+            if (!currentSection) return;
+
+            const existingWrapper = currentSection.querySelector('.next-section-wrapper');
+            if (existingWrapper) return;
+
+            const nextSectionId = sectionOrder[index + 1];
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'next-section-wrapper';
+            wrapper.style.display = 'flex';
+            wrapper.style.justifyContent = 'center';
+            wrapper.style.marginTop = '3rem';
+            wrapper.style.paddingBottom = '2rem';
+
+            const button = document.createElement('a');
+            button.href = `#${nextSectionId}`;
+            button.className = 'next-section-btn';
+            button.setAttribute('data-section', nextSectionId);
+            button.setAttribute('data-usal', 'fade-u delay-400');
+            button.setAttribute('class', 'quick-nav-item');
+            button.style.paddingInline = '2rem';
+            button.style.paddingBlock = '0.5rem';
+            button.style.display = 'flex';
+
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 24 24');
+            svg.setAttribute('fill', 'none');
+            svg.setAttribute('stroke', 'currentColor');
+            svg.setAttribute('stroke-width', '1');
+            svg.setAttribute('stroke-linecap', 'round');
+            svg.setAttribute('stroke-linejoin', 'round');
+            svg.style.width = '2rem';
+            svg.style.height = '2rem';
+
+            const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+            polyline.setAttribute('points', '6 9 12 15 18 9');
+            svg.appendChild(polyline);
+
+            button.appendChild(svg);
+
+            button.addEventListener('click', (e) => {
+              e.preventDefault();
+              showSection(nextSectionId);
+            });
+
+            button.addEventListener('mouseenter', () => {
+              button.style.transform = 'translateY(-2px)';
+            });
+
+            button.addEventListener('mouseleave', () => {
+              button.style.transform = 'translateY(0)';
+            });
+
+            wrapper.appendChild(button);
+            currentSection.appendChild(wrapper);
+          });
+        }
 
         navItems.forEach((item) => {
-          const sectionId = item.getAttribute('data-section');
-          if (sectionId) {
-            sectionOrder.push(sectionId);
-            sectionNames[sectionId] = item.textContent.trim();
-          }
-        });
-
-        return { order: sectionOrder, names: sectionNames };
-      }
-
-      function createSectionNavigationButtons() {
-        const { order: sectionOrder, names: sectionNames } = getSectionInfo();
-
-        sectionOrder.forEach((sectionId, index) => {
-          if (index >= sectionOrder.length - 1) return;
-
-          const currentSection = document.getElementById(sectionId);
-          if (!currentSection) return;
-
-          const existingWrapper = currentSection.querySelector('.next-section-wrapper');
-          if (existingWrapper) return;
-
-          const nextSectionId = sectionOrder[index + 1];
-          const nextSectionName = sectionNames[nextSectionId] || nextSectionId;
-
-          const wrapper = document.createElement('div');
-          wrapper.className = 'next-section-wrapper';
-          wrapper.style.display = 'flex';
-          wrapper.style.justifyContent = 'center';
-          wrapper.style.marginTop = '3rem';
-          wrapper.style.paddingBottom = '2rem';
-
-          const button = document.createElement('a');
-          button.href = `#${nextSectionId}`;
-          button.className = 'next-section-btn';
-          button.setAttribute('data-section', nextSectionId);
-          button.setAttribute('data-usal', 'fade-u delay-400');
-          button.setAttribute('class', 'quick-nav-item');
-          button.style.paddingInline = '2rem';
-          button.style.paddingBlock = '0.5rem';
-          button.style.display = 'flex';
-
-          const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-          svg.setAttribute('viewBox', '0 0 24 24');
-          svg.setAttribute('fill', 'none');
-          svg.setAttribute('stroke', 'currentColor');
-          svg.setAttribute('stroke-width', '1');
-          svg.setAttribute('stroke-linecap', 'round');
-          svg.setAttribute('stroke-linejoin', 'round');
-          svg.style.width = '2rem';
-          svg.style.height = '2rem';
-
-          const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-          polyline.setAttribute('points', '6 9 12 15 18 9');
-          svg.appendChild(polyline);
-
-          button.appendChild(svg);
-
-          button.addEventListener('click', (e) => {
+          item.addEventListener('click', (e) => {
             e.preventDefault();
-            showSection(nextSectionId);
+            const sectionId = item.getAttribute('data-section');
+            if (sectionId) {
+              showSection(sectionId);
+            }
           });
-
-          button.addEventListener('mouseenter', () => {
-            button.style.transform = 'translateY(-2px)';
-          });
-
-          button.addEventListener('mouseleave', () => {
-            button.style.transform = 'translateY(0)';
-          });
-
-          wrapper.appendChild(button);
-          currentSection.appendChild(wrapper);
         });
-      }
 
-      navItems.forEach((item) => {
-        item.addEventListener('click', (e) => {
-          e.preventDefault();
-          const sectionId = item.getAttribute('data-section');
-          if (sectionId) {
-            showSection(sectionId);
-          }
+        mobileMenuToggle.addEventListener('click', () => {
+          sidebar.classList.toggle('open');
+          sidebarOverlay.classList.toggle('show');
         });
-      });
 
-      mobileMenuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
-        sidebarOverlay.classList.toggle('show');
-      });
+        sidebarOverlay.addEventListener('click', () => {
+          sidebar.classList.remove('open');
+          sidebarOverlay.classList.remove('show');
+        });
 
-      sidebarOverlay.addEventListener('click', () => {
-        sidebar.classList.remove('open');
-        sidebarOverlay.classList.remove('show');
-      });
-
-      const initialHash = window.location.hash.substring(1);
-      if (initialHash && document.getElementById(initialHash)) {
-        showSection(initialHash);
-      }
-
-      setTimeout(() => {
-        const dynamicSection = document.getElementById('dynamic-section');
-        if (dynamicSection) {
-          for (let i = 0; i < 5; i++) {
-            setTimeout(() => addDynamicItem(), i * 200);
-          }
+        const initialHash = window.location.hash.substring(1);
+        if (initialHash && document.getElementById(initialHash)) {
+          showSection(initialHash);
         }
-      }, 1000);
+
+        setTimeout(() => {
+          const dynamicSection = document.getElementById('dynamic-section');
+          if (dynamicSection) {
+            for (let i = 0; i < 5; i++) {
+              setTimeout(() => addDynamicItem(), i * 200);
+            }
+          }
+        }, 1000);
 
         generateComparisonTables();
         createSectionNavigationButtons();
