@@ -918,6 +918,7 @@ console.log(window.USAL.version); // string</code></pre>
     </div>
 
     <script>
+      document.addEventListener('DOMContentLoaded', function() {
       window.USAL.config({ threshold: 10, delay: 100 });
 
       const navItems = document.querySelectorAll('.nav-item, .quick-nav-item');
@@ -931,7 +932,7 @@ console.log(window.USAL.version); // string</code></pre>
 
       function showSection(sectionId) {
         sections.forEach((section) => section.classList.remove('active'));
-        
+
         document.querySelectorAll('.sidebar .nav-item').forEach((item) => {
           item.classList.remove('active');
         });
@@ -1308,7 +1309,6 @@ console.log(window.USAL.version); // string</code></pre>
         }
       }, 1000);
 
-      document.addEventListener('DOMContentLoaded', function () {
         generateComparisonTables();
         createSectionNavigationButtons();
 
