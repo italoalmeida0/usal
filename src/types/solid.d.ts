@@ -1,5 +1,5 @@
 import { Component, JSX } from 'solid-js';
-import USAL, { USALConfig, USALInstance } from '../usal';
+import USAL, { USALConfig } from '../usal';
 
 export const USALProvider: Component<{
   children: JSX.Element;
@@ -7,17 +7,10 @@ export const USALProvider: Component<{
 }>;
 
 export const useUSAL: () => {
-  getInstance: () => USALInstance | null;
   config(): USALConfig;
   config(config: USALConfig): void;
   destroy: () => void;
-};
-
-export const createUSAL: (config?: USALConfig) => {
-  config(): USALConfig;
-  config(config: USALConfig): void;
-  destroy: () => void;
-  getInstance: () => USALInstance | null;
+  restart: () => void;
 };
 
 export default USAL;

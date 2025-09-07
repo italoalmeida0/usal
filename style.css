@@ -54,7 +54,7 @@ html ::-webkit-scrollbar-thumb:active {
   overflow-x: hidden;
 }
 .section {
-  padding: 7.5rem 0;
+  padding: 3rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   overflow: hidden;
 }
@@ -92,6 +92,26 @@ p {
   line-height: 1.7;
   color: #9ca3af;
 }
+
+.baseline {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-inline: 1rem;
+  padding-block: 0.5rem;
+  background: #1ea44624;
+  border: 1px solid #1ea446;
+  text-transform: uppercase;
+  width: fit-content;
+  gap: 1rem;
+  font-weight: 400;
+  font-size: 0.8rem;
+  margin-inline: auto;
+  margin-top: 1rem;
+  color: #ffffff;
+  text-decoration: none;
+}
+
 .subtitle {
   font-size: 1.25rem;
   font-weight: 400;
@@ -209,6 +229,9 @@ p {
 }
 .spec-item {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
 }
 .spec-value {
   font-size: 2rem;
@@ -601,7 +624,7 @@ p {
   left: 0;
   height: 100vh;
   overflow-y: auto;
-  z-index: 10;
+  z-index: 110;
   transition: transform 0.3s ease;
 }
 .sidebar-header {
@@ -610,7 +633,6 @@ p {
   position: sticky;
   top: 0;
   background: #0a0a0a;
-  z-index: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -665,6 +687,7 @@ p {
   background: #fff;
 }
 .main-content {
+  z-index: 1;
   flex: 1;
   margin-left: 280px;
   width: calc(100% - 280px);
@@ -672,13 +695,13 @@ p {
 .top-bar {
   background: #0a0a0a;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 9;
   padding: 1rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: calc(100% - 280px);
 }
 .mobile-menu-toggle {
   display: none;
@@ -713,7 +736,7 @@ p {
 .content-wrapper {
   max-width: 75rem;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 5rem 1.5rem;
 }
 .hero-section {
   text-align: center;
@@ -745,7 +768,7 @@ p {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 9;
+  z-index: 100;
 }
 @media (max-width: 768px) {
   .sidebar {
@@ -769,6 +792,7 @@ p {
   }
   .top-bar {
     padding: 1rem;
+    width: 100%;
   }
 }
 .quick-nav {

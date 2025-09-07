@@ -1,15 +1,17 @@
 import js from '@eslint/js';
-import globals from 'globals';
 import typescriptPlugin from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
+import prettierConfig from 'eslint-config-prettier';
+import compatPlugin from 'eslint-plugin-compat';
 import importPlugin from 'eslint-plugin-import';
 import sonarjs from 'eslint-plugin-sonarjs';
-import prettierConfig from 'eslint-config-prettier';
+import globals from 'globals';
 
 export default [
   js.configs.recommended,
   sonarjs.configs.recommended,
   prettierConfig,
+  compatPlugin.configs['flat/recommended'],
   {
     files: ['**/*.{js,mjs,cjs,ts}'],
     languageOptions: {
@@ -111,7 +113,7 @@ export default [
   {
     files: ['src/usal.js', 'src/usal.ts'],
     rules: {
-      'no-console': 'error',
+      'no-console': 'off',
       complexity: 'off',
       'max-depth': 'off',
       'max-lines': 'off',

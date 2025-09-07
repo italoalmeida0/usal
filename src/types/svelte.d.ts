@@ -1,5 +1,5 @@
 import { ActionReturn } from 'svelte/action';
-import USAL, { USALConfig, USALInstance } from '../usal';
+import USAL, { USALConfig } from '../usal';
 
 export interface USALAction {
   (node: HTMLElement, params?: string): ActionReturn<string>;
@@ -8,17 +8,10 @@ export interface USALAction {
 export const usal: USALAction;
 
 export const useUSAL: () => {
-  getInstance: () => USALInstance | null;
   config(): USALConfig;
   config(config: USALConfig): void;
   destroy: () => void;
-};
-
-export const createUSAL: (config?: USALConfig) => {
-  config(): USALConfig;
-  config(config: USALConfig): void;
-  destroy: () => void;
-  getInstance: () => USALInstance | null;
+  restart: () => void;
 };
 
 export default USAL;

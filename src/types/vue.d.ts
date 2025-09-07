@@ -1,24 +1,25 @@
 import { App } from 'vue';
 import USAL, { USALConfig, USALInstance } from '../usal';
 
-export const createUSAL: (config?: USALConfig) => {
-  install(app: App): void;
-  config(): USALConfig;
-  config(config: USALConfig): void;
-  destroy: () => void;
-  getInstance: () => USALInstance | null;
+export const USALPlugin: {
+  install(app: App, config?: USALConfig): void;
 };
 
 export const useUSAL: () => {
-  getInstance: () => USALInstance | null;
   config(): USALConfig;
   config(config: USALConfig): void;
   destroy: () => void;
+  restart: () => void;
 };
 
 declare module '@vue/runtime-core' {
   export interface GlobalProperties {
-    $usal: USALInstance;
+    $usal: {
+      config(): USALConfig;
+      config(config: USALConfig): void;
+      destroy: () => void;
+      restart: () => void;
+    };
   }
 }
 

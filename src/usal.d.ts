@@ -1,27 +1,34 @@
-export interface USALConfig {
-  maxConcurrent?: number;
+export interface USALDefaults {
+  animation?: string;
+  direction?: string;
   duration?: number;
   delay?: number;
   threshold?: number;
   splitDelay?: number;
+  easing?: string;
+  blur?: boolean;
+}
+
+export interface USALConfig {
+  defaults?: USALDefaults;
+  observersDelay?: number;
   once?: boolean;
 }
 
 export interface USALInstance {
   config(): USALConfig;
-  config(config: USALConfig): USALInstance;
-  destroy(): void;
-  createInstance(config?: USALConfig): USALInstance;
-  readonly version?: string;
-  readonly __usalInitialized?: boolean;
+  config(newConfig: USALConfig): USALInstance;
+  destroy(): USALInstance;
+  restart(): USALInstance;
+  initialized(): boolean;
+  readonly version: string;
 }
-
-declare const USAL: USALInstance;
-
-export default USAL;
 
 declare global {
   interface Window {
     USAL: USALInstance;
   }
 }
+
+declare const USAL: USALInstance;
+export default USAL;

@@ -217,8 +217,8 @@ function getUpdates(fileType, info) {
     }
 
     updates.push({
-      regex: /(<code class="js"># Install[\s\S]*?)<\/code><\/pre>/,
-      replacement: `<code class="js">${installCmds.join('\n')}</code></pre>`,
+      regex: /(<code class="bash"># Install[\s\S]*?)<\/code><\/pre>/,
+      replacement: `<code class="bash">${installCmds.join('\n')}</code></pre>`,
       name: 'Installation section',
     });
 

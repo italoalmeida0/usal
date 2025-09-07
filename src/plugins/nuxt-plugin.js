@@ -1,5 +1,5 @@
-import { createUSAL } from '@usal/vue';
+import { USALPlugin } from '@usal/vue';
+
 export default (nuxtApp) => {
-  const usal = createUSAL();
-  nuxtApp.vueApp.use(usal);
+  nuxtApp.vueApp.use(USALPlugin);
 };

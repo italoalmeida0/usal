@@ -2,101 +2,59 @@ import { directive, Directive } from 'lit/directive.js';
 
 import USALLib from '../usal.js';
 
-// Controller for managing USAL lifecycle in Lit components
+// Controller for managing USAL in Lit components
 export class USALController {
   constructor(host, config = {}) {
     this.host = host;
-    this.instance = null;
     this.initialConfig = config;
     host.addController(this);
   }
 
   hostConnected() {
-    if (!this.instance) {
-      this.instance = USALLib.createInstance(this.initialConfig);
+    // Configure global instance if config provided
+    if (this.initialConfig && Object.keys(this.initialConfig).length > 0) {
+      USALLib.config(this.initialConfig);
     }
   }
 
   hostDisconnected() {
-    // Delegate to the destroy method to avoid code duplication
-    this.destroy();
-  }
-
-  getInstance() {
-    return this.instance;
+    // Nothing to do - global instance persists
   }
 
   config(config) {
-    if (!this.instance) return config === undefined ? null : undefined;
-
     if (config === undefined) {
-      return this.instance.config();
+      return USALLib.config();
     }
-
-    this.instance.config(config);
+    USALLib.config(config);
   }
 
   destroy() {
-    if (this.instance) {
-      this.instance.destroy();
-      this.instance = null;
-    }
+    USALLib.destroy();
+  }
+
+  restart() {
+    USALLib.restart();
   }
 }
 
-// Global instance for standalone usage
-let globalInstance = null;
-
-export const useUSAL = () => {
-  if (!globalInstance) {
-    globalInstance = USALLib.createInstance();
-  }
-
-  return {
-    getInstance: () => globalInstance,
-    config: (config) => {
-      if (config === undefined) {
-        return globalInstance?.config();
-      }
-      globalInstance?.config(config);
-    },
-    destroy: () => {
-      if (globalInstance) {
-        globalInstance.destroy();
-        globalInstance = null;
-      }
-    },
-  };
-};
+export const useUSAL = () => ({
+  config: (config) => {
+    if (config === undefined) {
+      return USALLib.config();
+    }
+    USALLib.config(config);
+  },
+  destroy: () => USALLib.destroy(),
+  restart: () => USALLib.restart(),
+});
 
 export const useUSALController = (host, config = {}) => {
   const controller = new USALController(host, config);
 
   return {
-    getInstance: () => controller.getInstance(),
-    config: (config) => {
-      if (config === undefined) {
-        return controller.config();
-      }
-      controller.config(config);
-    },
+    config: (c) => controller.config(c),
     destroy: () => controller.destroy(),
-  };
-};
-
-// Standalone creation
-export const createUSAL = (config = {}) => {
-  const instance = USALLib.createInstance(config);
-
-  return {
-    config: (config) => {
-      if (config === undefined) {
-        return instance.config();
-      }
-      instance.config(config);
-    },
-    destroy: () => instance.destroy(),
-    getInstance: () => instance,
+    restart: () => controller.restart(),
   };
 };
 

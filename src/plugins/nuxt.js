@@ -5,7 +5,7 @@ export default defineNuxtModule({
     addPluginTemplate({
       filename: 'usal-plugin.js',
       getContents: () =>
-        `import USAL from '@usal/vue/nuxt-plugin';export default defineNuxtPlugin((nuxtApp) => USAL(nuxtApp));`,
+        `import USALPlugin from '@usal/vue/nuxt-plugin';export default defineNuxtPlugin((nuxtApp) => USALPlugin(nuxtApp));`,
     });
   },
 });

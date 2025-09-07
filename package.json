@@ -1,9 +1,9 @@
 {
   "name": "usal-monorepo",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
-  "description": "Ultimate Scroll Animation Library - 9KB of pure JavaScript magic",
+  "description": "Ultimate Scroll Animation Library - Lightweight, powerful, wonderfully simple ✨",
   "homepage": "https://usal.dev/",
   "repository": {
     "type": "git",
@@ -68,8 +68,8 @@
           "SvelteKit"
         ],
         "file": "App.svelte/+layout.svelte",
-        "import": "import { usal, createUSAL } from '@usal/svelte';",
-        "start": "const usalInstance = createUSAL();",
+        "import": "import { usal } from '@usal/svelte';",
+        "start": "// USAL auto-initializes globally",
         "prop": "use:usal={'VALUES'}"
       }
     },
@@ -110,8 +110,8 @@
         "color": "cyan",
         "pseudonym": [],
         "file": "main.ts",
-        "import": "import { usal, useUSAL } from '@usal/lit';",
-        "start": "const usalInstance = useUSAL();",
+        "import": "import { usal } from '@usal/lit';",
+        "start": "// USAL auto-initializes globally",
         "prop": "${usal('VALUES')}"
       }
     },
@@ -161,9 +161,11 @@
     "@nuxt/kit": ">=3.0.0",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
     "@typescript-eslint/parser": "^8.42.0",
+    "browserslist-config-baseline": "^0.5.0",
     "esbuild": "^0.25.9",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-compat": "^6.0.2",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-sonarjs": "^3.0.5",
     "globals": "^16.3.0",
@@ -186,5 +188,6 @@
     "scroll-animations",
     "intersection-observer",
     "scroll-lib"
-  ]
+  ],
+  "browserslist": "extends browserslist-config-baseline"
 }

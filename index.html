@@ -7,10 +7,16 @@
     <link rel="icon" type="image/png" href="assets/favicon.png" />
 
     <!-- SEO -->
-    <meta name="description" content="9KB scroll animation library with 40+ animations" />
-    <meta property="og:title" content="USAL.js" />
-    <meta property="og:description" content="Ultimate Scroll Animation Library" />
-    <meta property="og:url" content="https://italoalmeida0.github.io/usal" />
+    <meta
+      name="description"
+      content="Ultra-lightweight scroll animation library at just ~5KB gzipped. Powerful, wonderfully simple, featuring 40+ elegant animations in pure JavaScript."
+    />
+    <meta property="og:title" content="USAL.js - Ultimate Scroll Animation Library" />
+    <meta
+      property="og:description"
+      content="Lightweight, powerful, wonderfully simple ✨ Just ~5KB gzipped with 40+ beautiful scroll animations. Zero dependencies, maximum performance."
+    />
+    <meta property="og:url" content="https://usal.dev/" />
 
     <link rel="stylesheet" href="style.css" />
     <script src="https://cdn.usal.dev/latest"></script>
@@ -31,85 +37,23 @@
   </head>
   <body>
     <div class="docs-layout">
-      <!-- Sidebar -->
-      <nav class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-          <img
-            src="https://github.com/italoalmeida0/usal/raw/main/assets/logo.png"
-            alt="USAL.js"
-            class="sidebar-logo"
-          />
-          <div class="sidebar-version">
-            <img
-              src="https://badge.usal.dev/?ps=%40usal%2Freact%2C%40usal%2Fsolid%2C%40usal%2Fsvelte%2C%40usal%2Fvue%2C%40usal%2Flit%2C%40usal%2Fangular"
-              alt="usal npm package"
-            />
-          </div>
-        </div>
-
-        <div class="nav-section">
-          <div class="nav-section-title">Getting Started</div>
-          <a href="#home" class="nav-item active" data-section="home">Home</a>
-          <a href="#quickstart" class="nav-item" data-section="quickstart">Quick Start</a>
-          <a href="#installation" class="nav-item" data-section="installation">Installation</a>
-        </div>
-
-        <div class="nav-section">
-          <div class="nav-section-title">Animations</div>
-          <a href="#basic" class="nav-item" data-section="basic">Basic Animations</a>
-          <a href="#zoom" class="nav-item" data-section="zoom">Zoom Animations</a>
-          <a href="#flip" class="nav-item" data-section="flip">Flip Animations</a>
-          <a href="#text" class="nav-item" data-section="text">Text Animations</a>
-          <a href="#counter" class="nav-item" data-section="counter">Counter Animations</a>
-        </div>
-
-        <div class="nav-section">
-          <div class="nav-section-title">Advanced</div>
-          <a href="#modifiers" class="nav-item" data-section="modifiers">Modifiers & Options</a>
-          <a href="#timing" class="nav-item" data-section="timing">Timing & Delays</a>
-          <a href="#split" class="nav-item" data-section="split">Split Animations</a>
-          <a href="#dynamic" class="nav-item" data-section="dynamic">Dynamic Content</a>
-        </div>
-
-        <div class="nav-section">
-          <div class="nav-section-title">Reference</div>
-          <a href="#api" class="nav-item" data-section="api">API Documentation</a>
-          <a href="#comparison" class="nav-item" data-section="comparison">Framework Comparison</a>
-        </div>
-      </nav>
-
-      <!-- Sidebar Overlay for Mobile -->
-      <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
       <!-- Main Content -->
       <main class="main-content">
-        <!-- Top Bar -->
-        <div class="top-bar">
-          <button class="mobile-menu-toggle" id="mobileMenuToggle">☰</button>
-          <div class="top-bar-actions">
-            <a href="https://github.com/italoalmeida0/usal" class="github-link" target="_blank">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                <path
-                  d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
-                />
-              </svg>
-              View on GitHub
-            </a>
-          </div>
-        </div>
-
         <div class="content-wrapper">
           <!-- Home Section -->
           <section id="home" class="docs-section active">
             <div class="hero-section" data-usal="fade-d duration-1000">
               <h1
                 class="hero-title"
-                data-usal="text-fluid split-letter duration-3000"
+                data-usal="text-fluid split-letter duration-2000 split-delay-200"
                 style="font-family: 'Montserrat', serif"
               >
                 USAL.js
               </h1>
-              <p class="hero-subtitle" data-usal="text-shimmer split-letter duration-2000">
+              <p
+                class="hero-subtitle"
+                data-usal="text-shimmer split-letter duration-3000 split-delay-50"
+              >
                 Ultimate Scroll Animation Library
               </p>
               <div class="badges">
@@ -138,9 +82,20 @@
                   alt="@usal/angular npm package"
                 />
               </div>
+
+              <a
+                href="https://developer.mozilla.org/en-US/docs/Glossary/Baseline/Compatibility"
+                class="baseline"
+              >
+                <img
+                  src="https://web-platform-dx.github.io/web-features/assets/img/baseline-widely-word-dark.svg"
+                  alt="Baseline"
+                  style="max-width: 9rem"
+                /><span style="font-weight: 100">|</span><span>Baseline</span>
+              </a>
               <div class="quick-nav">
                 <a href="#quickstart" class="quick-nav-item" data-section="quickstart"
-                  >Get Started →</a
+                  >Get Started&nbsp;&nbsp;&nbsp;→</a
                 >
                 <a href="#basic" class="quick-nav-item" data-section="basic">View Examples</a>
                 <a href="#api" class="quick-nav-item" data-section="api">Documentation</a>
@@ -148,11 +103,11 @@
 
               <div class="specs" data-usal="fade-d split-item split-delay-300">
                 <div class="spec-item">
-                  <div class="spec-value" data-usal="count-[9] duration-2000 linear">9KB</div>
-                  <div class="spec-label">Minified Size</div>
+                  <div class="spec-value" data-usal="count-[5] duration-500 linear">~5KB</div>
+                  <div class="spec-label">Gzipped Size</div>
                 </div>
                 <div class="spec-item">
-                  <div class="spec-value" data-usal="count-[60] duration-2000 linear">60FPS</div>
+                  <div class="spec-value" data-usal="count-[120] duration-2000 linear">120FPS</div>
                   <div class="spec-label">Performance</div>
                 </div>
                 <div class="spec-item">
@@ -162,6 +117,23 @@
                 <div class="spec-item">
                   <div class="spec-value" data-usal="count-[40] duration-2000 linear">40+</div>
                   <div class="spec-label">Animations</div>
+                </div>
+                <div class="spec-item">
+                  <div
+                    class="spec-value"
+                    style="font-size: 1.25rem"
+                    data-usal="count-[40] duration-2000 linear"
+                  >
+                    WAAPI
+                  </div>
+                  <div
+                    class="spec-value"
+                    style="font-size: 1.25rem"
+                    data-usal="count-[40] duration-2000 linear"
+                  >
+                    Observer
+                  </div>
+                  <div class="spec-label">Engine</div>
                 </div>
               </div>
             </div>
@@ -182,7 +154,7 @@
 
                 <div class="card card-compact" data-usal="fade-u delay-100">
                   <h4>NPM</h4>
-                  <pre><code class="js"># Install
+                  <pre><code class="bash"># Install
 npm install usal
 
 # Framework-specific packages:
@@ -215,16 +187,16 @@ import { USALProvider } from &#39;@usal/solid&#39;;
 &lt;USALProvider&gt;{props.children}&lt;/USALProvider&gt;
 
 // Svelte (SvelteKit)
-import { usal, createUSAL } from &#39;@usal/svelte&#39;;
-const usalInstance = createUSAL();
+import { usal } from &#39;@usal/svelte&#39;;
+// USAL auto-initializes globally
 
 // Vue (Nuxt)
 export default defineNuxtConfig({
 modules: [&#39;@usal/vue/nuxt&#39;]
 
 // Lit
-import { usal, useUSAL } from &#39;@usal/lit&#39;;
-const usalInstance = useUSAL();
+import { usal } from &#39;@usal/lit&#39;;
+// USAL auto-initializes globally
 
 // Angular
 import { USALModule } from &#39;@usal/angular&#39;;
@@ -392,7 +364,7 @@ export class AppComponent</code></pre>
             <div class="section">
               <h2
                 class="section-title"
-                data-usal="flip-d split-letter split-delay-100 duration-800 delay-100 blur"
+                data-usal="fade-d delay-1000 split-flip-d split-letter split-delay-100 duration-800 blur"
               >
                 Text Split Animations
               </h2>
@@ -415,7 +387,7 @@ export class AppComponent</code></pre>
               </p>
 
               <h3
-                data-usal="text-fluid split-letter duration-2500"
+                data-usal="text-fluid split-letter duration-2000 split-delay-50"
                 style="
                   font-family: 'Raleway', serif;
                   font-size: 2.5rem;
@@ -427,7 +399,7 @@ export class AppComponent</code></pre>
               </h3>
 
               <p
-                data-usal="text-shimmer split-letter duration-1000"
+                data-usal="text-shimmer split-letter duration-1000 split-delay-50"
                 style="font-size: 1.5rem; text-align: center"
               >
                 SHIMMER LETTER BY LETTER
@@ -435,8 +407,8 @@ export class AppComponent</code></pre>
 
               <pre><code class="html">&lt;p data-usal="fade-u split-word split-delay-200">Each Word&lt;/p>
 &lt;p data-usal="fade-u split-letter split-delay-50">Each Letter&lt;/p>
-&lt;h2 data-usal="text-fluid split-letter duration-2500">Fluid Weight&lt;/h2>
-&lt;p data-usal="text-shimmer split-letter duration-1000">Shimmer&lt;/p></code></pre>
+&lt;h2 data-usal="text-fluid split-letter duration-2000 split-delay-50">Fluid Weight&lt;/h2>
+&lt;p data-usal="text-shimmer split-letter duration-2000 split-delay-100">Shimmer&lt;/p></code></pre>
             </div>
           </section>
 
@@ -497,8 +469,10 @@ export class AppComponent</code></pre>
                 <div class="box" data-usal="fade-d ease-in">
                   Ease-in easing <br /><span style="opacity: 50%">fade-d ease-in</span>
                 </div>
-                <div class="box" data-usal="zoomout ease-out">
-                  Ease-out easing <br /><span style="opacity: 50%">zoomout ease-out</span>
+                <div class="box" data-usal="zoomout duration-1000 easing-[steps(4)]">
+                  Ease-out easing <br /><span style="opacity: 50%"
+                    >zoomout duration-1000 easing-[steps(4)]</span
+                  >
                 </div>
                 <div class="box" data-usal="fade-ul blur duration-2000">
                   2s + Blur <br /><span style="opacity: 50%">fade-ul blur duration-2000</span>
@@ -644,7 +618,6 @@ parent.appendChild(item);</code></pre>
 
               <div class="grid-2">
                 <!-- Properties -->
-
                 <div class="card" data-usal="fade-u threshold-10">
                   <h3>Property Values</h3>
 
@@ -669,6 +642,17 @@ flip-ul, flip-ur, flip-dl, flip-dr</code></pre>
                   </div>
 
                   <div class="animation-item">
+                    <div class="animation-name">Easing Functions</div>
+                    <div class="animation-desc">Control animation acceleration</div>
+                    <pre><code class="javascript">// Preset easing
+linear, ease, ease-in, ease-out
+
+// Custom easing with easing-[value]
+easing-[cubic-bezier(0.4,0,0.2,1)]
+easing-[steps(10, jump-both)]</code></pre>
+                  </div>
+
+                  <div class="animation-item">
                     <div class="animation-name">Split Animations</div>
                     <div class="animation-desc">Animate text parts individually</div>
                     <pre><code class="javascript">// Split by words
@@ -689,9 +673,22 @@ split-delay-50, split-delay-100</code></pre>
 
                   <div class="animation-item">
                     <div class="animation-name">Count Animation</div>
-                    <div class="animation-desc">Animate numbers from 0 to target</div>
-                    <pre><code class="javascript">// count-[1234], count-[98.5], count-[42,350]
-count-[number]</code></pre>
+                    <div class="animation-desc">
+                      Animate numbers from 0 to their displayed value
+                    </div>
+                    <pre><code class="javascript">// Syntax: count-[target]
+// The target number must exist in the element's text content
+
+count-[1234]     // Element must contain "1234"
+count-[98.5]     // Element must contain "98.5"  
+count-[42,350]   // Element must contain "42,350"
+
+// HTML Example:
+&lt;span data-usal="count-[1000]"&gt;1000&lt;/span&gt;
+// Animates: 0 → 1000
+
+&lt;span data-usal="count-[4.9]"&gt;Rating: 4.9/5&lt;/span&gt;
+// Finds "4.9" and animates: 0 → 4.9</code></pre>
                   </div>
 
                   <div class="animation-item">
@@ -703,9 +700,6 @@ duration-500, duration-1000, duration-2000
 // Delay in milliseconds
 delay-200, delay-500, delay-1000
 
-// Easing functions
-linear, ease, ease-in, ease-out
-
 // Other modifiers
 blur, once, threshold-50</code></pre>
                   </div>
@@ -713,13 +707,21 @@ blur, once, threshold-50</code></pre>
                   <div class="animation-item">
                     <div class="animation-name">Text Effects</div>
                     <div class="animation-desc">
-                      Special text animations (for letters, use with split-letter)
+                      Special character animations (requires split-letter)
                     </div>
-                    <pre><code class="javascript">// Shimmer effect
-text-shimmer
+                    <pre><code class="javascript">// Effects available:
+text-shimmer    // Shimmering light sweep
+text-fluid      // Morphing font weight
 
-// Fluid weight animation
-text-fluid</code></pre>
+// Must be used with split-letter:
+&lt;h1 data-usal="split-letter text-shimmer"&gt;Text&lt;/h1&gt;
+
+// For best results:
+// - Use duration-2000 to duration-3000
+// - Use split-delay-50 to split-delay-100
+&lt;h1 data-usal="split-letter text-shimmer duration-2000 split-delay-75"&gt;
+  Beautiful
+&lt;/h1&gt;</code></pre>
                   </div>
                 </div>
 
@@ -757,10 +759,10 @@ text-fluid</code></pre>
                     <div class="animation-desc">
                       Unique identifiers control animation reactivity
                     </div>
-                    <pre><code class="html">&lt!-- Automatic ID (re-animates when element is recreated) -->
+                    <pre><code class="html">&lt;!-- Automatic ID (re-animates when element is recreated) -->
 &lt;div data-usal="fade-u">Auto ID&lt;/div>
 
-&lt!-- Custom ID (prevents re-animation) -->
+&lt;!-- Custom ID (prevents re-animation) -->
 &lt;div data-usal="fade-u" data-usal-id="unique-element">Fixed ID&lt;/div></code></pre>
                   </div>
 
@@ -779,30 +781,64 @@ text-fluid</code></pre>
                   <div class="animation-desc">Configure or reconfigure at any time</div>
                   <pre><code class="javascript">// Initial configuration
 window.USAL.config({
-  maxConcurrent: 100,    // Max concurrent animations
-  duration: 1000,       // Default duration (ms)
-  delay: 0,             // Default delay (ms)
-  threshold: 30,        // Default threshold (%)
-  splitDelay: 30,       // Default split delay (ms)
-  once: false           // Run animation only once
+  defaults: {
+    animation: "fade",      // Default animation type
+    direction: "u",         // Direction (u, d, l, r, ul, ur, dl, dr)
+    duration: 1000,         // Animation duration (ms)
+    delay: 0,               // Animation delay (ms)
+    threshold: 10,          // Viewport threshold (%)
+    splitDelay: 30,         // Delay between split items (ms)
+    easing: "ease-out",     // CSS easing function
+    blur: false             // Enable/disable blur effect
+  },
+  observersDelay: 50,       // Delay for observers (ms)
+  once: false               // Run animation only once
 });
 
 // Can be reconfigured later
 window.USAL.config({
-  duration: 2000,       // Change duration
-  threshold: 50         // Change threshold
+  defaults: {
+    duration: 2000,         // Change duration
+    easing: "ease-in-out"   // Change easing
+  },
+  once: true                // Now runs only once
 });</code></pre>
                 </div>
+
                 <div class="animation-item">
                   <div class="animation-name">window.USAL.destroy()</div>
-                  <div class="animation-desc">Clean up and remove all animations</div>
-                  <pre><code class="javascript">// Clean up when done
-window.USAL.destroy();</code></pre>
+                  <div class="animation-desc">
+                    Completely shut down USAL, remove all observers and restore original state
+                  </div>
+                  <pre><code class="javascript">// Completely shut down USAL
+window.USAL.destroy();
+// After destroy, USAL is turned off completely
+// Elements return to their original state</code></pre>
+                </div>
+
+                <div class="animation-item">
+                  <div class="animation-name">window.USAL.restart()</div>
+                  <div class="animation-desc">
+                    Destroy and reinitialize USAL (equivalent to destroy + init)
+                  </div>
+                  <pre><code class="javascript">// Restart USAL completely
+window.USAL.restart();
+// This is the same as calling:
+// window.USAL.destroy() then reinitializing</code></pre>
+                </div>
+
+                <div class="animation-item">
+                  <div class="animation-name">Properties</div>
+                  <div class="animation-desc">Read-only properties</div>
+                  <pre><code class="javascript">// Check if initialized
+console.log(window.USAL.initialized()); // returns boolean
+
+// Get version
+console.log(window.USAL.version); // string</code></pre>
                 </div>
               </div>
             </div>
           </section>
-
           <!-- Comparison Section -->
           <section id="comparison" class="docs-section">
             <div class="section">
@@ -813,19 +849,86 @@ window.USAL.destroy();</code></pre>
             </div>
           </section>
         </div>
+
+        <!-- Top Bar -->
+        <div class="top-bar">
+          <button class="mobile-menu-toggle" id="mobileMenuToggle">☰</button>
+          <div class="top-bar-actions">
+            <a href="https://github.com/italoalmeida0/usal" class="github-link" target="_blank">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path
+                  d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+                />
+              </svg>
+              View on GitHub
+            </a>
+          </div>
+        </div>
       </main>
+
+      <!-- Sidebar Overlay for Mobile -->
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Sidebar -->
+      <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <img
+            src="https://github.com/italoalmeida0/usal/raw/main/assets/logo.png"
+            alt="USAL.js"
+            class="sidebar-logo"
+          />
+          <div class="sidebar-version">
+            <img
+              src="https://badge.usal.dev/?ps=%40usal%2Freact%2C%40usal%2Fsolid%2C%40usal%2Fsvelte%2C%40usal%2Fvue%2C%40usal%2Flit%2C%40usal%2Fangular"
+              alt="usal npm package"
+            />
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Getting Started</div>
+          <a href="#home" class="nav-item active" data-section="home">Home</a>
+          <a href="#quickstart" class="nav-item" data-section="quickstart">Quick Start</a>
+          <a href="#installation" class="nav-item" data-section="installation">Installation</a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Animations</div>
+          <a href="#basic" class="nav-item" data-section="basic">Basic Animations</a>
+          <a href="#zoom" class="nav-item" data-section="zoom">Zoom Animations</a>
+          <a href="#flip" class="nav-item" data-section="flip">Flip Animations</a>
+          <a href="#text" class="nav-item" data-section="text">Text Animations</a>
+          <a href="#counter" class="nav-item" data-section="counter">Counter Animations</a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Advanced</div>
+          <a href="#modifiers" class="nav-item" data-section="modifiers">Modifiers & Options</a>
+          <a href="#timing" class="nav-item" data-section="timing">Timing & Delays</a>
+          <a href="#split" class="nav-item" data-section="split">Split Animations</a>
+          <a href="#dynamic" class="nav-item" data-section="dynamic">Dynamic Content</a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Reference</div>
+          <a href="#api" class="nav-item" data-section="api">API Documentation</a>
+          <a href="#comparison" class="nav-item" data-section="comparison">Framework Comparison</a>
+        </div>
+      </nav>
     </div>
 
     <script>
       window.USAL.config({ threshold: 10, delay: 100 });
-      // Navigation functionality
+
       const navItems = document.querySelectorAll('.nav-item, .quick-nav-item');
       const sections = document.querySelectorAll('.docs-section');
       const sidebar = document.getElementById('sidebar');
       const sidebarOverlay = document.getElementById('sidebarOverlay');
       const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 
-      // Section navigation
+      let dynamicCount = 0;
+      const animations = ['fade-u', 'zoomin', 'flip-r', 'fade-dr', 'zoomout-l'];
+
       function showSection(sectionId) {
         sections.forEach((section) => section.classList.remove('active'));
         navItems.forEach((item) => item.classList.remove('active'));
@@ -842,47 +945,13 @@ window.USAL.destroy();</code></pre>
           targetNavItem.classList.add('active');
         }
 
-        // Close mobile menu on section change
         if (window.innerWidth <= 768) {
           sidebar.classList.remove('open');
           sidebarOverlay.classList.remove('show');
         }
 
-        // Update URL hash
         history.pushState(null, null, '#' + sectionId);
       }
-
-      // Handle navigation clicks
-      navItems.forEach((item) => {
-        item.addEventListener('click', (e) => {
-          e.preventDefault();
-          const sectionId = item.getAttribute('data-section');
-          if (sectionId) {
-            showSection(sectionId);
-          }
-        });
-      });
-
-      // Mobile menu toggle
-      mobileMenuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
-        sidebarOverlay.classList.toggle('show');
-      });
-
-      sidebarOverlay.addEventListener('click', () => {
-        sidebar.classList.remove('open');
-        sidebarOverlay.classList.remove('show');
-      });
-
-      // Handle initial hash
-      const initialHash = window.location.hash.substring(1);
-      if (initialHash && document.getElementById(initialHash)) {
-        showSection(initialHash);
-      }
-
-      // Dynamic content functions (from original)
-      let dynamicCount = 0;
-      const animations = ['fade-u', 'zoomin', 'flip-r', 'fade-dr', 'zoomout-l'];
 
       function addDynamicItem() {
         const section = document.getElementById('dynamic-section');
@@ -904,22 +973,17 @@ window.USAL.destroy();</code></pre>
       function changeDynamicAnimations() {
         const items = document.querySelectorAll('#dynamic-section .dynamic-item');
         items.forEach((item) => {
-          const newAnimation = animations[Math.floor(Math.random() * animations.length)];
+          const currentData = item.getAttribute('data-usal') || '';
+          let newAnimation;
+
+          do {
+            newAnimation = animations[Math.floor(Math.random() * animations.length)];
+          } while (currentData.includes(newAnimation));
+
           item.setAttribute('data-usal', newAnimation + ' duration-800');
         });
       }
 
-      // Add initial dynamic items
-      setTimeout(() => {
-        const dynamicSection = document.getElementById('dynamic-section');
-        if (dynamicSection) {
-          for (let i = 0; i < 5; i++) {
-            setTimeout(() => addDynamicItem(), i * 200);
-          }
-        }
-      }, 1000);
-
-      // Generate comparison tables dynamically
       function generateComparisonTables() {
         const container = document.getElementById('comparison-container');
         if (!container) return;
@@ -941,7 +1005,7 @@ window.USAL.destroy();</code></pre>
             rows: [
               [
                 'USAL.js',
-                '~9KB / ~5KB',
+                '~10KB / ~5KB',
                 '✅ Native',
                 '✅ Native',
                 '✅ Native',
@@ -989,104 +1053,267 @@ window.USAL.destroy();</code></pre>
           },
         };
 
-        let html = '';
+        container.innerHTML = '';
 
-        Object.values(comparisonData).forEach((table) => {
-          html += `
-            <div class="card" style="margin-bottom: 2rem;">
-              <h3>${table.title}</h3>
-              <div class="comparison-table">
-                <table>
-                  <thead>
-                    <tr>
-                      ${table.headers.map((h) => `<th>${h}</th>`).join('')}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${table.rows
-                      .map(
-                        (row, i) => `
-                      <tr>
-                        ${row
-                          .map((cell, j) => {
-                            let className = '';
-                            if (cell.includes('✅ Native')) className = 'status-native';
-                            else if (cell.includes('✅')) className = 'status-yes';
-                            else if (cell.includes('⚠️')) className = 'status-partial';
-                            else if (cell.includes('❌')) className = 'status-no';
-                            else if (cell === '~9KB / ~5KB' && i === 0)
-                              className = 'highlight-value';
-                            else if (j === 1) className = 'size-value';
-                            else if (cell === 'Very Easy' && i === 0)
-                              className = 'highlight-value2';
+        Object.values(comparisonData).forEach((tableData) => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.style.marginBottom = '2rem';
 
-                            return `<td class="${className}">${j === 0 && i === 0 ? '<strong>' + cell + '</strong>' : cell}</td>`;
-                          })
-                          .join('')}
-                      </tr>
-                    `
-                      )
-                      .join('')}
-                  </tbody>
-                </table>
-              </div>
-              
-              <!-- Mobile Cards -->
-              <div class="mobile-cards">
-                ${table.rows
-                  .map(
-                    (row, i) => `
-                  <div class="framework-card ${i === 0 ? 'featured' : ''}">
-                    <div class="framework-name">${row[0]}</div>
-                    <div class="framework-details">
-                      ${row
-                        .slice(1)
-                        .map(
-                          (cell, j) => `
-                        <div class="detail-row">
-                          <span class="detail-label">${table.headers[j + 1]}</span>
-                          <span class="detail-value ${cell.includes('✅ Native') ? 'status-native' : cell.includes('✅') ? 'status-yes' : cell.includes('⚠️') ? 'status-partial' : cell.includes('❌') ? 'status-no' : ''}">${cell}</span>
-                        </div>
-                      `
-                        )
-                        .join('')}
-                    </div>
-                  </div>
-                `
-                  )
-                  .join('')}
-              </div>
-            </div>
-          `;
+          const title = document.createElement('h3');
+          title.textContent = tableData.title;
+          card.appendChild(title);
+
+          const tableWrapper = document.createElement('div');
+          tableWrapper.className = 'comparison-table';
+
+          const table = document.createElement('table');
+          const thead = document.createElement('thead');
+          const tbody = document.createElement('tbody');
+
+          const headerRow = document.createElement('tr');
+          tableData.headers.forEach((header) => {
+            const th = document.createElement('th');
+            th.textContent = header;
+            headerRow.appendChild(th);
+          });
+          thead.appendChild(headerRow);
+
+          tableData.rows.forEach((row, rowIndex) => {
+            const tr = document.createElement('tr');
+            row.forEach((cell, cellIndex) => {
+              const td = document.createElement('td');
+
+              if (cell.includes('✅ Native')) td.className = 'status-native';
+              else if (cell.includes('✅')) td.className = 'status-yes';
+              else if (cell.includes('⚠️')) td.className = 'status-partial';
+              else if (cell.includes('❌')) td.className = 'status-no';
+              else if (cell === '~10KB / ~5KB' && rowIndex === 0) td.className = 'highlight-value';
+              else if (cellIndex === 1) td.className = 'size-value';
+              else if (cell === 'Very Easy' && rowIndex === 0) td.className = 'highlight-value2';
+
+              if (cellIndex === 0 && rowIndex === 0) {
+                const strong = document.createElement('strong');
+                strong.textContent = cell;
+                td.appendChild(strong);
+              } else {
+                td.textContent = cell;
+              }
+
+              tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+          });
+
+          table.appendChild(thead);
+          table.appendChild(tbody);
+          tableWrapper.appendChild(table);
+          card.appendChild(tableWrapper);
+
+          const mobileCards = document.createElement('div');
+          mobileCards.className = 'mobile-cards';
+
+          tableData.rows.forEach((row, rowIndex) => {
+            const frameworkCard = document.createElement('div');
+            frameworkCard.className = 'framework-card';
+            if (rowIndex === 0) frameworkCard.classList.add('featured');
+
+            const frameworkName = document.createElement('div');
+            frameworkName.className = 'framework-name';
+            frameworkName.textContent = row[0];
+            frameworkCard.appendChild(frameworkName);
+
+            const frameworkDetails = document.createElement('div');
+            frameworkDetails.className = 'framework-details';
+
+            row.slice(1).forEach((cell, index) => {
+              const detailRow = document.createElement('div');
+              detailRow.className = 'detail-row';
+
+              const label = document.createElement('span');
+              label.className = 'detail-label';
+              label.textContent = tableData.headers[index + 1];
+
+              const value = document.createElement('span');
+              value.className = 'detail-value';
+
+              if (cell.includes('✅ Native')) value.classList.add('status-native');
+              else if (cell.includes('✅')) value.classList.add('status-yes');
+              else if (cell.includes('⚠️')) value.classList.add('status-partial');
+              else if (cell.includes('❌')) value.classList.add('status-no');
+
+              value.textContent = cell;
+
+              detailRow.appendChild(label);
+              detailRow.appendChild(value);
+              frameworkDetails.appendChild(detailRow);
+            });
+
+            frameworkCard.appendChild(frameworkDetails);
+            mobileCards.appendChild(frameworkCard);
+          });
+
+          card.appendChild(mobileCards);
+          container.appendChild(card);
         });
 
-        html += `
-          <div class="legend">
-            <div class="legend-item">
-              <span class="status-native">✅ Native/Core</span>
-              <span>Built-in support</span>
-            </div>
-            <div class="legend-item">
-              <span class="status-partial">⚠️ Plugin/Wrapper</span>
-              <span>Requires additional setup</span>
-            </div>
-            <div class="legend-item">
-              <span class="status-no">❌ Not supported</span>
-              <span>Feature not available</span>
-            </div>
-          </div>
-        `;
+        const legend = document.createElement('div');
+        legend.className = 'legend';
 
-        container.innerHTML = html;
+        const legendItems = [
+          { icon: '✅ Native/Core', text: 'Built-in support', class: 'status-native' },
+          { icon: '⚠️ Plugin/Wrapper', text: 'Requires additional setup', class: 'status-partial' },
+          { icon: '❌ Not supported', text: 'Feature not available', class: 'status-no' },
+        ];
+
+        legendItems.forEach((item) => {
+          const legendItem = document.createElement('div');
+          legendItem.className = 'legend-item';
+
+          const icon = document.createElement('span');
+          icon.className = item.class;
+          icon.textContent = item.icon;
+
+          const text = document.createElement('span');
+          text.textContent = item.text;
+
+          legendItem.appendChild(icon);
+          legendItem.appendChild(text);
+          legend.appendChild(legendItem);
+        });
+
+        container.appendChild(legend);
       }
 
-      // Initialize comparison tables
-      generateComparisonTables();
+      function getSectionInfo() {
+        const sidebar = document.getElementById('sidebar');
+        if (!sidebar) return { order: [], names: {} };
 
-      // Initialize highlight.js
+        const navItems = sidebar.querySelectorAll('.nav-item');
+        const sectionOrder = [];
+        const sectionNames = {};
+
+        navItems.forEach((item) => {
+          const sectionId = item.getAttribute('data-section');
+          if (sectionId) {
+            sectionOrder.push(sectionId);
+            sectionNames[sectionId] = item.textContent.trim();
+          }
+        });
+
+        return { order: sectionOrder, names: sectionNames };
+      }
+
+      function createSectionNavigationButtons() {
+        const { order: sectionOrder, names: sectionNames } = getSectionInfo();
+
+        sectionOrder.forEach((sectionId, index) => {
+          if (index >= sectionOrder.length - 1) return;
+
+          const currentSection = document.getElementById(sectionId);
+          if (!currentSection) return;
+
+          const existingWrapper = currentSection.querySelector('.next-section-wrapper');
+          if (existingWrapper) return;
+
+          const nextSectionId = sectionOrder[index + 1];
+          const nextSectionName = sectionNames[nextSectionId] || nextSectionId;
+
+          const wrapper = document.createElement('div');
+          wrapper.className = 'next-section-wrapper';
+          wrapper.style.display = 'flex';
+          wrapper.style.justifyContent = 'center';
+          wrapper.style.marginTop = '3rem';
+          wrapper.style.paddingBottom = '2rem';
+
+          const button = document.createElement('a');
+          button.href = `#${nextSectionId}`;
+          button.className = 'next-section-btn';
+          button.setAttribute('data-section', nextSectionId);
+          button.setAttribute('data-usal', 'fade-u delay-400');
+          button.setAttribute('class', 'quick-nav-item');
+          button.style.paddingInline = '2rem';
+          button.style.paddingBlock = '0.5rem';
+          button.style.display = 'flex';
+
+          const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          svg.setAttribute('viewBox', '0 0 24 24');
+          svg.setAttribute('fill', 'none');
+          svg.setAttribute('stroke', 'currentColor');
+          svg.setAttribute('stroke-width', '1');
+          svg.setAttribute('stroke-linecap', 'round');
+          svg.setAttribute('stroke-linejoin', 'round');
+          svg.style.width = '2rem';
+          svg.style.height = '2rem';
+
+          const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+          polyline.setAttribute('points', '6 9 12 15 18 9');
+          svg.appendChild(polyline);
+
+          button.appendChild(svg);
+
+          button.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection(nextSectionId);
+          });
+
+          button.addEventListener('mouseenter', () => {
+            button.style.transform = 'translateY(-2px)';
+          });
+
+          button.addEventListener('mouseleave', () => {
+            button.style.transform = 'translateY(0)';
+          });
+
+          wrapper.appendChild(button);
+          currentSection.appendChild(wrapper);
+        });
+      }
+
+      navItems.forEach((item) => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          const sectionId = item.getAttribute('data-section');
+          if (sectionId) {
+            showSection(sectionId);
+          }
+        });
+      });
+
+      mobileMenuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('show');
+      });
+
+      sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('show');
+      });
+
+      const initialHash = window.location.hash.substring(1);
+      if (initialHash && document.getElementById(initialHash)) {
+        showSection(initialHash);
+      }
+
+      setTimeout(() => {
+        const dynamicSection = document.getElementById('dynamic-section');
+        if (dynamicSection) {
+          for (let i = 0; i < 5; i++) {
+            setTimeout(() => addDynamicItem(), i * 200);
+          }
+        }
+      }, 1000);
+
       document.addEventListener('DOMContentLoaded', function () {
+        generateComparisonTables();
+        createSectionNavigationButtons();
+
         if (typeof hljs !== 'undefined') {
           hljs.highlightAll();
+        }
+
+        if (typeof window.USAL !== 'undefined' && window.USAL.init) {
+          window.USAL.init();
         }
       });
     </script>

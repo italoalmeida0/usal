@@ -2,7 +2,7 @@
 
 ![Logo USAL.js](https://github.com/italoalmeida0/usal/raw/main/assets/logo.png)
 
-**Ultimate Scroll Animation Library - 9KB of pure JavaScript magic ✨**
+**Ultimate Scroll Animation Library - Lightweight, powerful, wonderfully simple ✨**
 
 **Works with React, Solid, Svelte, Vue, Lit, Angular, Vanilla JS and more**
 
@@ -20,7 +20,7 @@
 - 📝 **Text animations** (split by word/letter)
 - 🔢 **Number counters**
 - 🎨 **Text effects** (shimmer, fluid)
-- 📦 **Only 9KB minified** (5KB Gzipped)
+- 📦 **Only 5KB Gzipped**
 - 🚀 **Zero dependencies**
 - ♾ **60fps performance**
 - 🪤 **Web components supported**
@@ -68,8 +68,8 @@ import { USALProvider } from '@usal/solid';
 ### Svelte (SvelteKit)
 
 ```js
-import { usal, createUSAL } from '@usal/svelte';
-const usalInstance = createUSAL();
+import { usal } from '@usal/svelte';
+// USAL auto-initializes globally
 ```
 
 ### Vue (Nuxt)
@@ -82,8 +82,8 @@ modules: ['@usal/vue/nuxt']
 ### Lit
 
 ```js
-import { usal, useUSAL } from '@usal/lit';
-const usalInstance = useUSAL();
+import { usal } from '@usal/lit';
+// USAL auto-initializes globally
 ```
 
 ### Angular
@@ -170,17 +170,42 @@ flip-ul     flip-ur     flip-dl     flip-dr
 
 ![Split Animations](https://github.com/italoalmeida0/usal/raw/main/assets/split.gif)
 
+#### Split Types
+
+Split content into animated parts
+
+```
+split-word      // Split text by words
+split-letter    // Split text by letters
+split-item      // Split child elements
+```
+
+#### Split with Animation
+
+Combine split with any animation type
+
+```
+split-fade-[direction]    // split-fade-u, split-fade-r
+split-zoomin-[direction]  // split-zoomin, split-zoomin-l
+split-flip-[direction]    // split-flip-d, split-flip-r
+```
+
+#### Split Delay
+
+Control delay between split parts (milliseconds)
+
+```
+split-delay-[value]
+// Examples: split-delay-30, split-delay-50, split-delay-100
+```
+
 ```html
-<!-- Split text by words -->
 <h1 data-usal="split-word fade-u">Hello World</h1>
 
-<!-- Split text by letters -->
 <h1 data-usal="split-letter zoomin">USAL.js</h1>
 
-<!-- Split with custom delay -->
 <p data-usal="split-word fade-r split-delay-100">Animated paragraph</p>
 
-<!-- Split child items -->
 <ul data-usal="split-item flip-l">
   <li>Item 1</li>
   <li>Item 2</li>
@@ -190,59 +215,97 @@ flip-ul     flip-ur     flip-dl     flip-dr
 
 ### 🔢 Count Animation
 
+Animate numbers from 0 to target value (preserves formatting)
+
 ![Count Animations](https://github.com/italoalmeida0/usal/raw/main/assets/count.gif)
 
+```
+count-[number]
+// Examples:
+count-[100]       // Count to 100
+count-[98.5]     // Count to 98.5
+count-[1,000]     // Count to 1,000
+count-[42,350]    // Count to 42,350
+count-[1 000 000]  // Count to 1 000 000
+```
+
 ```html
-<!-- Count to integer -->
-<span data-usal="count-1000">0</span>
+<!-- Count isolated -->
+<span data-usal="count-[1000]">1000</span>
 
-<!-- Count to decimal -->
-<span data-usal="count-98.5">0</span>
+<!-- Count in context -->
+<span data-usal="count-[4.9]">Stars: 4.9/5</span>
 
-<!-- Count to formatted number -->
-<span data-usal="count-42,350">0</span>
+<!-- Counting in a complex context -->
+<span data-usal="count-[21 000 000.00]">
+  In 2025, we will earn US$21 000 000.00 in the first quarter alone.
+</span>
 ```
 
 ### ✨ Text Effects
 
+Special effects for individual characters
+
 ![Text Effects](https://github.com/italoalmeida0/usal/raw/main/assets/text.gif)
 
+```
+text-shimmer    // Shimmering light sweep effect
+text-fluid      // Morphing font weight animation
+```
+
+> **💡 Tip:** Must be combined with `split-letter`. For best results, use longer durations (1000-3000ms) and split delays between 50-100ms to create smooth, captivating animations.
+
 ```html
-<!-- Shimmer effect (use with split-letter) -->
-<h1 data-usal="split-letter text-shimmer">Shimmer Text</h1>
+<!-- Shimmer effect -->
+<h1 data-usal="text-shimmer split-letter duration-2000 split-delay-100">Shimmer Text</h1>
 
 <!-- Fluid weight animation -->
-<h1 data-usal="split-letter text-fluid">Fluid Text</h1>
+<h1 data-usal="text-fluid split-letter duration-2000 split-delay-50">Fluid Text</h1>
 ```
 
 ### ⚙️ Modifiers
 
 #### Duration
 
+Control animation duration in milliseconds
+
 ```
-duration-300    duration-500    duration-800
-duration-1000   duration-1500   duration-2000
+duration-value
+// Examples: duration-500, duration-1000, duration-2000
 ```
 
 #### Delay
 
+Add delay before animation starts (milliseconds)
+
 ```
-delay-100       delay-200       delay-300
-delay-500       delay-800       delay-1000
+delay-value
+// Examples: delay-200, delay-500, delay-1000
 ```
 
 #### Easing
 
 ```
-linear          ease            ease-in
-ease-out        ease-in-out
+linear          ease            ease-in         ease-out
+easing-[value]  // Custom easing: easing-[cubic-bezier(0.4,0,0.2,1)]
 ```
+
+#### Threshold
+
+Control when animation triggers (percentage of element visible)
+
+```
+threshold-value
+// Examples: threshold-10, threshold-30, threshold-50
+```
+
+> **💡 Tip:** For large elements (height > 100vh), use lower thresholds like `threshold-5` or `threshold-10` to ensure animations trigger properly.
 
 #### Other Modifiers
 
 ```
-blur            once            threshold-10
-threshold-30    threshold-50    threshold-70
+blur            // Add blur effect during animation
+once            // Run animation only once
 ```
 
 ### 🔧 JavaScript API
@@ -252,26 +315,81 @@ threshold-30    threshold-50    threshold-70
 ```javascript
 // Initialize with custom settings
 window.USAL.config({
-  maxConcurrent: 100, // Maximum concurrent animations
-  duration: 1000, // Default animation duration (ms)
-  delay: 0, // Default animation delay (ms)
-  threshold: 30, // Viewport threshold for trigger (%)
-  splitDelay: 30, // Delay between split items (ms)
+  defaults: {
+    animation: 'fade', // Default animation type
+    direction: 'u', // Default direction (u, d, l, r, ul, ur, dl, dr)
+    duration: 1000, // Animation duration (ms)
+    delay: 0, // Animation delay (ms)
+    threshold: 10, // Viewport threshold for trigger (%)
+    splitDelay: 30, // Delay between split items (ms)
+    easing: 'ease-out', // CSS easing function
+    blur: false, // Enable/disable blur effect
+  },
+  observersDelay: 50, // Delay for observers (ms)
   once: false, // Run animation only once
 });
 
+// Get current configuration
+const currentConfig = window.USAL.config();
+
 // Reconfigure at any time
 window.USAL.config({
-  duration: 2000,
+  defaults: {
+    duration: 2000,
+    easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+  },
   once: true,
+});
+
+// Partial updates work too
+window.USAL.config({
+  defaults: {
+    animation: 'zoomin',
+    direction: 'l',
+  },
 });
 ```
 
-#### Cleanup
+#### Control Methods
 
 ```javascript
-// Remove all animations and observers
+// Check if initialized
+if (window.USAL.initialized()) {
+  console.log('USAL is running');
+}
+
+// Restart USAL (destroy + reinitialize)
+window.USAL.restart();
+
+// Completely shut down USAL
 window.USAL.destroy();
+
+// Get version
+console.log(window.USAL.version);
+```
+
+#### Easing Functions
+
+```javascript
+// Any valid CSS easing function
+window.USAL.config({
+  defaults: {
+    easing: 'ease-in-out',
+    // or
+    easing: 'linear',
+    // or custom cubic-bezier
+    easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+  },
+});
+```
+
+#### Chaining
+
+```javascript
+// Methods return the instance for chaining
+window.USAL.config({ defaults: { duration: 500 } })
+  .restart()
+  .config({ once: true });
 ```
 
 ### 🎯 Custom IDs
@@ -283,8 +401,6 @@ window.USAL.destroy();
 <!-- Fixed ID (prevents re-animation) -->
 <div data-usal="fade-u" data-usal-id="hero-section">Fixed ID</div>
 ```
-
-> **💡 Tip:** For large elements (height > 100vh), use lower thresholds like `threshold-5` or `threshold-10` to ensure animations trigger properly.
 
 ## 📊 Packages Overview
 
@@ -304,7 +420,7 @@ window.USAL.destroy();
 
 | Framework      | Bundle Size (min/gzip) | React     | Vue       | Angular   | Svelte    | Solid     | Lit       | Vanilla |
 | -------------- | ---------------------- | --------- | --------- | --------- | --------- | --------- | --------- | ------- |
-| **🚀 USAL.js** | **~9KB / ~5KB**        | ✅ Native | ✅ Native | ✅ Native | ✅ Native | ✅ Native | ✅ Native | ✅      |
+| **🚀 USAL.js** | **~10KB / ~5KB**       | ✅ Native | ✅ Native | ✅ Native | ✅ Native | ✅ Native | ✅ Native | ✅      |
 | Motion One     | Variable (~small)      | ✅        | ✅        | ❌        | ❌        | ❌        | ❌        | ✅      |
 | GSAP           | ~60KB+                 | ✅        | ✅        | ✅        | ✅        | ✅        | ✅        | ✅      |
 | Anime.js v4    | ~27KB / ~27KB          | ✅        | ✅        | ✅        | ✅        | ✅        | ✅        | ✅      |

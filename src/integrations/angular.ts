@@ -8,37 +8,25 @@ import {
   NgModule,
 } from '@angular/core';
 
-import USALLib, { type USALInstance, type USALConfig } from '~/usal';
+import USALLib, { type USALConfig } from '~/usal';
 
 @Injectable({
   providedIn: 'root',
 })
 export class USALService {
-  private instance: USALInstance | null = null;
-
-  constructor() {
-    this.instance = USALLib.createInstance();
-  }
-
-  getInstance() {
-    return this.instance;
-  }
-
-  config(configOptions?: USALConfig): USALConfig | null | void {
-    if (!this.instance) return null;
-
+  config(configOptions?: USALConfig): USALConfig | void {
     if (configOptions === undefined) {
-      return this.instance.config();
+      return USALLib.config();
     }
-
-    this.instance.config(configOptions);
+    USALLib.config(configOptions);
   }
 
   destroy() {
-    if (this.instance) {
-      this.instance.destroy();
-      this.instance = null;
-    }
+    USALLib.destroy();
+  }
+
+  restart() {
+    USALLib.restart();
   }
 }
 
@@ -50,10 +38,7 @@ export class USALDirective implements OnInit, OnChanges {
   @Input('usal') usalValue: string = 'fade';
   @Input('data-usal') dataUsalValue: string = 'fade';
 
-  constructor(
-    private el: ElementRef,
-    private usalService: USALService
-  ) {}
+  constructor(private el: ElementRef) {}
 
   ngOnInit() {
     this.updateAttribute();
@@ -76,34 +61,15 @@ export class USALDirective implements OnInit, OnChanges {
 })
 export class USALModule {}
 
-export const createUSAL = (config: USALConfig = {}) => {
-  const instance = USALLib.createInstance(config);
-
-  return {
-    config(configOptions?: USALConfig): USALConfig | void {
-      if (configOptions === undefined) {
-        return instance.config();
-      }
-      instance.config(configOptions);
-    },
-    destroy: () => instance.destroy(),
-    getInstance: () => instance,
-  };
-};
-
-export const useUSAL = () => {
-  const instance = USALLib.createInstance();
-
-  return {
-    getInstance: () => instance,
-    config(configOptions?: USALConfig): USALConfig | void {
-      if (configOptions === undefined) {
-        return instance.config();
-      }
-      instance.config(configOptions);
-    },
-    destroy: () => instance.destroy(),
-  };
-};
+export const useUSAL = () => ({
+  config: (configOptions?: USALConfig): USALConfig | void => {
+    if (configOptions === undefined) {
+      return USALLib.config();
+    }
+    USALLib.config(configOptions);
+  },
+  destroy: () => USALLib.destroy(),
+  restart: () => USALLib.restart(),
+});
 
 export default USALLib;
