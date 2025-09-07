@@ -931,10 +931,14 @@ console.log(window.USAL.version); // string</code></pre>
 
       function showSection(sectionId) {
         sections.forEach((section) => section.classList.remove('active'));
-        navItems.forEach((item) => item.classList.remove('active'));
+        
+        document.querySelectorAll('.sidebar .nav-item').forEach((item) => {
+          item.classList.remove('active');
+        });
 
         const targetSection = document.getElementById(sectionId);
-        const targetNavItem = document.querySelector(`[data-section="${sectionId}"]`);
+
+        const targetNavItem = document.querySelector(`.sidebar .nav-item[data-section="${sectionId}"]`);
 
         if (targetSection) {
           targetSection.classList.add('active');
