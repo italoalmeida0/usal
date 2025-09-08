@@ -22,11 +22,11 @@ export class USALService {
   }
 
   destroy() {
-    USALLib.destroy();
+    return USALLib.destroy();
   }
 
   restart() {
-    USALLib.restart();
+    return USALLib.restart();
   }
 }
 

@@ -8,8 +8,8 @@ export const USALPlugin: {
 export const useUSAL: () => {
   config(): USALConfig;
   config(config: USALConfig): void;
-  destroy: () => void;
-  restart: () => void;
+  destroy: () => Promise<void>;
+  restart: () => Promise<USALInstance>;
 };
 
 declare module '@vue/runtime-core' {
@@ -17,8 +17,8 @@ declare module '@vue/runtime-core' {
     $usal: {
       config(): USALConfig;
       config(config: USALConfig): void;
-      destroy: () => void;
-      restart: () => void;
+      destroy: () => Promise<void>;
+      restart: () => Promise<USALInstance>;
     };
   }
 }

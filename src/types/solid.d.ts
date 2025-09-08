@@ -1,5 +1,5 @@
 import { Component, JSX } from 'solid-js';
-import USAL, { USALConfig } from '../usal';
+import USAL, { USALConfig, USALInstance } from '../usal';
 
 export const USALProvider: Component<{
   children: JSX.Element;
@@ -9,8 +9,8 @@ export const USALProvider: Component<{
 export const useUSAL: () => {
   config(): USALConfig;
   config(config: USALConfig): void;
-  destroy: () => void;
-  restart: () => void;
+  destroy: () => Promise<void>;
+  restart: () => Promise<USALInstance>;
 };
 
 export default USAL;

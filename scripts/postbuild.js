@@ -1,6 +1,7 @@
+import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import { execSync } from 'child_process';
+
 import { colorize } from './colorize.js';
 
 // Parse arguments
@@ -22,7 +23,7 @@ let errorCount = 0;
 // File paths
 const files = {
   readme: 'README.md',
-  index: 'index.html',
+  index: 'docs/index.html',
   vanilla: path.join('packages', 'vanilla', 'README.md'),
 };
 

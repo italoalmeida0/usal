@@ -645,6 +645,7 @@ p {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  z-index: 120;
 }
 .sidebar-logo {
   width: 120px;
@@ -821,7 +822,86 @@ p {
   font-size: 0.875rem;
   font-weight: 500;
 }
+
 .quick-nav-item:hover {
   background: rgb(255 255 255 / 10%);
   border-color: rgb(255 255 255 / 30%);
+}
+
+.quick-nav-item2 {
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.5rem;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.quick-nav-item2:hover {
+  background: rgb(255 255 255 / 10%);
+  border-color: rgb(255 255 255 / 30%);
+}
+
+.changelog-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.changelog-entry {
+  background: #0f0f0f;
+  border: 1px solid #222;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.changelog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #222;
+}
+
+.changelog-version {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.changelog-date {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.changelog-content h4 {
+  color: #ddd;
+  font-size: 1rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.changelog-content h4:first-child {
+  margin-top: 0;
+}
+
+.changelog-content ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #999;
+}
+
+.changelog-content li {
+  margin: 0.25rem 0;
+}
+
+.changelog-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #222;
 }

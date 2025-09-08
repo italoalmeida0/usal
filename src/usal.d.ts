@@ -18,8 +18,8 @@ export interface USALConfig {
 export interface USALInstance {
   config(): USALConfig;
   config(newConfig: USALConfig): USALInstance;
-  destroy(): USALInstance;
-  restart(): USALInstance;
+  destroy(): Promise<void>;
+  restart(): Promise<USALInstance>;
   initialized(): boolean;
   readonly version: string;
 }

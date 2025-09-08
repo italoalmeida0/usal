@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>USAL.js - Ultimate Scroll Animation Library</title>
-    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <link rel="icon" type="image/png" href="https://usal.dev/favicon.png" />
 
     <!-- SEO -->
     <meta
@@ -97,8 +97,10 @@
                 <a href="#quickstart" class="quick-nav-item" data-section="quickstart"
                   >Get Started&nbsp;&nbsp;&nbsp;→</a
                 >
-                <a href="#basic" class="quick-nav-item" data-section="basic">View Examples</a>
-                <a href="#api" class="quick-nav-item" data-section="api">Documentation</a>
+                <a href="#api" class="quick-nav-item" data-section="api">API Documentation</a>
+                <a href="https://usal.dev/playground.html" class="quick-nav-item2" target="_blank"
+                  >Playground</a
+                >
               </div>
 
               <div class="specs" data-usal="fade-d split-item split-delay-300">
@@ -839,13 +841,115 @@ console.log(window.USAL.version); // string</code></pre>
               </div>
             </div>
           </section>
-          <!-- Comparison Section -->
-          <section id="comparison" class="docs-section">
+          <!-- Changelog Section -->
+          <section id="changelog" class="docs-section">
             <div class="section">
-              <h2 class="section-title" data-usal="fade-dl duration-800 delay-400 blur">
-                Framework Comparison
+              <h2 class="section-title" data-usal="fade-d duration-800 delay-400 blur">
+                Changelog
               </h2>
-              <div id="comparison-container" data-usal="fade-u threshold-2"></div>
+
+              <div class="changelog-container">
+                <!-- v1.1.1 -->
+                <div class="changelog-entry" data-usal="fade-u">
+                  <div class="changelog-header">
+                    <h3 class="changelog-version">v1.1.1</h3>
+                    <span class="changelog-date">September 2025</span>
+                  </div>
+                  <div class="changelog-content">
+                    <h4>Robustness & Stability</h4>
+                    <ul>
+                      <li>
+                        Complete API overhaul with promise-based chain system (Rust-like enum
+                        states)
+                      </li>
+                      <li>Significantly improved edge case handling for extreme usage scenarios</li>
+                      <li>Better orchestrated state machine for animation lifecycle</li>
+                      <li>Enhanced public API usability and consistency</li>
+                    </ul>
+
+                    <h4>Bug Fixes</h4>
+                    <ul>
+                      <li>
+                        Fixed text animations losing characteristics in flex containers without
+                        wrapper
+                      </li>
+                      <li>Resolved smooth scroll issue on mobile when switching tabs</li>
+                    </ul>
+
+                    <h4>Developer Experience</h4>
+                    <ul>
+                      <li>
+                        Added comprehensive debug panel in source code for development testing
+                      </li>
+                      <li>Improved error handling and recovery mechanisms</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- v1.1.0 -->
+                <div class="changelog-entry" data-usal="fade-u delay-100">
+                  <div class="changelog-header">
+                    <h3 class="changelog-version">v1.1.0</h3>
+                    <span class="changelog-date">September 2025</span>
+                  </div>
+                  <div class="changelog-content">
+                    <h4>Complete WAAPI Migration</h4>
+                    <ul>
+                      <li>Full migration to Web Animations API (WAAPI) for all animations</li>
+                      <li>Only count animations remain using RAF for precise number formatting</li>
+                      <li>Zero direct DOM manipulation - no inline styles or attributes</li>
+                    </ul>
+
+                    <h4>Framework Compatibility</h4>
+                    <ul>
+                      <li>Eliminated SSR hydration mismatches</li>
+                      <li>No longer manipulates HTML node attributes directly</li>
+                      <li>
+                        Perfect compatibility with React, Vue, Svelte, Solid, and other SSR
+                        frameworks
+                      </li>
+                    </ul>
+
+                    <h4>Performance</h4>
+                    <ul>
+                      <li>Significantly improved performance through WAAPI</li>
+                      <li>Better browser optimization and hardware acceleration</li>
+                      <li>Reduced JavaScript overhead</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- v1.0.0 -->
+                <div class="changelog-entry" data-usal="fade-u delay-200">
+                  <div class="changelog-header">
+                    <h3 class="changelog-version">v1.0.0</h3>
+                    <span class="changelog-date">September 2025</span>
+                  </div>
+                  <div class="changelog-content">
+                    <h4>Initial Release</h4>
+                    <ul>
+                      <li>40+ scroll-triggered animations</li>
+                      <li>Intersection Observer based triggers</li>
+                      <li>Zero dependencies, ~5KB gzipped</li>
+                      <li>Full Shadow DOM support</li>
+                      <li>Framework packages for all major libraries</li>
+                      <li>Automatic initialization</li>
+                      <li>Split text animations (word/letter)</li>
+                      <li>Count animations with smart formatting</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div class="changelog-footer" data-usal="fade-u delay-300">
+                <a
+                  href="https://github.com/italoalmeida0/usal/releases"
+                  class="github-link"
+                  target="_blank"
+                >
+                  View all releases on GitHub →
+                </a>
+              </div>
             </div>
           </section>
         </div>
@@ -913,6 +1017,7 @@ console.log(window.USAL.version); // string</code></pre>
           <div class="nav-section-title">Reference</div>
           <a href="#api" class="nav-item" data-section="api">API Documentation</a>
           <a href="#comparison" class="nav-item" data-section="comparison">Framework Comparison</a>
+          <a href="#changelog" class="nav-item" data-section="changelog">Changelog</a>
         </div>
       </nav>
     </div>
@@ -945,7 +1050,7 @@ console.log(window.USAL.version); // string</code></pre>
 
           if (targetSection) {
             targetSection.classList.add('active');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0 });
           }
 
           if (targetNavItem) {

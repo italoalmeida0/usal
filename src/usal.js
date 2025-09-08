@@ -8,64 +8,24 @@ const USAL = (() => {
 
   // SSR safety
   if (typeof window === 'undefined') {
-    const noop = () => {};
+    const asyncNoop = async function () {
+      return this;
+    };
     return {
-      config: () => ({}),
-      destroy: noop,
-      restart: noop,
+      config: function () {
+        return arguments.length === 0 ? {} : this;
+      },
+      destroy: asyncNoop,
+      restart: asyncNoop,
       initialized: () => false,
       version: '{%%VERSION%%}',
     };
   }
 
-  const SHADOW_CAPABLE_SELECTOR =
-    '*:not(:is(area,base,br,col,embed,hr,img,input,link,meta,param,source,track,wbr,textarea,select,option,optgroup,script,style,title,iframe,object,video,audio,canvas,map,svg,math))';
+  // ============================================================================
+  // Configuration & State
+  // ============================================================================
 
-  // Data attributes - stored as constants to avoid repetition
-  const DATA_USAL_ATTRIBUTE = 'data-usal';
-  const DATA_USAL_ID = `${DATA_USAL_ATTRIBUTE}-id`;
-  const DATA_USAL_SELECTOR = `[${DATA_USAL_ATTRIBUTE}]`;
-
-  // Config array indices - descriptive names that will minify
-  const CONFIG_ANIMATION = 0;
-  const CONFIG_DIRECTION = 1;
-  const CONFIG_DURATION = 2;
-  const CONFIG_DELAY = 3;
-  const CONFIG_THRESHOLD = 4;
-  const CONFIG_EASING = 5;
-  const CONFIG_BLUR = 6;
-  const CONFIG_ONCE = 7;
-  const CONFIG_SPLIT = 8;
-  const CONFIG_COUNT = 9;
-  const CONFIG_TEXT = 10;
-
-  // Direction bit flags
-  const DIRECTION_UP = 1;
-  const DIRECTION_DOWN = 2;
-  const DIRECTION_LEFT = 4;
-  const DIRECTION_RIGHT = 8;
-
-  // Animation states
-  const STATE_IDLE = 0;
-  const STATE_ANIMATING = 1;
-  const STATE_COMPLETED = 2;
-
-  // CSS property names as constants (these strings won't minify, so reuse them)
-  const STYLE_OPACITY = 'opacity';
-  const STYLE_TRANSFORM = 'transform';
-  const STYLE_FILTER = 'filter';
-  const STYLE_DISPLAY = 'display';
-  const STYLE_FONT_WEIGHT = 'fontWeight';
-  const CSS_NONE = 'none';
-  const CSS_INLINE_BLOCK = 'inline-block';
-
-  // Observer settings
-  const INTERSECTION_THRESHOLDS = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
-
-  // Animation types - keep as array for indexOf
-  const ANIMATION_TYPES = ['fade', 'zoomin', 'zoomout', 'flip'];
-
-  // Default configuration
   const defaultConfig = {
     defaults: {
       animation: 'fade',
@@ -81,20 +41,78 @@ const USAL = (() => {
     once: false,
   };
 
+  const instance = {
+    destroying: null,
+    restarting: null,
+    initialized: false,
+    observers: () => {},
+    elements: new Map(),
+    config: { ...defaultConfig },
+  };
+
+  // ============================================================================
+  // Constants
+  // ============================================================================
+
+  const SHADOW_CAPABLE_SELECTOR =
+    '*:not(:is(area,base,br,col,embed,hr,img,input,link,meta,param,source,track,wbr,textarea,select,option,optgroup,script,style,title,iframe,object,video,audio,canvas,map,svg,math))';
+
+  const DATA_USAL_ATTRIBUTE = 'data-usal';
+  const DATA_USAL_ID = `${DATA_USAL_ATTRIBUTE}-id`;
+  const DATA_USAL_SELECTOR = `[${DATA_USAL_ATTRIBUTE}]`;
+
+  const CONFIG_ANIMATION = 0;
+  const CONFIG_DIRECTION = 1;
+  const CONFIG_DURATION = 2;
+  const CONFIG_DELAY = 3;
+  const CONFIG_THRESHOLD = 4;
+  const CONFIG_EASING = 5;
+  const CONFIG_BLUR = 6;
+  const CONFIG_ONCE = 7;
+  const CONFIG_SPLIT = 8;
+  const CONFIG_COUNT = 9;
+  const CONFIG_TEXT = 10;
+
+  const DIRECTION_UP = 1;
+  const DIRECTION_DOWN = 2;
+  const DIRECTION_LEFT = 4;
+  const DIRECTION_RIGHT = 8;
+
+  const STYLE_OPACITY = 'opacity';
+  const STYLE_TRANSFORM = 'transform';
+  const STYLE_FILTER = 'filter';
+  const STYLE_DISPLAY = 'display';
+  const STYLE_FONT_WEIGHT = 'fontWeight';
+  const CSS_NONE = 'none';
+  const CSS_INLINE_BLOCK = 'inline-block';
+
+  const INTERSECTION_THRESHOLDS = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
+  const ANIMATION_TYPES = ['fade', 'zoomin', 'zoomout', 'flip'];
+
+  // ============================================================================
+  // Utilities
+  // ============================================================================
+
   const genTmpId = () => `__usal${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
-  const cancelAllAnimations = (element, originalStyle) =>
-    setTimeout(() => {
-      if (!element) return;
+  const calculateVisibilityRatio = (element) => {
+    const rect = element.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    const windowWidth = window.innerWidth;
 
-      element
-        .getAnimations()
-        .filter((animation) => animation.id && animation.id.startsWith('__usal'))
-        .forEach((animation) => {
-          animation.cancel();
-          applyStyles(element, originalStyle);
-        });
-    }, 0);
+    if (
+      rect.bottom <= 0 ||
+      rect.top >= windowHeight ||
+      rect.right <= 0 ||
+      rect.left >= windowWidth
+    ) {
+      return 0;
+    }
+
+    const visibleHeight = Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0);
+    const visibleWidth = Math.min(rect.right, windowWidth) - Math.max(rect.left, 0);
+    return (visibleHeight / rect.height) * (visibleWidth / rect.width);
+  };
 
   const captureComputedStyle = (element) => {
     const computedStyle = window.getComputedStyle(element);
@@ -105,31 +123,75 @@ const USAL = (() => {
     };
   };
 
+  const composeValues = (newValue, originalValue) => {
+    if (!originalValue || originalValue === CSS_NONE) return newValue;
+    if (!newValue) return originalValue;
+    return `${originalValue} ${newValue}`;
+  };
+
+  // ============================================================================
+  // Style Management
+  // ============================================================================
+
   function applyStyles(elementRaw, styles, clean = false) {
     const element =
       typeof elementRaw === 'string' ? document.createElement(elementRaw) : elementRaw;
     if (!element) return null;
+
     element.animate([styles], {
       duration: 0,
       fill: 'forwards',
       iterations: 1,
       id: genTmpId(),
     });
-    if (!clean) element.__usalFragment = 1;
-    else {
+
+    if (instance.destroying == null && !clean) {
+      element.__usalFragment = 1;
+    } else {
       delete element.__usalFragment;
       delete element.__usalOriginals;
       delete element.__usalID;
     }
+
     return element;
   }
 
-  // Compose CSS values (for transform and filter)
-  const composeValues = (newValue, originalValue) => {
-    if (!originalValue || originalValue === CSS_NONE) return newValue;
-    if (!newValue) return originalValue;
-    return `${originalValue} ${newValue}`;
+  const cancelAllAnimations = (data, element, originalStyle) =>
+    new Promise((resolve) => {
+      setTimeout(() => {
+        if (!element) {
+          resolve();
+          return;
+        }
+        element
+          .getAnimations()
+          .filter((animation) => animation.id && animation.id.startsWith('__usal'))
+          .forEach((animation) => {
+            animation.cancel();
+            if (originalStyle) applyStyles(element, originalStyle);
+          });
+        resolve();
+      }, 0);
+    });
+
+  const resetStyle = (data) => {
+    if (data.countData) {
+      data.countData.span.textContent = '0';
+    } else if (!data.config[CONFIG_TEXT]) {
+      if (data.targets) {
+        data.targets.forEach((target) => {
+          applyStyles(target, { [STYLE_OPACITY]: '0' });
+        });
+      } else {
+        applyStyles(data.element, { [STYLE_OPACITY]: '0' });
+      }
+    }
+    data.stop = false;
   };
+
+  // ============================================================================
+  // Configuration Parsing
+  // ============================================================================
 
   function extractAndSetConfig(prefix, config, configKey, classString) {
     const pattern = new RegExp(`${prefix}-\\[[^\\]]+\\]`);
@@ -150,7 +212,6 @@ const USAL = (() => {
     if (!secondPart) return fallback;
 
     let direction = 0;
-
     for (const char of secondPart) {
       switch (char) {
         case 'u':
@@ -167,11 +228,9 @@ const USAL = (() => {
           break;
       }
     }
-
     return direction > 0 ? direction : fallback;
   };
 
-  // Parse data-usal attribute - using switch for better minification
   const parseClasses = (classString) => {
     const config = new Array(11).fill(null);
 
@@ -184,14 +243,12 @@ const USAL = (() => {
       const parts = token.split('-');
       const firstPart = parts[0];
 
-      // Check animation types first (most common)
       config[CONFIG_ANIMATION] = extractAnimation(firstPart);
       if (config[CONFIG_ANIMATION] !== null) {
         config[CONFIG_DIRECTION] = extractDirection(parts[1]);
         continue;
       }
 
-      // Handle other tokens with switch
       switch (token) {
         case 'blur':
           config[CONFIG_BLUR] = true;
@@ -206,7 +263,6 @@ const USAL = (() => {
           config[CONFIG_EASING] = token;
           break;
         default:
-          // Handle complex tokens
           switch (firstPart) {
             case 'split':
               if (parts[1])
@@ -233,8 +289,11 @@ const USAL = (() => {
     return config;
   };
 
-  // Generate animation keyframes
-  const createKeyframes = (instance, config, originalStyle = null) => {
+  // ============================================================================
+  // Animation Keyframes
+  // ============================================================================
+
+  const createKeyframes = (config, originalStyle = null) => {
     const animationType =
       config[CONFIG_ANIMATION] ?? extractAnimation(instance.config.defaults.animation, 0);
     const direction =
@@ -246,7 +305,7 @@ const USAL = (() => {
 
     let animationTransform = '';
 
-    // Build animation transform based on type
+    // Build animation transform
     if (animationType === 1) {
       // Zoom in
       animationTransform = 'scale(0.6)';
@@ -267,7 +326,7 @@ const USAL = (() => {
       animationTransform = `perspective(400px) ${transforms.join(' ')}`;
     }
 
-    // Add directional movement (not for flip)
+    // Add directional movement
     if (animationType !== 3 && direction) {
       const distance = 30;
       const translateX =
@@ -313,7 +372,10 @@ const USAL = (() => {
     return [fromState, toState];
   };
 
-  // Create split elements
+  // ============================================================================
+  // Split Animation Setup
+  // ============================================================================
+
   const setupSplit = (element, splitBy, opacity) => {
     const targets = [];
 
@@ -332,7 +394,7 @@ const USAL = (() => {
       return targets;
     }
 
-    // Create span helper
+    // Split by text
     const createSpan = (content) => {
       const span = applyStyles('span', {
         [STYLE_DISPLAY]: CSS_INLINE_BLOCK,
@@ -346,11 +408,12 @@ const USAL = (() => {
     const words = text.split(/(\s+)/);
     element.innerHTML = '';
 
+    const wrapper = document.createElement('span');
     words.forEach((word) => {
       if (!word) return;
 
       if (/\s/.test(word)) {
-        element.appendChild(document.createTextNode(word));
+        wrapper.appendChild(document.createTextNode(word));
         return;
       }
 
@@ -361,14 +424,10 @@ const USAL = (() => {
 
       let chars = [word];
       if (splitBy === 'letter') {
-        // Use Intl.Segmenter if available
         if (typeof Intl !== 'undefined' && Intl.Segmenter) {
           const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
           chars = Array.from(segmenter.segment(word), (s) => s.segment);
         } else {
-          // Fallback to regex
-
-          // Non-capturing groups needed for proper Unicode segmentation
           // noinspection RegExpUnnecessaryNonCapturingGroup
           chars = word.match(
             /\p{RI}\p{RI}|(?:\p{Emoji}(?:\u200D\p{Emoji})*)|(?:\P{M}\p{M}*)|./gsu
@@ -382,13 +441,17 @@ const USAL = (() => {
         targets.push(span);
       });
 
-      element.appendChild(container);
+      wrapper.appendChild(container);
     });
 
+    element.appendChild(wrapper);
     return targets;
   };
 
-  // Setup count animation
+  // ============================================================================
+  // Count Animation Setup
+  // ============================================================================
+
   const setupCount = (element, config, data) => {
     const text = element.textContent || '';
     const parts = text.split(config[CONFIG_COUNT]);
@@ -431,22 +494,25 @@ const USAL = (() => {
       decimals = clean.substring(sepPositions[0].p + 1).replace(/\D/g, '').length;
     }
 
+    const wrapper = document.createElement('span');
+    wrapper.appendChild(document.createTextNode(parts[0]));
+
     const span = applyStyles('span', {
       [STYLE_DISPLAY]: 'inline',
     });
     span.textContent = '0';
+    wrapper.appendChild(span);
+
+    wrapper.appendChild(document.createTextNode(parts[1]));
 
     element.innerHTML = '';
-    element.appendChild(document.createTextNode(parts[0]));
-    element.appendChild(span);
-    element.appendChild(document.createTextNode(parts[1]));
+    element.appendChild(wrapper);
 
     data.countData = { value, decimals, original, span, thousandSep, decimalSep };
     return true;
   };
 
-  // Animate count
-  const animateCount = (data, instance) => {
+  const animateCount = (data, resolve) => {
     const { value, decimals, original, span, thousandSep, decimalSep } = data.countData;
     const duration = data.config[CONFIG_DURATION] ?? instance.config.defaults.duration;
     const delay = data.config[CONFIG_DELAY] ?? instance.config.defaults.delay;
@@ -483,19 +549,19 @@ const USAL = (() => {
 
       span.textContent = progress >= 1 ? original : formatNumber(value * easedProgress);
 
-      if (progress < 1) {
-        data.rafId = requestAnimationFrame(tick);
-      } else {
-        data.state = STATE_COMPLETED;
-        data.onfinish();
-      }
+      if (data.stop || progress >= 1) {
+        resolve();
+      } else requestAnimationFrame(tick);
     };
 
-    data.rafId = requestAnimationFrame(tick);
+    requestAnimationFrame(tick);
   };
 
-  // Create text effect animations
-  const animateTextEffect = (targets, type, duration, splitDelay) => {
+  // ============================================================================
+  // Text Effects Animation
+  // ============================================================================
+
+  const animateTextEffect = (data, targets, type, duration, splitDelay, resolve) => {
     const animations = [];
 
     targets.forEach((target, index) => {
@@ -528,128 +594,180 @@ const USAL = (() => {
       animations.push(animation);
     });
 
-    return () => {
-      animations.forEach((animation) => {
-        animation.cancel();
-      });
-      animations.length = 0;
-    };
+    function checkStop() {
+      if (data.stop) {
+        animations.forEach((animation) => animation.cancel());
+        animations.length = 0;
+        resolve();
+        return;
+      }
+      requestAnimationFrame(checkStop);
+    }
+    requestAnimationFrame(checkStop);
   };
 
-  // Main animation controller
-  const animate = (data, instance) => {
-    if (data.state !== STATE_IDLE) return;
-    data.state = STATE_ANIMATING;
+  // ============================================================================
+  // Main Animation Controller
+  // ============================================================================
 
-    const { config, element, targets, countData, splitConfig } = data;
+  const animate = (data) => {
+    if (data.stop) return;
+    data.hasAnimated = true;
 
-    const duration = config[CONFIG_DURATION] ?? instance.config.defaults.duration;
-    const delay = config[CONFIG_DELAY] ?? instance.config.defaults.delay;
-    const easing = config[CONFIG_EASING] ?? instance.config.defaults.easing;
-    const splitDelay = splitConfig[CONFIG_DELAY] ?? instance.config.defaults.splitDelay;
+    data.animating = new Promise((resolve) => {
+      const { config, element, targets, countData, splitConfig } = data;
 
-    // Handle text effects
-    if (config[CONFIG_TEXT]) {
-      data.cleanTextEffect = animateTextEffect(
-        targets || [element],
-        config[CONFIG_TEXT],
+      const duration = config[CONFIG_DURATION] ?? instance.config.defaults.duration;
+      const delay = config[CONFIG_DELAY] ?? instance.config.defaults.delay;
+      const easing = config[CONFIG_EASING] ?? instance.config.defaults.easing;
+      const splitDelay = splitConfig[CONFIG_DELAY] ?? instance.config.defaults.splitDelay;
+      const originalStyle = element.__usalOriginals?.style;
+
+      // Text effects
+      if (config[CONFIG_TEXT]) {
+        animateTextEffect(
+          data,
+          targets || [element],
+          config[CONFIG_TEXT],
+          duration,
+          splitDelay,
+          resolve
+        );
+        return;
+      }
+
+      // Count animation
+      if (countData) {
+        animateCount(data, resolve);
+        return;
+      }
+
+      // Standard animation
+      const options = {
         duration,
-        splitDelay
-      );
-      data.state = STATE_COMPLETED;
-      return;
-    }
+        delay,
+        easing,
+        fill: 'forwards',
+      };
 
-    // Handle count animation
-    if (countData) {
-      animateCount(data, instance);
-      return;
-    }
-
-    // Create keyframes
-    const keyframes = createKeyframes(instance, config, element.__usalOriginals.style);
-    const options = {
-      duration,
-      delay,
-      easing,
-      fill: 'forwards',
-      id: genTmpId(),
-    };
-
-    // Animate split elements OR single element (not both)
-    if (targets) {
-      const animationPromises = targets.map((target, index) => {
-        const originalStyle = target.__usalOriginals?.style || element.__usalOriginals.style;
-        const splitKeyframes = createKeyframes(instance, data.splitConfig, originalStyle);
-
-        const animation = target.animate(splitKeyframes, {
+      const lestGo = (element, config, options, originalStyle, resolve) => {
+        const animation = element.animate(createKeyframes(config, originalStyle), {
           ...options,
-          delay: delay + index * splitDelay,
+          id: genTmpId(),
         });
-
         animation.persist();
 
-        return new Promise((resolve) => {
-          animation.onfinish = () => {
-            cancelAllAnimations(target, originalStyle);
-            resolve();
-          };
-        });
-      });
+        let cleanup = () => {
+          cleanup = () => {};
+          cancelAllAnimations(data, element, originalStyle).then(() => resolve());
+        };
 
-      Promise.all(animationPromises).then(() => {
-        data.state = STATE_COMPLETED;
-        data.onfinish();
-      });
-    } else {
-      // Animate single element
-      const animation = element.animate(keyframes, options);
-      const originalStyle = element.__usalOriginals.style;
-      animation.persist();
-      animation.onfinish = () => {
-        data.state = STATE_COMPLETED;
-        cancelAllAnimations(element, originalStyle);
-        data.onfinish();
+        animation.onfinish = () => cleanup();
+
+        function checkStop() {
+          if (data.stop) {
+            cleanup();
+            return;
+          }
+          if (animation.playState === 'running') {
+            requestAnimationFrame(checkStop);
+          }
+        }
+        requestAnimationFrame(checkStop);
       };
-    }
-  };
-  // Reset element
-  const reset = (data, instance, isDestroy = false) => {
-    // Cancel animations
-    if (data.rafId) {
-      cancelAnimationFrame(data.rafId);
-      data.rafId = null;
-    }
-    data.cleanTextEffect();
 
-    if (isDestroy) {
-      const splitByItem = data.config[CONFIG_SPLIT]?.includes('item');
-      if (data.targets && splitByItem) {
-        data.targets.forEach((target) => applyStyles(target, target.__usalOriginals.style, true));
-      }
-      if (!splitByItem && (data.config[CONFIG_SPLIT] || data.countData))
-        data.element.innerHTML = data.element.__usalOriginals.innerHTML;
-      applyStyles(data.element, data.element.__usalOriginals.style, true);
-    } else if (data.countData) {
-      // Normal reset
-      data.countData.span.textContent = '0';
-    } else if (!data.config[CONFIG_TEXT]) {
-      if (data.targets) {
-        data.targets.forEach((target) => {
-          applyStyles(target, { [STYLE_OPACITY]: '0' });
+      // Animate split elements or single element
+      if (targets) {
+        const animationPromises = targets.map((target, index) => {
+          const targetOriginalStyle = target.__usalOriginals?.style || originalStyle;
+          if (!targetOriginalStyle) {
+            return Promise.resolve();
+          }
+
+          return new Promise((resolve) =>
+            lestGo(
+              target,
+              data.splitConfig,
+              {
+                ...options,
+                delay: delay + index * splitDelay,
+              },
+              targetOriginalStyle,
+              resolve
+            )
+          );
         });
+        Promise.all(animationPromises).then(() => resolve());
       } else {
-        applyStyles(data.element, { [STYLE_OPACITY]: '0' });
+        lestGo(element, config, options, originalStyle, resolve);
       }
+    }).then(() => {
+      data.onfinish();
+      data.animating = null;
+      data.stop = true;
+    });
+  };
+
+  const animateIfVisible = (data, ratio = null) => {
+    if (
+      data.animating !== null ||
+      (data.hasAnimated && (data.config[CONFIG_ONCE] ?? instance.config.once))
+    )
+      return;
+
+    const _ratio = ratio ?? calculateVisibilityRatio(data.element);
+
+    if (data.stop && _ratio < 0.01) {
+      resetStyle(data);
+      return;
     }
 
-    const isOnce = data.config[CONFIG_ONCE] ?? instance.config.once;
-    data.state = isDestroy ? STATE_IDLE : isOnce ? STATE_COMPLETED : STATE_IDLE;
-  };
-  // Process element
-  const processElement = (element, instance, elementObserver) => {
-    element.__usalFragment = 1;
+    const threshold = Math.max(
+      0,
+      Math.min(1, (data.config[CONFIG_THRESHOLD] ?? instance.config.defaults.threshold) / 100)
+    );
 
+    if (_ratio >= threshold) {
+      animate(data);
+    }
+  };
+
+  // ============================================================================
+  // Element Processing & Cleanup
+  // ============================================================================
+
+  const cleanupElement = (data) =>
+    new Promise((resolve) => {
+      data.onfinish = () => {
+        data.onfinish = () => {};
+
+        const splitByItem = data.config[CONFIG_SPLIT]?.includes('item');
+
+        if (data.targets) {
+          data.targets.forEach((target) => {
+            if (target.__usalOriginals?.style) {
+              applyStyles(target, target.__usalOriginals.style, true);
+            }
+          });
+        }
+
+        const innerHTML = data.element.__usalOriginals?.innerHTML;
+        if (innerHTML && !splitByItem && (data.config[CONFIG_SPLIT] || data.countData)) {
+          data.element.innerHTML = innerHTML;
+        }
+
+        if (data.element.__usalOriginals?.style) {
+          applyStyles(data.element, data.element.__usalOriginals.style, true);
+        }
+
+        requestAnimationFrame(() => resolve());
+      };
+
+      if (data.animating === null) data.onfinish();
+      else data.stop = true;
+    });
+
+  const processElement = (element, elementObserver) => {
     if (!element.__usalID) {
       element.__usalOriginals = {
         style: captureComputedStyle(element),
@@ -663,25 +781,15 @@ const USAL = (() => {
     const existing = instance.elements.get(element.__usalID);
     if (existing) {
       if (classes !== existing.configString) {
-        existing.onfinish = () => {
-          existing.onfinish = () => {};
-          elementObserver.unobserve(element);
-          requestAnimationFrame(() => {
-            reset(existing, instance, true);
-            requestAnimationFrame(() => {
-              const data = processElement(element, instance, elementObserver);
-              requestAnimationFrame(() => {
-                animateIfVisible(data, instance);
-              });
-            });
-          });
-        };
-        if (existing.state !== STATE_ANIMATING) existing.onfinish();
-      } else {
-        return existing;
+        elementObserver.unobserve(element);
+        cleanupElement(existing).then(() => {
+          processElement(element, elementObserver);
+        });
       }
+      return;
     }
 
+    element.__usalFragment = 1;
     const config = parseClasses(classes);
 
     const data = {
@@ -690,9 +798,11 @@ const USAL = (() => {
       splitConfig: [...config],
       configString: classes,
       targets: null,
-      state: STATE_IDLE,
-      cleanTextEffect: () => {},
-      rafId: null,
+      state: null,
+      stop: false,
+      hasAnimated: false,
+      animating: null,
+      countData: null,
       onfinish: () => {},
     };
 
@@ -716,77 +826,37 @@ const USAL = (() => {
     }
 
     instance.elements.set(element.__usalID, data);
-    elementObserver.observe(element);
 
-    return data;
+    requestAnimationFrame(async () => {
+      animateIfVisible(data);
+      elementObserver.observe(element);
+    });
   };
 
-  const calculateVisibilityRatio = (element) => {
-    const rect = element.getBoundingClientRect();
-    const windowHeight = window.innerHeight;
-    const windowWidth = window.innerWidth;
-    if (
-      rect.bottom <= 0 ||
-      rect.top >= windowHeight ||
-      rect.right <= 0 ||
-      rect.left >= windowWidth
-    ) {
-      return 0;
-    }
-    const visibleHeight = Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0);
-    const visibleWidth = Math.min(rect.right, windowWidth) - Math.max(rect.left, 0);
-    return (visibleHeight / rect.height) * (visibleWidth / rect.width);
-  };
+  // ============================================================================
+  // Observers Setup
+  // ============================================================================
 
-  // Check visibility and animate
-  const animateIfVisible = (data, instance, ratio = null) => {
-    if (data.state === STATE_ANIMATING) {
-      return;
-    }
-    const _ratio = ratio ?? calculateVisibilityRatio(data.element);
-
-    if (data.state === STATE_COMPLETED) {
-      const isOnce = data.config[CONFIG_ONCE] ?? instance.config.once;
-      if (_ratio < 0.01 && !isOnce) {
-        reset(data, instance);
-      }
-      return;
-    }
-
-    const threshold = Math.max(
-      0,
-      Math.min(1, (data.config[CONFIG_THRESHOLD] ?? instance.config.defaults.threshold) / 100)
-    );
-
-    if (_ratio >= threshold) {
-      animate(data, instance);
-    }
-  };
-
-  // Setup observers
-  const setupObservers = (instance) => {
+  const setupObservers = () => {
     const domObservers = new Set();
     const resizeObservers = new Set();
     const observedDOMs = new Set();
     let lastScan = 0;
     let throttleOnTailTimer = null;
 
-    // Intersection observer
     const elementObserver = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
+        for (const entry of entries) {
           const data = instance.elements.get(
             entry.target.__usalID || entry.target.getAttribute(DATA_USAL_ID)
           );
           if (data) {
-            animateIfVisible(data, instance, entry.intersectionRatio);
+            animateIfVisible(data, entry.intersectionRatio);
           }
-        });
+        }
       },
       { threshold: INTERSECTION_THRESHOLDS }
     );
-
-    // Collect all DOMs including shadow roots
 
     const collectAllDOMs = (root = document.body, collected = new Set()) => {
       if (collected.has(root)) return collected;
@@ -802,7 +872,6 @@ const USAL = (() => {
       return collected;
     };
 
-    // Setup DOM observation
     const observeDOM = (dom) => {
       const mutationObs = new MutationObserver(handleObserverEvents);
       mutationObs.observe(dom, {
@@ -819,39 +888,36 @@ const USAL = (() => {
       }
     };
 
-    // Scan all DOMs
     const scanAllDOMs = () => {
-      const allDOMs = collectAllDOMs();
+      // Clean disconnected elements
+      instance.elements.forEach((data, id) => {
+        if (!data.element.isConnected) {
+          cleanupElement(data).then(() => {
+            elementObserver.unobserve(data.element);
+            instance.elements.delete(id);
+          });
+        } else {
+          animateIfVisible(data);
+        }
+      });
 
-      allDOMs.forEach((dom) => {
+      // Process new elements
+      const allDOMs = collectAllDOMs();
+      for (const dom of allDOMs) {
         if (!observedDOMs.has(dom)) {
           observeDOM(dom);
           observedDOMs.add(dom);
         }
-        dom.querySelectorAll?.(DATA_USAL_SELECTOR).forEach((element) => {
-          processElement(element, instance, elementObserver);
-        });
-      });
-
-      // Clean disconnected elements
-      const toRemove = [];
-      instance.elements.forEach((data, id) => {
-        if (!data.element.isConnected) {
-          elementObserver.unobserve(data.element);
-          reset(data, instance, true);
-          toRemove.push(id);
-        } else {
-          animateIfVisible(data, instance);
+        const elements = dom.querySelectorAll?.(DATA_USAL_SELECTOR);
+        for (const element of elements) {
+          processElement(element, elementObserver);
         }
-      });
-      toRemove.forEach((id) => instance.elements.delete(id));
+      }
       lastScan = Date.now();
     };
 
-    // Handle observer events
     const handleObserverEvents = (events) => {
       const items = Array.isArray(events) ? events : [events];
-
       const hasUsalFragment = (target) => !!target.__usalFragment;
 
       let cancel = null;
@@ -859,7 +925,7 @@ const USAL = (() => {
         if (item.type === 'attributes') {
           const attrName = item.attributeName;
           if (attrName === DATA_USAL_ATTRIBUTE || attrName === DATA_USAL_ID) {
-            processElement(item.target, instance, elementObserver);
+            processElement(item.target, elementObserver);
             cancel = true;
           }
         }
@@ -873,7 +939,9 @@ const USAL = (() => {
           }
         }
       }
+
       if (cancel) return;
+
       const timeSinceLastScan = Date.now() - lastScan;
       if (timeSinceLastScan >= instance.config.observersDelay) {
         scanAllDOMs();
@@ -887,6 +955,7 @@ const USAL = (() => {
         );
       }
     };
+
     scanAllDOMs();
 
     return () => {
@@ -900,54 +969,79 @@ const USAL = (() => {
     };
   };
 
-  // Instance state
-  const instanceState = {
-    initialized: false,
-    observers: () => {},
-    elements: new Map(),
-    config: { ...defaultConfig },
-  };
+  // ============================================================================
+  // Initialization
+  // ============================================================================
 
-  // Auto-initialize
   const autoInit = () => {
-    if (!instanceState.initialized) {
-      instanceState.initialized = true;
-      instanceState.observers = setupObservers(instanceState);
+    if (!instance.initialized) {
+      instance.initialized = true;
+      instance.observers = setupObservers();
     }
   };
 
+  // ============================================================================
   // Public API
+  // ============================================================================
+
   const publicAPI = {
     config(newConfig = {}) {
-      if (arguments.length === 0) return { ...instanceState.config };
-      Object.assign(instanceState.config, newConfig);
+      if (arguments.length === 0) return { ...instance.config };
+      Object.assign(instance.config, newConfig);
       return publicAPI;
     },
 
-    destroy() {
-      instanceState.observers();
-      instanceState.elements.forEach((data) => {
-        reset(data, instanceState, true);
+    async destroy() {
+      if (!instance.initialized) return Promise.resolve();
+      if (instance.destroying != null) return instance.destroying;
+
+      instance.observers();
+      const elements = Array.from(instance.elements.values());
+
+      instance.destroying = Promise.all(elements.map((data) => cleanupElement(data))).then(() => {
+        instance.elements.clear();
+        instance.observers = () => {};
+        instance.initialized = false;
+        instance.destroying = null;
       });
-      instanceState.elements.clear();
-      instanceState.observers = () => {};
-      instanceState.initialized = false;
-      return publicAPI;
+
+      return instance.destroying;
     },
 
-    restart() {
-      publicAPI.destroy();
-      setTimeout(() => {
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', autoInit, { once: true });
-        } else {
-          autoInit();
-        }
-      }, 0);
-      return publicAPI;
+    async restart() {
+      if (instance.restarting != null) return instance.restarting;
+      if (instance.destroying != null) return instance.destroying.then(() => publicAPI.restart());
+
+      instance.restarting = publicAPI
+        .destroy()
+        .then(
+          () =>
+            new Promise((resolve) => {
+              requestAnimationFrame(() => {
+                if (document.readyState === 'loading') {
+                  document.addEventListener(
+                    'DOMContentLoaded',
+                    () => {
+                      autoInit();
+                      resolve(publicAPI);
+                    },
+                    { once: true }
+                  );
+                } else {
+                  autoInit();
+                  resolve(publicAPI);
+                }
+              });
+            })
+        )
+        .finally(() => {
+          instance.restarting = null;
+        });
+
+      return instance.restarting;
     },
 
-    initialized: () => instanceState.initialized,
+    initialized: () => instance.initialized,
     version: '{%%VERSION%%}',
   };
 

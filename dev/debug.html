@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>USAL.js Debug Panel</title>
+    <link rel="icon" type="image/png" href="https://usal.dev/favicon.png" />
+    <link rel="stylesheet" href="./debug.css" />
+  </head>
+  <body>
+    <!-- Control Panel -->
+    <div class="controls">
+      <h3>Version Loader</h3>
+      <input
+        type="text"
+        id="usal-version-input"
+        placeholder="Version (latest, 1.0.0) or URL"
+        style="width: calc(100% - 100px)"
+      />
+      <button onclick="Debug.loadUSALVersion()" style="width: 70px">Load</button>
+
+      <h3>Core Controls</h3>
+      <button onclick="USAL?.destroy?.()">Destroy</button>
+      <button onclick="USAL?.restart?.()">Restart</button>
+      <button onclick="Debug.forceConfig()">Force Config</button>
+      <button onclick="Debug.clearAll()">Clear All</button>
+
+      <h3>Observer Tests</h3>
+      <button onclick="Debug.testObservers()">Test Mutation</button>
+      <button onclick="Debug.testResize()">Test Resize</button>
+      <button onclick="Debug.testIntersection()">Test Intersection</button>
+      <button onclick="Debug.testObserverCleanup()">Test Cleanup</button>
+
+      <h3>Animation States</h3>
+      <button onclick="Debug.inspectStates()">Inspect States</button>
+      <button onclick="Debug.forceAnimateAll()">Force Animate</button>
+      <button onclick="Debug.resetAll()">Reset All</button>
+      <button onclick="Debug.testStateTransitions()">Test Transitions</button>
+
+      <h3>Shadow DOM & Components</h3>
+      <button onclick="Debug.createShadowTree()">Create Shadow Tree</button>
+      <button onclick="Debug.createNestedShadows()">Nested Shadows</button>
+      <button onclick="Debug.createWebComponent()">Web Component</button>
+      <button onclick="Debug.testShadowMutations()">Shadow Mutations</button>
+
+      <h3>Performance Tests</h3>
+      <button onclick="Debug.stressTest(100)">100 Elements</button>
+      <button onclick="Debug.stressTest(500)">500 Elements</button>
+      <button onclick="Debug.stressTest(1000)">1000 Elements</button>
+      <button onclick="Debug.rapidToggle()">Rapid Toggle</button>
+
+      <h3>Memory & Cleanup</h3>
+      <button onclick="Debug.checkMemoryLeaks()">Check Leaks</button>
+      <button onclick="Debug.testFragmentCleanup()">Fragment Cleanup</button>
+      <button onclick="Debug.testElementRemoval()">Element Removal</button>
+
+      <h3>Edge Cases</h3>
+      <button onclick="Debug.testUnicodeHandling()">Unicode/Emoji</button>
+      <button onclick="Debug.testComplexCounts()">Complex Counts</button>
+      <button onclick="Debug.testCustomEasing()">Custom Easings</button>
+      <button onclick="Debug.testThresholds()">All Thresholds</button>
+
+      <h3>Configuration</h3>
+      <input type="number" id="duration" placeholder="Duration" value="1000" />
+      <input type="number" id="delay" placeholder="Delay" value="0" />
+      <input type="number" id="threshold" placeholder="Threshold" value="10" />
+      <input type="number" id="splitDelay" placeholder="Split Delay" value="30" />
+      <select id="easing">
+        <option value="ease-out">ease-out</option>
+        <option value="linear">linear</option>
+        <option value="ease">ease</option>
+        <option value="ease-in">ease-in</option>
+      </select>
+      <select id="once">
+        <option value="false">Repeat</option>
+        <option value="true">Once</option>
+      </select>
+      <button onclick="Debug.applyConfig()">Apply Config</button>
+
+      <h3>Instance Monitor</h3>
+      <div id="instance-monitor" class="monitor"></div>
+
+      <h3>Performance Metrics</h3>
+      <div class="perf-display">
+        <div class="perf-metric">
+          <div id="perf-fps" class="perf-value">0</div>
+          <div class="perf-label">FPS</div>
+        </div>
+        <div class="perf-metric">
+          <div id="perf-elements" class="perf-value">0</div>
+          <div class="perf-label">Elements</div>
+        </div>
+        <div class="perf-metric">
+          <div id="perf-memory" class="perf-value">0</div>
+          <div class="perf-label">MB Used</div>
+        </div>
+      </div>
+
+      <h3>Test Runner</h3>
+      <div id="test-runner" class="test-runner"></div>
+
+      <h3>Config State</h3>
+      <div id="config-display" class="config-display"></div>
+    </div>
+
+    <h1>USAL.js Debug Panel</h1>
+
+    <!-- Basic Tests -->
+    <div class="section">
+      <h2>Basic Animations</h2>
+      <div class="grid" id="basic-grid">
+        <div class="test-box" data-usal="fade">fade</div>
+        <div class="test-box" data-usal="fade-u">fade-u</div>
+        <div class="test-box" data-usal="fade-d">fade-d</div>
+        <div class="test-box" data-usal="fade-l">fade-l</div>
+        <div class="test-box" data-usal="fade-r">fade-r</div>
+        <div class="test-box" data-usal="fade-ul">fade-ul</div>
+        <div class="test-box" data-usal="fade-ur">fade-ur</div>
+        <div class="test-box" data-usal="fade-dl">fade-dl</div>
+        <div class="test-box" data-usal="fade-dr">fade-dr</div>
+        <div class="test-box" data-usal="zoomin">zoomin</div>
+        <div class="test-box" data-usal="zoomout">zoomout</div>
+        <div class="test-box" data-usal="flip">flip</div>
+      </div>
+    </div>
+
+    <!-- Split Tests -->
+    <div class="section">
+      <h2>Split & Text Effects</h2>
+      <p class="test-box" data-usal="split-word fade-u split-delay-100">
+        Split words animation test
+      </p>
+      <p class="test-box" data-usal="split-letter zoomin split-delay-50">Letter by letter zoom</p>
+      <div data-usal="split-item flip-r split-delay-200">
+        <div class="test-box">Item 1</div>
+        <div class="test-box">Item 2</div>
+        <div class="test-box">Item 3</div>
+      </div>
+      <h3 class="test-box" data-usal="text-fluid split-letter duration-2000 split-delay-50">
+        Fluid Weight Animation
+      </h3>
+      <p class="test-box" data-usal="text-shimmer split-letter duration-2000 split-delay-100">
+        SHIMMER EFFECT TEST
+      </p>
+    </div>
+
+    <!-- Count Tests -->
+    <div class="section">
+      <h2>Count Animations</h2>
+      <div class="grid">
+        <div class="test-box" data-usal="count-[100] duration-1000">100</div>
+        <div class="test-box" data-usal="count-[999.99] duration-2000">999.99</div>
+        <div class="test-box" data-usal="count-[1,234.56] duration-2500">$1,234.56</div>
+        <div class="test-box" data-usal="count-[42.5] duration-1500">Score: 42.5%</div>
+        <div class="test-box" data-usal="count-[1 234 567] duration-3000">1 234 567 units</div>
+      </div>
+    </div>
+
+    <!-- Threshold Tests -->
+    <div class="section">
+      <h2>Threshold Tests</h2>
+      <div style="height: 150vh; overflow: auto; border: 1px solid #333; padding: 20px">
+        <div style="height: 100vh"></div>
+        <div class="grid">
+          <div class="test-box" data-usal="fade-u threshold-0">0%</div>
+          <div class="test-box" data-usal="fade-u threshold-10">10%</div>
+          <div class="test-box" data-usal="fade-u threshold-25">25%</div>
+          <div class="test-box" data-usal="fade-u threshold-50">50%</div>
+          <div class="test-box" data-usal="fade-u threshold-75">75%</div>
+          <div class="test-box" data-usal="fade-u threshold-100">100%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Easing Tests -->
+    <div class="section">
+      <h2>Custom Easing</h2>
+      <div class="grid">
+        <div class="test-box" data-usal="fade-u easing-[cubic-bezier(0.68,-0.55,0.265,1.55)]">
+          elastic
+        </div>
+        <div class="test-box" data-usal="zoomin easing-[steps(5)]">steps(5)</div>
+        <div class="test-box" data-usal="flip-r easing-[cubic-bezier(0.25,0.46,0.45,0.94)]">
+          ease-out-quad
+        </div>
+      </div>
+    </div>
+
+    <!-- Dynamic Container -->
+    <div class="section">
+      <h2>Dynamic Test Container</h2>
+      <div id="dynamic-container"></div>
+    </div>
+
+    <!-- Shadow DOM Container -->
+    <div class="section">
+      <h2>Shadow DOM Container</h2>
+      <div id="shadow-container"></div>
+    </div>
+
+    <!-- Stress Test Container -->
+    <div class="section">
+      <h2>Stress Test Container</h2>
+      <div id="stress-container"></div>
+    </div>
+
+    <!-- Status Display -->
+    <div id="status">
+      <div class="status-item">
+        <span>USAL:</span>
+        <span id="usal-status" class="status-value">-</span>
+      </div>
+      <div class="status-item">
+        <span>Version:</span>
+        <span id="usal-version" class="status-value">-</span>
+      </div>
+      <div class="status-item">
+        <span>Elements:</span>
+        <span id="element-count" class="status-value">0</span>
+      </div>
+      <div class="status-item">
+        <span>Animations:</span>
+        <span id="animation-count" class="status-value">0</span>
+      </div>
+      <div class="status-item">
+        <span>FPS:</span>
+        <span id="fps-count" class="status-value">0</span>
+      </div>
+    </div>
+
+    <script src="./debug.js"></script>
+  </body>
+</html>

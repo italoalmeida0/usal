@@ -1,12 +1,12 @@
 import { ReactiveController, ReactiveControllerHost, DirectiveResult } from 'lit';
-import USAL, { USALConfig } from '../usal';
+import USAL, { USALConfig, USALInstance } from '../usal';
 
 export class USALController implements ReactiveController {
   constructor(host: ReactiveControllerHost, config?: USALConfig);
   config(): USALConfig;
   config(config: USALConfig): void;
-  destroy(): void;
-  restart(): void;
+  destroy(): Promise<void>;
+  restart(): Promise<USALInstance>;
   hostConnected(): void;
   hostDisconnected(): void;
 }
@@ -14,8 +14,8 @@ export class USALController implements ReactiveController {
 export const useUSAL: () => {
   config(): USALConfig;
   config(config: USALConfig): void;
-  destroy: () => void;
-  restart: () => void;
+  destroy: () => Promise<void>;
+  restart: () => Promise<USALInstance>;
 };
 
 export const useUSALController: (

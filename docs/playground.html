@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>USAL.js - Playground</title>
+    <link rel="icon" type="image/png" href="https://usal.dev/favicon.png" />
+
+    <link rel="stylesheet" href="https://codemirror.net/5/theme/yonce.css" />
+    <link rel="stylesheet" href="playground.css" />
+    <script src="https://cdn.usal.dev/latest"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/joi@18.0.1/dist/joi-browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Raleway:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="playground-container">
+      <!-- Header -->
+      <header class="playground-header">
+        <h1>USAL.js Playground</h1>
+        <div class="header-actions">
+          <button id="resetBtn" class="btn btn-secondary">Reset</button>
+          <button id="shareBtn" class="btn btn-primary">Share</button>
+        </div>
+      </header>
+
+      <div class="playground-main">
+        <!-- Sidebar -->
+        <aside class="playground-sidebar">
+          <div class="sidebar-section">
+            <h3>Animation Type</h3>
+            <select id="animationType" class="control-select">
+              <option value="">Select animation...</option>
+              <optgroup label="Fade">
+                <option value="fade">fade</option>
+                <option value="fade-u">fade-u</option>
+                <option value="fade-d">fade-d</option>
+                <option value="fade-l">fade-l</option>
+                <option value="fade-r">fade-r</option>
+                <option value="fade-ul">fade-ul</option>
+                <option value="fade-ur">fade-ur</option>
+                <option value="fade-dl">fade-dl</option>
+                <option value="fade-dr">fade-dr</option>
+              </optgroup>
+
+              <optgroup label="Zoom In">
+                <option value="zoomin">zoomin</option>
+                <option value="zoomin-u">zoomin-u</option>
+                <option value="zoomin-d">zoomin-d</option>
+                <option value="zoomin-l">zoomin-l</option>
+                <option value="zoomin-r">zoomin-r</option>
+                <option value="zoomin-ul">zoomin-ul</option>
+                <option value="zoomin-ur">zoomin-ur</option>
+                <option value="zoomin-dl">zoomin-dl</option>
+                <option value="zoomin-dr">zoomin-dr</option>
+              </optgroup>
+
+              <optgroup label="Zoom Out">
+                <option value="zoomout">zoomout</option>
+                <option value="zoomout-u">zoomout-u</option>
+                <option value="zoomout-d">zoomout-d</option>
+                <option value="zoomout-l">zoomout-l</option>
+                <option value="zoomout-r">zoomout-r</option>
+                <option value="zoomout-ul">zoomout-ul</option>
+                <option value="zoomout-ur">zoomout-ur</option>
+                <option value="zoomout-dl">zoomout-dl</option>
+                <option value="zoomout-dr">zoomout-dr</option>
+              </optgroup>
+
+              <optgroup label="Flip">
+                <option value="flip">flip</option>
+                <option value="flip-u">flip-u</option>
+                <option value="flip-d">flip-d</option>
+                <option value="flip-l">flip-l</option>
+                <option value="flip-r">flip-r</option>
+                <option value="flip-ul">flip-ul</option>
+                <option value="flip-ur">flip-ur</option>
+                <option value="flip-dl">flip-dl</option>
+                <option value="flip-dr">flip-dr</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="sidebar-section">
+            <h3>Split Options</h3>
+            <select id="splitType" class="control-select">
+              <option value="">No split</option>
+              <option value="split-word">split-word</option>
+              <option value="split-letter">split-letter</option>
+              <option value="split-item">split-item</option>
+            </select>
+            <label class="control-label">
+              Split Delay (ms)
+              <input
+                type="number"
+                id="splitDelay"
+                class="control-input"
+                value="50"
+                min="0"
+                max="500"
+                step="10"
+              />
+            </label>
+          </div>
+
+          <div class="sidebar-section">
+            <h3>Text Effects</h3>
+            <select id="textEffect" class="control-select">
+              <option value="">None</option>
+              <option value="text-shimmer">text-shimmer</option>
+              <option value="text-fluid">text-fluid</option>
+            </select>
+          </div>
+
+          <div class="sidebar-section">
+            <h3>Count Animation</h3>
+            <label class="control-label">
+              Target Number
+              <input
+                type="text"
+                id="countTarget"
+                class="control-input"
+                placeholder="e.g., 1234.56"
+              />
+            </label>
+          </div>
+
+          <div class="sidebar-section">
+            <h3>Timing</h3>
+            <label class="control-label">
+              Duration (ms)
+              <input
+                type="number"
+                id="duration"
+                class="control-input"
+                value="1000"
+                min="100"
+                max="5000"
+                step="100"
+              />
+            </label>
+            <label class="control-label">
+              Delay (ms)
+              <input
+                type="number"
+                id="delay"
+                class="control-input"
+                value="0"
+                min="0"
+                max="5000"
+                step="100"
+              />
+            </label>
+            <label class="control-label">
+              Threshold (%)
+              <input
+                type="number"
+                id="threshold"
+                class="control-input"
+                value="10"
+                min="0"
+                max="100"
+                step="5"
+              />
+            </label>
+          </div>
+
+          <div class="sidebar-section">
+            <h3>Easing</h3>
+            <select id="easing" class="control-select">
+              <option value="">Default (ease-out)</option>
+              <option value="linear">linear</option>
+              <option value="ease">ease</option>
+              <option value="ease-in">ease-in</option>
+              <option value="ease-out">ease-out</option>
+              <option value="easing-[cubic-bezier(0.68,-0.55,0.265,1.55)]">elastic</option>
+              <option value="easing-[steps(5)]">steps(5)</option>
+              <option value="custom">Custom</option>
+            </select>
+
+            <label class="control-label">
+              <input
+                type="text"
+                id="easingCustom"
+                class="control-input"
+                placeholder="cubic-bezier(0.4,0,0.2,1)"
+                style="display: none"
+              />
+            </label>
+          </div>
+
+          <div class="sidebar-section">
+            <h3>Typography</h3>
+            <select id="fontFamily" class="control-select">
+              <option value="">Default Font</option>
+              <option value="'Inter', sans-serif">Inter</option>
+              <option value="'Raleway', sans-serif">Raleway</option>
+              <option value="'Montserrat', sans-serif">Montserrat</option>
+              <option value="'Plus Jakarta Sans', sans-serif">Plus Jakarta Sans</option>
+              <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+            </select>
+            <label class="control-label">
+              Font Weight
+              <select id="fontWeight" class="control-select">
+                <option value="">Default</option>
+                <option value="100">100 - Thin</option>
+                <option value="200">200 - Extra Light</option>
+                <option value="300">300 - Light</option>
+                <option value="400">400 - Regular</option>
+                <option value="500">500 - Medium</option>
+                <option value="600">600 - Semi Bold</option>
+                <option value="700">700 - Bold</option>
+                <option value="800">800 - Extra Bold</option>
+                <option value="900">900 - Black</option>
+              </select>
+            </label>
+            <label class="control-label">
+              Font Size (px)
+              <input
+                type="number"
+                id="fontSize"
+                class="control-input"
+                value=""
+                placeholder="Default"
+                min="10"
+                max="120"
+                step="2"
+              />
+            </label>
+          </div>
+
+          <div class="sidebar-section">
+            <h3>Modifiers</h3>
+            <label class="control-checkbox">
+              <input type="checkbox" id="blur" />
+              <span>Blur effect</span>
+            </label>
+          </div>
+
+          <div class="sidebar-section">
+            <h3>Presets</h3>
+            <button class="preset-btn" data-preset="hero">Hero Title</button>
+            <button class="preset-btn" data-preset="cards">Card List</button>
+            <button class="preset-btn" data-preset="counter">Counter</button>
+            <button class="preset-btn" data-preset="shimmer">Shimmer Text</button>
+            <button class="preset-btn" data-preset="fluid">Fluid Text</button>
+            <button class="preset-btn" data-preset="paragraph">Split Paragraph</button>
+          </div>
+        </aside>
+
+        <!-- Content Area -->
+        <div class="playground-content">
+          <!-- Editor -->
+          <div class="editor-section">
+            <div class="section-header">
+              <h3>HTML</h3>
+              <span></span>
+            </div>
+            <div id="editor"></div>
+          </div>
+
+          <!-- Preview -->
+          <div class="preview-section">
+            <div class="section-header">
+              <h3>Preview</h3>
+              <span></span>
+            </div>
+            <div class="preview-wrapper">
+              <div id="preview"></div>
+            </div>
+          </div>
+
+          <!-- Generated Code -->
+          <div class="code-section">
+            <div class="section-header">
+              <h3>Generated data-usal</h3>
+              <button id="copyBtn" class="btn btn-sm">Copy</button>
+            </div>
+            <code id="generatedCode" class="code-display"></code>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="playground.js"></script>
+  </body>
+</html>
