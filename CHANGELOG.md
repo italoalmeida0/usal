@@ -5,6 +5,12 @@ All notable changes to USAL.js will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+### [1.2.1] - 2025-09-09
+
+#### Fixed
+
+- **Animation tuning**: Fixed parsing of tuning values when no direction is specified (e.g., `fade-50`, `flip-90` now work correctly)
+
 ## [1.2.0] - 2025-09-09
 
 ### Added
@@ -99,6 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Threshold controls
 - Duration and delay modifiers
 
+[1.2.1]: https://github.com/italoalmeida0/usal/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/italoalmeida0/usal/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/italoalmeida0/usal/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/italoalmeida0/usal/compare/v1.0.0...v1.1.0

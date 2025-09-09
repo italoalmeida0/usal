@@ -137,6 +137,7 @@ const USAL = (() => {
   function applyStyles(element, styles, clean = false) {
     if (!element) return;
 
+    // eslint-disable-next-line no-unused-vars
     const { offset, composite, easing, ...cleanedStyles } = styles;
 
     element.animate([cleanedStyles], {
@@ -258,7 +259,7 @@ const USAL = (() => {
       if (config[CONFIG_ANIMATION] !== null) {
         config[CONFIG_DIRECTION] = extractDirection(parts[1]);
         config[CONFIG_TUNING] = parts
-          .slice(2)
+          .slice(1 + (config[CONFIG_DIRECTION] ? 1 : 0))
           .filter((item) => !isNaN(item) && item !== '')
           .map((item) => +item);
         continue;
