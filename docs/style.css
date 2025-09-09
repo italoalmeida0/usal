@@ -254,7 +254,9 @@ p {
   letter-spacing: 0.05em;
 }
 .tip {
-  padding-top: 1.5rem;
+  padding-block: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  margin-bottom: 2rem;
 }
 .animation-item {
   padding: 1.5rem 0;
@@ -324,6 +326,7 @@ p {
   text-align: center;
   flex: 0 0 18.75rem;
 }
+
 .number {
   font-size: 3rem;
   font-weight: 700;

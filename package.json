@@ -1,6 +1,6 @@
 {
   "name": "usal-monorepo",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "description": "Ultimate Scroll Animation Library - Lightweight, powerful, wonderfully simple ✨",
@@ -151,7 +151,7 @@
     "lint": "eslint src/**/*.{js,ts,jsx,tsx}",
     "lint:fix": "eslint src/**/*.{js,ts,jsx,tsx} --fix",
     "lint:pkgs": "npx eslint packages/** --no-ignore --rule {no-var:off,no-redeclare:off,prefer-const:off,eqeqeq:off,import/order:off,no-setter-return:off,no-sparse-arrays:off,no-cond-assign:off}",
-    "lint:comments": "node scripts/lint-comments.js"
+    "lint:texts": "node scripts/lint-texts.js"
   },
   "devDependencies": {
     "@angular/common": ">=12.0.0",

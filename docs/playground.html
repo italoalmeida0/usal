@@ -91,7 +91,61 @@
                 <option value="flip-dl">flip-dl</option>
                 <option value="flip-dr">flip-dr</option>
               </optgroup>
+
+              <optgroup label="Custom Timeline">
+                <option value="custom-timeline">Custom Timeline</option>
+              </optgroup>
             </select>
+          </div>
+
+          <div class="sidebar-section">
+            <h3>Animation Tuning</h3>
+            <label class="control-label">
+              Value 1 (movement/angle)
+              <input
+                type="number"
+                id="tuning1"
+                class="control-input"
+                placeholder="Default"
+                min="0"
+                max="200"
+              />
+            </label>
+            <label class="control-label">
+              Value 2 (Y/perspective)
+              <input
+                type="number"
+                id="tuning2"
+                class="control-input"
+                placeholder="Default"
+                min="0"
+                max="200"
+              />
+            </label>
+            <label class="control-label">
+              Value 3 (intensity)
+              <input
+                type="number"
+                id="tuning3"
+                class="control-input"
+                placeholder="Default"
+                min="0"
+                max="200"
+              />
+            </label>
+          </div>
+
+          <div class="sidebar-section" id="customTimelineSection" style="display: none">
+            <h3>Custom Timeline</h3>
+            <label class="control-label">
+              Timeline Definition
+              <textarea
+                id="timeline"
+                class="control-input"
+                rows="4"
+                placeholder="o+0 s+0.5 tx+50 | 50 s+1.2 | o+100 s+1"
+              ></textarea>
+            </label>
           </div>
 
           <div class="sidebar-section">
@@ -244,9 +298,27 @@
 
           <div class="sidebar-section">
             <h3>Modifiers</h3>
+            <label class="control-label">
+              Blur
+              <select id="blur" class="control-select">
+                <option value="">No blur</option>
+                <option value="blur">Default (0.625rem)</option>
+                <option value="blur-1">1rem</option>
+                <option value="blur-2">2rem</option>
+                <option value="blur-3">3rem</option>
+              </select>
+            </label>
             <label class="control-checkbox">
-              <input type="checkbox" id="blur" />
-              <span>Blur effect</span>
+              <input type="checkbox" id="once" />
+              <span>Once only</span>
+            </label>
+            <label class="control-checkbox">
+              <input type="checkbox" id="loop" />
+              <span>Loop continuously</span>
+            </label>
+            <label class="control-checkbox">
+              <input type="checkbox" id="forwards" />
+              <span>Keep final state</span>
             </label>
           </div>
 
@@ -258,6 +330,9 @@
             <button class="preset-btn" data-preset="shimmer">Shimmer Text</button>
             <button class="preset-btn" data-preset="fluid">Fluid Text</button>
             <button class="preset-btn" data-preset="paragraph">Split Paragraph</button>
+            <button class="preset-btn" data-preset="timeline">Custom Timeline</button>
+            <button class="preset-btn" data-preset="tuning">Tuned Animation</button>
+            <button class="preset-btn" data-preset="loop">Loop Animation</button>
           </div>
         </aside>
 

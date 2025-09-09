@@ -705,6 +705,184 @@ const Debug = (() => {
   }
 
   // ============================================================================
+  // Loop & Blur Tests
+  // ============================================================================
+
+  function testLoopAnimations() {
+    const container = document.getElementById('dynamic-container');
+
+    const tests = [
+      ['fade loop', 'Continuous fade'],
+      ['zoomin loop blur', 'Loop with blur'],
+      ['flip-r loop duration-500', 'Fast loop'],
+      ['text-shimmer split-letter', 'Auto-loop shimmer'],
+      ['text-fluid split-letter', 'Auto-loop fluid'],
+    ];
+
+    tests.forEach(([usal, label]) => {
+      const el = document.createElement('div');
+      el.className = 'test-box';
+      el.textContent = label;
+      el.setAttribute('data-usal', usal);
+      container.appendChild(el);
+    });
+
+    log('Loop animations test added', 'pass');
+  }
+
+  function testBlurVariations() {
+    const container = document.getElementById('dynamic-container');
+
+    const tests = [
+      ['fade blur', 'Default blur (0.625rem)'],
+      ['fade blur-1', 'Blur 1rem'],
+      ['fade blur-2', 'Blur 2rem'],
+      ['fade blur-0.5', 'Blur 0.5rem'],
+      ['zoomin-50 blur-3', 'Heavy blur'],
+    ];
+
+    tests.forEach(([usal, label]) => {
+      const el = document.createElement('div');
+      el.className = 'test-box';
+      el.textContent = label;
+      el.setAttribute('data-usal', usal);
+      container.appendChild(el);
+    });
+
+    log('Blur variations test added', 'pass');
+  }
+
+  // ============================================================================
+  // Timeline Tests
+  // ============================================================================
+
+  function testBasicTimelines() {
+    const container = document.getElementById('dynamic-container');
+
+    const tests = [
+      ['line-[o+0]', 'Fade in'],
+      ['line-[s+0.5]', 'Scale from 0.5'],
+      ['line-[tx+50]', 'Slide from right'],
+      ['line-[r+360]', 'Full rotation'],
+      ['line-[o+0s+0.5tx+30]', 'Complex start'],
+    ];
+
+    tests.forEach(([usal, label]) => {
+      const el = document.createElement('div');
+      el.className = 'test-box';
+      el.textContent = label;
+      el.setAttribute('data-usal', usal);
+      container.appendChild(el);
+    });
+
+    log('Basic timeline tests added', 'pass');
+  }
+
+  function testKeyframeTimelines() {
+    const container = document.getElementById('dynamic-container');
+
+    const tests = [
+      ['line-[|o+50]', 'Fade to 50%'],
+      ['line-[|50s+1.5]', 'Scale at 50%'],
+      ['line-[|25o+30|50o+60|75o+90]', 'Multi-step fade'],
+      ['line-[o+0|50s+1.5o+50|o+100s+1]', 'Complex sequence'],
+    ];
+
+    tests.forEach(([usal, label]) => {
+      const el = document.createElement('div');
+      el.className = 'test-box';
+      el.textContent = label;
+      el.setAttribute('data-usal', usal);
+      container.appendChild(el);
+    });
+
+    log('Keyframe timeline tests added', 'pass');
+  }
+
+  function test3DTimelines() {
+    const container = document.getElementById('dynamic-container');
+
+    const tests = [
+      ['line-[rx+90p+50]', '3D flip X'],
+      ['line-[ry+180p+100]', '3D flip Y'],
+      ['line-[sx+0.5sy+2sz+1]', '3D scale'],
+      ['line-[tz+100p+80]', 'Z-axis translate'],
+      ['line-[rx+0ry+0|25rx+90|50ry+90|75rx+180|rx+360ry+360]', '3D spin'],
+    ];
+
+    tests.forEach(([usal, label]) => {
+      const el = document.createElement('div');
+      el.className = 'test-box';
+      el.textContent = label;
+      el.setAttribute('data-usal', usal);
+      container.appendChild(el);
+    });
+
+    log('3D timeline tests added', 'pass');
+  }
+
+  function testComplexTimelines() {
+    const container = document.getElementById('dynamic-container');
+
+    // Multi-line timeline test
+    const multiline = document.createElement('div');
+    multiline.className = 'test-box';
+    multiline.textContent = 'Multi-line timeline';
+    multiline.setAttribute(
+      'data-usal',
+      `line-[
+    o+0 sx+0.2 sy+0.2 tx+70 |
+    40 o+50 sx+0.8 sy+0.8 tx+35 |
+    70 o+90 sx+0.95 sy+0.95 tx+5 |
+    o+100 sx+1 sy+1 tx+0
+  ]`
+    );
+    container.appendChild(multiline);
+
+    // Timeline with other modifiers
+    const withModifiers = document.createElement('div');
+    withModifiers.className = 'test-box';
+    withModifiers.textContent = 'Timeline + modifiers';
+    withModifiers.setAttribute(
+      'data-usal',
+      'line-[o+0s+0.5|50s+1.2|o+100s+1] duration-3000 easing-[cubic-bezier(0.4,0,0.2,1)]'
+    );
+    container.appendChild(withModifiers);
+
+    log('Complex timeline tests added', 'pass');
+  }
+
+  // ============================================================================
+  // Animation Tuning Tests
+  // ============================================================================
+
+  function testAnimationTuning() {
+    const container = document.getElementById('dynamic-container');
+
+    const tests = [
+      ['fade-10', 'Subtle fade 10%'],
+      ['fade-60', 'Strong fade 60%'],
+      ['fade-30-50', 'Fade X:30% Y:50%'],
+      ['zoomin-15', 'Gentle zoom 15%'],
+      ['zoomin-80', 'Dramatic zoom 80%'],
+      ['zoomin-40-60', 'Zoom move:40% scale:60%'],
+      ['zoomin-30-50-80', 'Zoom X:30% Y:50% scale:80%'],
+      ['flip-120', 'Flip 120°'],
+      ['flip-180-60', 'Flip 180° persp:60rem'],
+    ];
+
+    tests.forEach(([usal, label]) => {
+      const el = document.createElement('div');
+      el.className = 'test-box';
+      el.textContent = label;
+      el.setAttribute('data-usal', usal);
+      container.appendChild(el);
+    });
+
+    log('Animation tuning tests added', 'pass');
+  }
+
+  // ============================================================================
   // Initialization
   // ============================================================================
 
@@ -766,6 +944,13 @@ const Debug = (() => {
     testComplexCounts,
     testCustomEasing,
     testThresholds,
+    testLoopAnimations,
+    testBlurVariations,
+    testBasicTimelines,
+    testKeyframeTimelines,
+    test3DTimelines,
+    testComplexTimelines,
+    testAnimationTuning,
     init,
   };
 })();

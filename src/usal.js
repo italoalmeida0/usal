@@ -34,6 +34,7 @@ const USAL = (() => {
       delay: 0,
       threshold: 10,
       splitDelay: 30,
+      forwards: false,
       easing: 'ease-out',
       blur: false,
     },
@@ -72,6 +73,10 @@ const USAL = (() => {
   const CONFIG_SPLIT = 8;
   const CONFIG_COUNT = 9;
   const CONFIG_TEXT = 10;
+  const CONFIG_LOOP = 11;
+  const CONFIG_FORWARDS = 12;
+  const CONFIG_TUNING = 13;
+  const CONFIG_LINE = 14;
 
   const DIRECTION_UP = 1;
   const DIRECTION_DOWN = 2;
@@ -81,6 +86,7 @@ const USAL = (() => {
   const STYLE_OPACITY = 'opacity';
   const STYLE_TRANSFORM = 'transform';
   const STYLE_FILTER = 'filter';
+  const STYLE_PERSPECTIVE = 'perspective';
   const STYLE_DISPLAY = 'display';
   const STYLE_FONT_WEIGHT = 'fontWeight';
   const CSS_NONE = 'none';
@@ -118,27 +124,22 @@ const USAL = (() => {
     const computedStyle = window.getComputedStyle(element);
     return {
       [STYLE_OPACITY]: computedStyle[STYLE_OPACITY] || '1',
-      [STYLE_TRANSFORM]: computedStyle[STYLE_TRANSFORM] || 'none',
-      [STYLE_FILTER]: computedStyle[STYLE_FILTER] || 'none',
+      [STYLE_TRANSFORM]: computedStyle[STYLE_TRANSFORM] || CSS_NONE,
+      [STYLE_FILTER]: computedStyle[STYLE_FILTER] || CSS_NONE,
+      [STYLE_PERSPECTIVE]: computedStyle[STYLE_PERSPECTIVE] || CSS_NONE,
     };
-  };
-
-  const composeValues = (newValue, originalValue) => {
-    if (!originalValue || originalValue === CSS_NONE) return newValue;
-    if (!newValue) return originalValue;
-    return `${originalValue} ${newValue}`;
   };
 
   // ============================================================================
   // Style Management
   // ============================================================================
 
-  function applyStyles(elementRaw, styles, clean = false) {
-    const element =
-      typeof elementRaw === 'string' ? document.createElement(elementRaw) : elementRaw;
-    if (!element) return null;
+  function applyStyles(element, styles, clean = false) {
+    if (!element) return;
 
-    element.animate([styles], {
+    const { offset, composite, easing, ...cleanedStyles } = styles;
+
+    element.animate([cleanedStyles], {
       duration: 0,
       fill: 'forwards',
       iterations: 1,
@@ -152,8 +153,6 @@ const USAL = (() => {
       delete element.__usalOriginals;
       delete element.__usalID;
     }
-
-    return element;
   }
 
   const cancelAllAnimations = (data, element, originalStyle) =>
@@ -175,20 +174,28 @@ const USAL = (() => {
     });
 
   const resetStyle = (data) => {
+    if (data.config[CONFIG_LOOP]) return;
+    const originalStyle = data.element.__usalOriginals?.style;
     if (data.countData) {
-      data.countData.span.textContent = '0';
-    } else if (!data.config[CONFIG_TEXT]) {
+      const span = data.countData.span;
+      applyStyles(span, {
+        [STYLE_DISPLAY]: 'inline',
+      });
+      span.textContent = '0';
+    } else if (data.config[CONFIG_SPLIT]) {
       if (data.targets) {
         data.targets.forEach((target) => {
-          applyStyles(target, { [STYLE_OPACITY]: '0' });
+          applyStyles(
+            target,
+            createKeyframes(data.config, target.__usalOriginals?.style || originalStyle)[0]
+          );
         });
-      } else {
-        applyStyles(data.element, { [STYLE_OPACITY]: '0' });
       }
+    } else {
+      applyStyles(data.element, createKeyframes(data.config, originalStyle)[0]);
     }
     data.stop = false;
   };
-
   // ============================================================================
   // Configuration Parsing
   // ============================================================================
@@ -232,12 +239,16 @@ const USAL = (() => {
   };
 
   const parseClasses = (classString) => {
-    const config = new Array(11).fill(null);
+    const config = new Array(15).fill(null);
+    config[CONFIG_LOOP] = false;
+    config[CONFIG_TUNING] = [];
+    classString = classString.toLowerCase().trim();
 
     classString = extractAndSetConfig('count', config, CONFIG_COUNT, classString);
     classString = extractAndSetConfig('easing', config, CONFIG_EASING, classString);
+    classString = extractAndSetConfig('line', config, CONFIG_LINE, classString);
 
-    const tokens = classString.trim().split(/\s+/).filter(Boolean);
+    const tokens = classString.split(/\s+/).filter(Boolean);
 
     for (const token of tokens) {
       const parts = token.split('-');
@@ -246,20 +257,30 @@ const USAL = (() => {
       config[CONFIG_ANIMATION] = extractAnimation(firstPart);
       if (config[CONFIG_ANIMATION] !== null) {
         config[CONFIG_DIRECTION] = extractDirection(parts[1]);
+        config[CONFIG_TUNING] = parts
+          .slice(2)
+          .filter((item) => !isNaN(item) && item !== '')
+          .map((item) => +item);
         continue;
       }
 
       switch (token) {
-        case 'blur':
-          config[CONFIG_BLUR] = true;
+        case 'loop':
+          config[CONFIG_LOOP] = true;
           break;
         case 'once':
           config[CONFIG_ONCE] = true;
+          break;
+        case 'forwards':
+          config[CONFIG_FORWARDS] = true;
           break;
         case 'linear':
         case 'ease':
         case 'ease-in':
         case 'ease-out':
+        case 'ease-in-out':
+        case 'step-start':
+        case 'step-end':
           config[CONFIG_EASING] = token;
           break;
         default:
@@ -268,9 +289,14 @@ const USAL = (() => {
               if (parts[1])
                 config[CONFIG_SPLIT] = (config[CONFIG_SPLIT] ?? '') + ' ' + token.slice(6);
               break;
+            case 'blur':
+              if (parts[1]) config[CONFIG_BLUR] = +parts[1];
+              else config[CONFIG_BLUR] = true;
+              break;
             case 'text':
               if (parts[1] === 'shimmer' || parts[1] === 'fluid') {
                 config[CONFIG_TEXT] = parts[1];
+                config[CONFIG_LOOP] = true;
               }
               break;
             case 'duration':
@@ -293,90 +319,171 @@ const USAL = (() => {
   // Animation Keyframes
   // ============================================================================
 
-  const createKeyframes = (config, originalStyle = null) => {
+  function parseTimeline(content, originalStyle, inlineBlock = false) {
+    const clean = content.replace(/\s/g, '').toLowerCase();
+
+    const buildTransform = (type, axis, value, unit) => {
+      const axisStr =
+        axis && ['x', 'y', 'z'].includes(axis) ? axis.toUpperCase() : type === 'rotate' ? 'Z' : '';
+      return `${type}${axisStr}(${value}${unit})`;
+    };
+
+    const parseTransforms = (str) => {
+      const regex = /(\w|\w\w)([+-]\d+(?:\.\d+)?)/g;
+
+      let transforms = '';
+      let opacity = null;
+      let filter = null;
+      let perspective = null;
+
+      let match;
+      while ((match = regex.exec(str)) !== null) {
+        const [, prop, value] = match;
+        const num = parseFloat(value);
+        const first = prop[0];
+        const second = prop[1];
+
+        switch (first) {
+          case 't':
+            transforms += ' ' + buildTransform('translate', second, num, '%');
+            break;
+          case 'r':
+            transforms += ' ' + buildTransform('rotate', second, num, 'deg');
+            break;
+          case 's':
+            transforms += ' ' + buildTransform('scale', second, num, '');
+            break;
+          case 'o':
+            opacity = Math.max(0, Math.min(100, num)) / 100;
+            break;
+          case 'b':
+            filter = `blur(${Math.max(0, num)}rem)`;
+            break;
+          case 'p':
+            perspective = `${num}rem`;
+            break;
+        }
+      }
+
+      const result = {};
+      if (transforms) result[STYLE_TRANSFORM] = transforms.trim();
+      if (opacity !== null) result[STYLE_OPACITY] = opacity;
+      if (filter) result[STYLE_FILTER] = filter;
+      if (perspective) result[STYLE_PERSPECTIVE] = perspective;
+      return result;
+    };
+
+    const keyframes = new Map();
+    clean.split('|').forEach((frame, index) => {
+      const percentMatch = frame.match(/^(\d+)/);
+      const percent =
+        index === 0
+          ? 0
+          : percentMatch
+            ? Math.max(0, Math.min(100, parseInt(percentMatch[1])))
+            : 100;
+      keyframes.set(percent, parseTransforms(frame.replace(/^\d+/, '')));
+    });
+
+    if (Object.keys(keyframes.get(0)).length === 0) {
+      keyframes.set(0, originalStyle);
+    }
+    if (keyframes.size === 1) {
+      keyframes.set(100, originalStyle);
+    } else {
+      const allKeys = [...keyframes.keys()];
+      if (keyframes.size >= 3) {
+        const minKey = Math.min(...allKeys);
+        keyframes.set(0, keyframes.get(minKey));
+      }
+      const maxKey = Math.max(...allKeys);
+      keyframes.set(100, keyframes.get(maxKey));
+    }
+
+    return Array.from(keyframes.entries())
+      .filter(([_, frame]) => Object.keys(frame).length > 0)
+      .sort((a, b) => a[0] - b[0])
+      .map(([offset, frame]) => ({
+        offset: offset / 100,
+        ...frame,
+        ...(inlineBlock && { display: 'inline-block' }),
+      }));
+  }
+
+  const createKeyframes = (config, originalStyle) => {
+    if (!originalStyle) return;
+    const splitByNotItem = config[CONFIG_SPLIT] && !config[CONFIG_SPLIT]?.includes('item');
+    if (config[CONFIG_LINE])
+      return parseTimeline(config[CONFIG_LINE], originalStyle, splitByNotItem);
+
     const animationType =
       config[CONFIG_ANIMATION] ?? extractAnimation(instance.config.defaults.animation, 0);
     const direction =
       config[CONFIG_DIRECTION] ?? extractDirection(instance.config.defaults.direction, 1);
-    const hasBlur = config[CONFIG_BLUR] ?? instance.config.defaults.blur;
+    const blur = config[CONFIG_BLUR] ?? instance.config.defaults.blur;
 
-    const fromState = { [STYLE_OPACITY]: 0 };
-    const toState = { [STYLE_OPACITY]: originalStyle?.[STYLE_OPACITY] || 1 };
+    const tuning = config[CONFIG_TUNING];
 
-    let animationTransform = '';
+    let firstTuning = tuning?.at(0);
+    const lastTuning = tuning?.at(-1);
+    let secondTuning = tuning?.at(1);
 
-    // Build animation transform
-    if (animationType === 1) {
-      // Zoom in
-      animationTransform = 'scale(0.6)';
-    } else if (animationType === 2) {
-      // Zoom out
-      animationTransform = 'scale(1.2)';
+    let fromTimeline = 'o+0';
+
+    const defaultDelta = splitByNotItem ? 50 : 15;
+    const intensity = (lastTuning ?? defaultDelta) / 100;
+
+    if (animationType === 1 || animationType === 2) {
+      // Zoom
+      fromTimeline += `s+${1 + (animationType === 1 ? -intensity : intensity)}`;
+      firstTuning = null;
+      secondTuning = tuning?.length === 2 ? null : secondTuning;
     } else if (animationType === 3) {
       // Flip
-      const angle = 90;
-      const transforms = [];
+      const angle = firstTuning ?? 90;
       if (direction & (DIRECTION_UP | DIRECTION_DOWN)) {
-        transforms.push(`rotateX(${direction & DIRECTION_UP ? angle : -angle}deg)`);
+        const rotX = direction & DIRECTION_UP ? angle : -angle;
+        fromTimeline += `rx${rotX > 0 ? '+' : ''}${rotX}`;
       }
       if (direction & (DIRECTION_LEFT | DIRECTION_RIGHT)) {
-        transforms.push(`rotateY(${direction & DIRECTION_LEFT ? -angle : angle}deg)`);
+        const rotY = direction & DIRECTION_LEFT ? -angle : angle;
+        fromTimeline += `ry${rotY > 0 ? '+' : ''}${rotY}`;
       }
-      if (!transforms.length) transforms.push(`rotateY(${angle}deg)`);
-      animationTransform = `perspective(400px) ${transforms.join(' ')}`;
+      if (!(direction & (DIRECTION_UP | DIRECTION_DOWN | DIRECTION_LEFT | DIRECTION_RIGHT))) {
+        fromTimeline += `ry+${angle}`;
+      }
+      const perspectiveValue = tuning?.length === 2 ? lastTuning : 25;
+      fromTimeline += `p+${perspectiveValue ?? 25}`;
     }
 
-    // Add directional movement
     if (animationType !== 3 && direction) {
-      const distance = 30;
-      const translateX =
-        direction & DIRECTION_RIGHT ? -distance : direction & DIRECTION_LEFT ? distance : 0;
-      const translateY =
-        direction & DIRECTION_DOWN ? -distance : direction & DIRECTION_UP ? distance : 0;
+      if (direction & DIRECTION_RIGHT) {
+        fromTimeline += `tx-${firstTuning ?? defaultDelta}`;
+      } else if (direction & DIRECTION_LEFT) {
+        fromTimeline += `tx+${firstTuning ?? defaultDelta}`;
+      }
 
-      if (translateX || translateY) {
-        const translate = `translate(${translateX}px, ${translateY}px)`;
-        animationTransform = animationTransform ? `${animationTransform} ${translate}` : translate;
+      if (direction & DIRECTION_DOWN) {
+        fromTimeline += `ty-${secondTuning ?? firstTuning ?? defaultDelta}`;
+      } else if (direction & DIRECTION_UP) {
+        fromTimeline += `ty+${secondTuning ?? firstTuning ?? defaultDelta}`;
       }
     }
 
-    // Set transforms
-    if (animationTransform) {
-      fromState[STYLE_TRANSFORM] = composeValues(
-        animationTransform,
-        originalStyle?.[STYLE_TRANSFORM]
-      );
-    } else if (originalStyle?.[STYLE_TRANSFORM]) {
-      fromState[STYLE_TRANSFORM] = originalStyle[STYLE_TRANSFORM];
+    if (blur) {
+      const blurValue =
+        blur === true ? 0.625 : typeof blur === 'number' && !isNaN(blur) ? blur : 0.625;
+      fromTimeline += `b+${blurValue}`;
     }
 
-    if (originalStyle?.[STYLE_TRANSFORM]) {
-      toState[STYLE_TRANSFORM] = originalStyle[STYLE_TRANSFORM];
-    } else if (animationType === 1 || animationType === 2) {
-      toState[STYLE_TRANSFORM] = 'scale(1)';
-    } else if (animationType === 3) {
-      toState[STYLE_TRANSFORM] = 'perspective(400px) rotateX(0) rotateY(0)';
-    } else if (animationTransform) {
-      toState[STYLE_TRANSFORM] = 'translate(0, 0)';
-    }
-
-    // Add blur effect
-    if (hasBlur) {
-      fromState[STYLE_FILTER] = composeValues('blur(10px)', originalStyle?.[STYLE_FILTER]);
-      toState[STYLE_FILTER] = originalStyle?.[STYLE_FILTER] || 'blur(0)';
-    } else if (originalStyle?.[STYLE_FILTER]) {
-      fromState[STYLE_FILTER] = originalStyle[STYLE_FILTER];
-      toState[STYLE_FILTER] = originalStyle[STYLE_FILTER];
-    }
-
-    return [fromState, toState];
+    return parseTimeline(fromTimeline, originalStyle, splitByNotItem);
   };
 
   // ============================================================================
   // Split Animation Setup
   // ============================================================================
 
-  const setupSplit = (element, splitBy, opacity) => {
+  const setupSplit = (element, splitBy) => {
     const targets = [];
 
     // Split by child elements
@@ -386,9 +493,6 @@ const USAL = (() => {
           style: captureComputedStyle(child),
           innerHTML: null,
         };
-        applyStyles(child, {
-          [STYLE_OPACITY]: opacity,
-        });
         targets.push(child);
       });
       return targets;
@@ -396,10 +500,7 @@ const USAL = (() => {
 
     // Split by text
     const createSpan = (content) => {
-      const span = applyStyles('span', {
-        [STYLE_DISPLAY]: CSS_INLINE_BLOCK,
-        [STYLE_OPACITY]: opacity,
-      });
+      const span = document.createElement('span');
       span.textContent = content;
       return span;
     };
@@ -416,8 +517,8 @@ const USAL = (() => {
         wrapper.appendChild(document.createTextNode(word));
         return;
       }
-
-      const container = applyStyles('span', {
+      const container = document.createElement('span');
+      applyStyles(container, {
         [STYLE_DISPLAY]: CSS_INLINE_BLOCK,
         whiteSpace: 'nowrap',
       });
@@ -497,10 +598,7 @@ const USAL = (() => {
     const wrapper = document.createElement('span');
     wrapper.appendChild(document.createTextNode(parts[0]));
 
-    const span = applyStyles('span', {
-      [STYLE_DISPLAY]: 'inline',
-    });
-    span.textContent = '0';
+    const span = document.createElement('span');
     wrapper.appendChild(span);
 
     wrapper.appendChild(document.createTextNode(parts[1]));
@@ -517,7 +615,7 @@ const USAL = (() => {
     const duration = data.config[CONFIG_DURATION] ?? instance.config.defaults.duration;
     const delay = data.config[CONFIG_DELAY] ?? instance.config.defaults.delay;
     const easing = data.config[CONFIG_EASING] ?? instance.config.defaults.easing;
-    const start = performance.now() + delay;
+    let start = performance.now() + delay;
 
     const easingFunction =
       easing === 'linear'
@@ -548,10 +646,20 @@ const USAL = (() => {
       const easedProgress = easingFunction(progress);
 
       span.textContent = progress >= 1 ? original : formatNumber(value * easedProgress);
-
-      if (data.stop || progress >= 1) {
+      if (data.stop) {
         resolve();
-      } else requestAnimationFrame(tick);
+        return;
+      }
+      if (progress >= 1) {
+        if (data.config[CONFIG_LOOP]) {
+          start = performance.now() + delay;
+          requestAnimationFrame(tick);
+          return;
+        }
+        resolve();
+        return;
+      }
+      requestAnimationFrame(tick);
     };
 
     requestAnimationFrame(tick);
@@ -620,7 +728,9 @@ const USAL = (() => {
       const duration = config[CONFIG_DURATION] ?? instance.config.defaults.duration;
       const delay = config[CONFIG_DELAY] ?? instance.config.defaults.delay;
       const easing = config[CONFIG_EASING] ?? instance.config.defaults.easing;
+      const forwards = config[CONFIG_FORWARDS] ?? instance.config.defaults.forwards;
       const splitDelay = splitConfig[CONFIG_DELAY] ?? instance.config.defaults.splitDelay;
+
       const originalStyle = element.__usalOriginals?.style;
 
       // Text effects
@@ -643,15 +753,19 @@ const USAL = (() => {
       }
 
       // Standard animation
-      const options = {
+      let options = {
         duration,
         delay,
         easing,
         fill: 'forwards',
       };
 
-      const lestGo = (element, config, options, originalStyle, resolve) => {
-        const animation = element.animate(createKeyframes(config, originalStyle), {
+      if (config[CONFIG_LOOP]) options = { ...options, iterations: Infinity };
+
+      const letsGo = (element, config, options, originalStyle, resolve) => {
+        const keyframes = createKeyframes(config, originalStyle);
+        if (forwards) originalStyle = keyframes[keyframes.length - 1];
+        const animation = element.animate(keyframes, {
           ...options,
           id: genTmpId(),
         });
@@ -685,7 +799,7 @@ const USAL = (() => {
           }
 
           return new Promise((resolve) =>
-            lestGo(
+            letsGo(
               target,
               data.splitConfig,
               {
@@ -699,7 +813,7 @@ const USAL = (() => {
         });
         Promise.all(animationPromises).then(() => resolve());
       } else {
-        lestGo(element, config, options, originalStyle, resolve);
+        letsGo(element, config, options, originalStyle, resolve);
       }
     }).then(() => {
       data.onfinish();
@@ -710,6 +824,7 @@ const USAL = (() => {
 
   const animateIfVisible = (data, ratio = null) => {
     if (
+      data.config[CONFIG_LOOP] ||
       data.animating !== null ||
       (data.hasAnimated && (data.config[CONFIG_ONCE] ?? instance.config.once))
     )
@@ -781,6 +896,7 @@ const USAL = (() => {
     const existing = instance.elements.get(element.__usalID);
     if (existing) {
       if (classes !== existing.configString) {
+        instance.elements.delete(element.__usalID);
         elementObserver.unobserve(element);
         cleanupElement(existing).then(() => {
           processElement(element, elementObserver);
@@ -815,21 +931,23 @@ const USAL = (() => {
       ['word', 'letter', 'item'].includes(item)
     );
     if (splitBy) {
-      data.targets = setupSplit(element, splitBy, config[CONFIG_TEXT] ? '1' : '0');
+      data.targets = setupSplit(element, splitBy);
       const splitOverrides = parseClasses(config[CONFIG_SPLIT]);
       data.splitConfig = config.map((value, index) => splitOverrides[index] ?? value);
     }
 
-    // Hide element initially
-    if (!config[CONFIG_TEXT] && !config[CONFIG_COUNT] && !config[CONFIG_SPLIT]) {
-      applyStyles(element, { [STYLE_OPACITY]: '0' });
-    }
+    // Reset Style initially
+    resetStyle(data);
 
     instance.elements.set(element.__usalID, data);
 
     requestAnimationFrame(async () => {
-      animateIfVisible(data);
-      elementObserver.observe(element);
+      if (config[CONFIG_LOOP]) {
+        animate(data);
+      } else {
+        animateIfVisible(data);
+        elementObserver.observe(element);
+      }
     });
   };
 
@@ -892,8 +1010,8 @@ const USAL = (() => {
       // Clean disconnected elements
       instance.elements.forEach((data, id) => {
         if (!data.element.isConnected) {
+          elementObserver.unobserve(data.element);
           cleanupElement(data).then(() => {
-            elementObserver.unobserve(data.element);
             instance.elements.delete(id);
           });
         } else {

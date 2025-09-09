@@ -6,7 +6,7 @@ export interface USALDefaults {
   threshold?: number;
   splitDelay?: number;
   easing?: string;
-  blur?: boolean;
+  blur?: boolean | number;
 }
 
 export interface USALConfig {

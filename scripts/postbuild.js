@@ -24,6 +24,7 @@ let errorCount = 0;
 const files = {
   readme: 'README.md',
   index: 'docs/index.html',
+  api: 'docs/API.md',
   vanilla: path.join('packages', 'vanilla', 'README.md'),
 };
 
@@ -163,29 +164,13 @@ function getUpdates(fileType, info) {
 
         updates.push({
           regex: new RegExp(
-            `(### ${frameworkName}${pseudonymText}\n\n\`\`\`jsx?\n)([\\s\\S]*?)(\`\`\`)`,
-            'i'
+            `(### [\\u{1F7E0}-\\u{1F7EB}\\u{2B1B}\\u{2B1C}] ${frameworkName}${pseudonymText}\n\n\`\`\`jsx?\n)([\\s\\S]*?)(\`\`\`)`,
+            'iu'
           ),
           replacement: `$1${setup}\n$3`,
           name: `${frameworkName} setup`,
         });
       });
-
-    // Framework Usage section
-    const usageExamples = examples
-      .map(({ framework, example, pseudonyms }) => {
-        if (!example) return '';
-        const label = pseudonyms.length > 0 ? `${framework}/${pseudonyms.join('/')}` : framework;
-        return `<!-- ${label} -->\n${example}`;
-      })
-      .filter(Boolean)
-      .join('\n\n');
-
-    updates.push({
-      regex: /(### Framework Usage\n\n```html\n)([\s\S]*?)(```)/,
-      replacement: `$1${usageExamples}\n$3`,
-      name: 'Framework usage examples',
-    });
 
     // Package table in Packages Overview section
     let pkgTable = '| Package | Description | Version |\n|---------|-------------|---------|\n';
@@ -204,6 +189,24 @@ function getUpdates(fileType, info) {
       regex: /(## 📊 Packages Overview\n\n)([\s\S]*?)(\n\n## )/,
       replacement: `$1${pkgTable}$3`,
       name: 'Package overview table',
+    });
+  }
+
+  if (fileType === 'api' && fs.existsSync(files.api)) {
+    // Framework Usage section agora em API.md
+    const usageExamples = examples
+      .map(({ framework, example, pseudonyms }) => {
+        if (!example) return '';
+        const label = pseudonyms.length > 0 ? `${framework}/${pseudonyms.join('/')}` : framework;
+        return `<!-- ${label} -->\n${example}`;
+      })
+      .filter(Boolean)
+      .join('\n\n');
+
+    updates.push({
+      regex: /(### Framework Usage\n\n```html\n)([\s\S]*?)(```)/,
+      replacement: `$1${usageExamples}\n$3`,
+      name: 'Framework usage examples',
     });
   }
 

@@ -13,11 +13,17 @@ const Playground = (() => {
       threshold: '10',
       splitDelay: '50',
       easing: '',
-      blur: false,
+      blur: '',
       once: false,
       fontFamily: '',
       fontWeight: '',
       fontSize: '',
+      tuning1: '',
+      tuning2: '',
+      tuning3: '',
+      timeline: '',
+      loop: false,
+      forwards: false,
     },
   };
 
@@ -26,7 +32,7 @@ const Playground = (() => {
       html: '<h1>Welcome to USAL</h1>',
       animationType: 'fade-d',
       duration: '1000',
-      blur: true,
+      blur: 'blur',
     },
     cards: {
       html: `<div class="cards" style="display: flex">
@@ -78,6 +84,40 @@ const Playground = (() => {
       animationType: 'fade-u',
       splitDelay: '50',
       duration: '800',
+    },
+    tuning: {
+      html: '<h1>Tuned Animation</h1>',
+      animationType: 'zoomin',
+      tuning1: '30',
+      tuning2: '50',
+      tuning3: '80',
+      duration: '1500',
+    },
+    timeline: {
+      html: `<div style="
+    width: 100px;
+    height: 100px;
+    background: #bebebe12;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    border: 1px solid;
+    box-shadow: 0 10px 30px rgb(91 91 91 / 50%);
+  ">BANG!</div>`,
+      timeline:
+        'p+150 ry+0 | 20 ry+1440 | 50 ry+2160 | 80 ry+2340 | 95 ry+2430 rx+30 | ry+2440 rx+90',
+      duration: '5000',
+      forwards: true,
+    },
+    loop: {
+      html: '<div class="pulse">Continuous Loop</div>',
+      animationType: 'fade',
+      loop: true,
+      duration: '1000',
     },
   };
 
@@ -166,6 +206,15 @@ const Playground = (() => {
       }, 300)
     );
 
+    document.getElementById('animationType').addEventListener('change', (e) => {
+      const timelineSection = document.getElementById('customTimelineSection');
+      if (e.target.value === 'custom-timeline') {
+        timelineSection.style.display = 'block';
+      } else {
+        timelineSection.style.display = 'none';
+      }
+    });
+
     document.querySelectorAll('.preset-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         loadPreset(btn.dataset.preset);
@@ -220,8 +269,21 @@ const Playground = (() => {
       )
       .allow(''),
 
-    blur: joi.boolean(),
+    blur: joi
+      .string()
+      .pattern(/^(blur(-\d+)?)?$/)
+      .allow(''),
     once: joi.boolean(),
+
+    tuning1: joi.string().pattern(/^\d*$/).allow(''),
+    tuning2: joi.string().pattern(/^\d*$/).allow(''),
+    tuning3: joi.string().pattern(/^\d*$/).allow(''),
+    timeline: joi
+      .string()
+      .pattern(/^[a-z0-9\s+\-.|]*$/i)
+      .allow(''),
+    loop: joi.boolean(),
+    forwards: joi.boolean(),
   });
 
   function validateAndSanitize(config) {
@@ -230,7 +292,7 @@ const Playground = (() => {
     });
 
     if (error) {
-      throw new Error('Configuração inválida');
+      throw new Error('Invalid configuration');
     }
 
     if (value.html) {
@@ -249,17 +311,50 @@ const Playground = (() => {
     const tokens = dataUsal.trim().split(/\s+/).filter(Boolean);
     const newConfig = { ...state.config };
 
+    // Reset all
     newConfig.animationType = '';
     newConfig.splitType = '';
     newConfig.textEffect = '';
     newConfig.countTarget = '';
     newConfig.easing = '';
-    newConfig.blur = false;
+    newConfig.blur = '';
     newConfig.once = false;
+    newConfig.loop = false;
+    newConfig.forwards = false;
+    newConfig.tuning1 = '';
+    newConfig.tuning2 = '';
+    newConfig.tuning3 = '';
+    newConfig.timeline = '';
 
     for (const token of tokens) {
-      if (token.match(/^(fade|zoomin|zoomout|flip)(-[udlr]{1,2})?$/)) {
-        newConfig.animationType = token;
+      // Parse animation with tuning
+      if (token.match(/^(fade|zoomin|zoomout|flip)(-[udlr]{1,2})?(-\d+)?(-\d+)?(-\d+)?$/)) {
+        const parts = token.split('-');
+        newConfig.animationType = parts.slice(0, 2).join('-').replace(/--/, '-');
+
+        // Extract tuning values
+        const numbers = parts.slice(2).filter((p) => /^\d+$/.test(p));
+        if (numbers[0]) newConfig.tuning1 = numbers[0];
+        if (numbers[1]) newConfig.tuning2 = numbers[1];
+        if (numbers[2]) newConfig.tuning3 = numbers[2];
+        continue;
+      }
+
+      // Parse custom timeline
+      if (token.startsWith('line-[') && token.endsWith(']')) {
+        newConfig.timeline = token.slice(6, -1);
+        continue;
+      }
+
+      // Parse loop
+      if (token === 'loop') {
+        newConfig.loop = true;
+        continue;
+      }
+
+      // Parse forwards
+      if (token === 'forwards') {
+        newConfig.forwards = true;
         continue;
       }
 
@@ -311,7 +406,11 @@ const Playground = (() => {
       }
 
       if (token === 'blur') {
-        newConfig.blur = true;
+        newConfig.blur = 'blur';
+        continue;
+      }
+      if (token.match(/^blur-\d+$/)) {
+        newConfig.blur = token;
         continue;
       }
 
@@ -319,8 +418,6 @@ const Playground = (() => {
         newConfig.once = true;
       }
     }
-
-    state.config = newConfig;
 
     Object.keys(newConfig).forEach((key) => {
       const element = document.getElementById(key);
@@ -332,6 +429,8 @@ const Playground = (() => {
         }
       }
     });
+
+    state.config = newConfig;
   }
 
   function generateDataUsal() {
@@ -339,7 +438,20 @@ const Playground = (() => {
     const { config } = state;
 
     if (config.animationType) {
-      parts.push(config.animationType);
+      let animation = config.animationType.replace('custom-timeline', '');
+
+      if (config.tuning1 || config.tuning2 || config.tuning3) {
+        const tuningParts = [];
+        if (config.tuning1) tuningParts.push(config.tuning1);
+        if (config.tuning2) tuningParts.push(config.tuning2);
+        if (config.tuning3) tuningParts.push(config.tuning3);
+
+        if (tuningParts.length > 0) {
+          animation = `${animation}-${tuningParts.join('-')}`;
+        }
+      }
+
+      parts.push(animation);
     }
 
     if (config.splitType) {
@@ -352,6 +464,10 @@ const Playground = (() => {
       if (config.splitDelay && config.splitDelay !== '50') {
         parts.push(`split-delay-${config.splitDelay}`);
       }
+    }
+
+    if (config.timeline) {
+      parts.push(`line-[${config.timeline}]`);
     }
 
     if (config.textEffect) {
@@ -385,11 +501,19 @@ const Playground = (() => {
     }
 
     if (config.blur) {
-      parts.push('blur');
+      parts.push(config.blur);
     }
 
     if (config.once) {
       parts.push('once');
+    }
+
+    if (config.loop) {
+      parts.push('loop');
+    }
+
+    if (config.forwards) {
+      parts.push('forwards');
     }
 
     return parts.join(' ');
@@ -509,11 +633,17 @@ const Playground = (() => {
       threshold: '10',
       splitDelay: '50',
       easing: '',
-      blur: false,
+      blur: '',
       once: false,
       fontFamily: '',
       fontWeight: '',
       fontSize: '',
+      tuning1: '',
+      tuning2: '',
+      tuning3: '',
+      timeline: '',
+      loop: false,
+      forwards: false,
     };
 
     Object.keys(state.config).forEach((key) => {
@@ -626,7 +756,7 @@ const Playground = (() => {
       state.isUpdating = false;
       updateFromState();
     } catch (e) {
-      console.error('Falha ao carregar configuração:', e.message);
+      console.error('Failed to load configuration:', e.message);
     }
   }
 

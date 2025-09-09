@@ -60,6 +60,15 @@
       <button onclick="Debug.testCustomEasing()">Custom Easings</button>
       <button onclick="Debug.testThresholds()">All Thresholds</button>
 
+      <h3>New Features 1.1.2</h3>
+      <button onclick="Debug.testLoopAnimations()">Loop Tests</button>
+      <button onclick="Debug.testBlurVariations()">Blur Tests</button>
+      <button onclick="Debug.testBasicTimelines()">Basic Timeline</button>
+      <button onclick="Debug.testKeyframeTimelines()">Keyframe Timeline</button>
+      <button onclick="Debug.test3DTimelines()">3D Timeline</button>
+      <button onclick="Debug.testComplexTimelines()">Complex Timeline</button>
+      <button onclick="Debug.testAnimationTuning()">Animation Tuning</button>
+
       <h3>Configuration</h3>
       <input type="number" id="duration" placeholder="Duration" value="1000" />
       <input type="number" id="delay" placeholder="Delay" value="0" />
@@ -150,7 +159,7 @@
       <div class="grid">
         <div class="test-box" data-usal="count-[100] duration-1000">100</div>
         <div class="test-box" data-usal="count-[999.99] duration-2000">999.99</div>
-        <div class="test-box" data-usal="count-[1,234.56] duration-2500">$1,234.56</div>
+        <div class="test-box" data-usal="count-[1,234.56] duration-2500 loop">$1,234.56</div>
         <div class="test-box" data-usal="count-[42.5] duration-1500">Score: 42.5%</div>
         <div class="test-box" data-usal="count-[1 234 567] duration-3000">1 234 567 units</div>
       </div>
@@ -183,6 +192,42 @@
         <div class="test-box" data-usal="flip-r easing-[cubic-bezier(0.25,0.46,0.45,0.94)]">
           ease-out-quad
         </div>
+      </div>
+    </div>
+
+    <!-- Loop & Blur Tests -->
+    <div class="section">
+      <h2>Loop & Blur Tests</h2>
+      <div class="grid">
+        <div class="test-box" data-usal="fade loop">Loop fade</div>
+        <div class="test-box" data-usal="zoomin loop blur">Loop + blur</div>
+        <div class="test-box" data-usal="fade blur">Default blur</div>
+        <div class="test-box" data-usal="fade blur-2">Blur 2rem</div>
+        <div class="test-box" data-usal="flip loop duration-500">Fast loop</div>
+      </div>
+    </div>
+
+    <!-- Timeline Tests -->
+    <div class="section">
+      <h2>Custom Timeline</h2>
+      <div class="grid">
+        <div class="test-box" data-usal="line-[o+0s+0.5]">Fade + Scale</div>
+        <div class="test-box" data-usal="line-[|50s+1.5o+50] forwards">Keyframe 50%</div>
+        <div class="test-box" data-usal="line-[rx+180p+50]">3D Flip</div>
+        <div class="test-box" data-usal="line-[|25o+30|50o+60|75o+10] forwards once">
+          Multi-step
+        </div>
+      </div>
+    </div>
+
+    <!-- Animation Tuning -->
+    <div class="section">
+      <h2>Animation Tuning</h2>
+      <div class="grid">
+        <div class="test-box" data-usal="fade-10">Fade 10%</div>
+        <div class="test-box" data-usal="zoomin-75">Zoom 75%</div>
+        <div class="test-box" data-usal="flip-180-60">Flip 180°/60rem</div>
+        <div class="test-box" data-usal="fade-dr-60-40">Diagonal 60/40</div>
       </div>
     </div>
 

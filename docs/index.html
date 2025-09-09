@@ -9,12 +9,12 @@
     <!-- SEO -->
     <meta
       name="description"
-      content="Ultra-lightweight scroll animation library at just ~5KB gzipped. Powerful, wonderfully simple, featuring 40+ elegant animations in pure JavaScript."
+      content="Ultra-lightweight scroll animation library at just ~8KB gzipped. Powerful, wonderfully simple, featuring 40+ elegant animations in pure JavaScript."
     />
     <meta property="og:title" content="USAL.js - Ultimate Scroll Animation Library" />
     <meta
       property="og:description"
-      content="Lightweight, powerful, wonderfully simple ✨ Just ~5KB gzipped with 40+ beautiful scroll animations. Zero dependencies, maximum performance."
+      content="Lightweight, powerful, wonderfully simple ✨ Just ~8KB gzipped with 40+ beautiful scroll animations. Zero dependencies, maximum performance."
     />
     <meta property="og:url" content="https://usal.dev/" />
 
@@ -42,7 +42,7 @@
         <div class="content-wrapper">
           <!-- Home Section -->
           <section id="home" class="docs-section active">
-            <div class="hero-section" data-usal="fade-d duration-1000">
+            <div class="hero-section" data-usal="fade-d-10 duration-1000">
               <h1
                 class="hero-title"
                 data-usal="text-fluid split-letter duration-2000 split-delay-200"
@@ -105,7 +105,7 @@
 
               <div class="specs" data-usal="fade-d split-item split-delay-300">
                 <div class="spec-item">
-                  <div class="spec-value" data-usal="count-[5] duration-500 linear">~5KB</div>
+                  <div class="spec-value" data-usal="count-[5] duration-500 linear">~8KB</div>
                   <div class="spec-label">Gzipped Size</div>
                 </div>
                 <div class="spec-item">
@@ -133,7 +133,7 @@
                     style="font-size: 1.25rem"
                     data-usal="count-[40] duration-2000 linear"
                   >
-                    Observer
+                    rAF
                   </div>
                   <div class="spec-label">Engine</div>
                 </div>
@@ -144,7 +144,7 @@
           <!-- Quick Start Section -->
           <section id="quickstart" class="docs-section">
             <div class="section">
-              <h2 class="section-title" data-usal="fade-dl duration-800 delay-400 blur">
+              <h2 class="section-title" data-usal="fade-dl-10 duration-800 delay-400 blur">
                 Quick Start
               </h2>
 
@@ -174,7 +174,7 @@ npm install @usal/angular</code></pre>
           <!-- Installation Section -->
           <section id="installation" class="docs-section">
             <div class="section">
-              <h2 class="section-title" data-usal="fade-dr duration-800 delay-400 blur">
+              <h2 class="section-title" data-usal="fade-dr-10 duration-800 delay-400 blur">
                 Framework Setup
               </h2>
               <div class="card card-compact" data-usal="fade-u delay-200">
@@ -366,7 +366,7 @@ export class AppComponent</code></pre>
             <div class="section">
               <h2
                 class="section-title"
-                data-usal="fade-d delay-1000 split-flip-d split-letter split-delay-100 duration-800 blur"
+                data-usal="fade-d split-flip-d split-letter split-delay-100 duration-800 blur"
               >
                 Text Split Animations
               </h2>
@@ -417,7 +417,7 @@ export class AppComponent</code></pre>
           <!-- Counter Section -->
           <section id="counter" class="docs-section">
             <div class="section">
-              <h2 class="section-title" data-usal="fade-ul duration-800 delay-400 blur">
+              <h2 class="section-title" data-usal="fade-ul-10 duration-800 delay-400 blur">
                 Count Animations
               </h2>
 
@@ -588,10 +588,97 @@ export class AppComponent</code></pre>
             </div>
           </section>
 
+          <!-- Timeline Section -->
+          <section id="timeline" class="docs-section">
+            <div class="section">
+              <h2
+                class="section-title"
+                data-usal="fade-d split-word split-delay-100 duration-800 delay-400 blur"
+              >
+                Advanced Timeline
+              </h2>
+
+              <div class="grid">
+                <div class="box" data-usal="fade-u loop">
+                  Loop Animation <br /><span style="opacity: 50%">fade-u loop</span>
+                </div>
+                <div class="box" data-usal="line-[|50s+1.5o+50] forwards">
+                  Forwards State <br /><span style="opacity: 50%"
+                    >line-[|50s+1.5o+50] forwards</span
+                  >
+                </div>
+                <div class="box" data-usal="flip-r blur-3">
+                  Custom Blur <br /><span style="opacity: 50%">flip-r blur-3</span>
+                </div>
+                <div class="box" data-usal="fade-40">
+                  Tuned Movement <br /><span style="opacity: 50%">fade-40</span>
+                </div>
+                <div class="box" data-usal="zoomin-30-50">
+                  Tuned Zoom <br /><span style="opacity: 50%">zoomin-30-50</span>
+                </div>
+                <div class="box" data-usal="line-[o+0 s+0.5 | 50 s+1.2 | o+100 s+1] duration-2000">
+                  Timeline Basic <br /><span style="opacity: 50%"
+                    >line-[o+0 s+0.5 | 50 s+1.2 | o+100 s+1]</span
+                  >
+                </div>
+                <div class="box" data-usal="line-[p+150 ry+0 | 50 ry+180 | ry+360] duration-3000">
+                  Timeline 3D <br /><span style="opacity: 50%"
+                    >line-[p+150 ry+0 | 50 ry+180 | ry+360]</span
+                  >
+                </div>
+                <div class="box" data-usal="line-[b+5 o+0 | 30 b+2 o+50 | b+0 o+100] duration-2500">
+                  Timeline Blur <br /><span style="opacity: 50%"
+                    >line-[b+5 o+0 | 30 b+2 o+50 | b+0 o+100]</span
+                  >
+                </div>
+                <div
+                  class="box"
+                  data-usal="custom-timeline line-[p+150 ry+0 | 20 ry+1440 | 50 ry+2160 | 80 ry+2340 | 95 ry+2430 rx+30 | ry+2440 rx+90] forwards duration-5000"
+                >
+                  Bang!
+                </div>
+              </div>
+
+              <pre><code class="html">&lt;!-- Loop Animation --&gt;
+&lt;div data-usal="fade-u loop"&gt;Continuous loop&lt;/div&gt;
+
+&lt;!-- Forwards State --&gt;
+&lt;div data-usal="line-[|50s+1.5o+50] forwards"&gt;Keep final state&lt;/div&gt;
+
+&lt;!-- Custom Blur --&gt;
+&lt;div data-usal="flip-r blur-3"&gt;3rem blur effect&lt;/div&gt;
+
+&lt;!-- Animation Tuning --&gt;
+&lt;div data-usal="fade-40"&gt;40% movement distance&lt;/div&gt;
+&lt;div data-usal="zoomin-30-50"&gt;30% movement, 50% intensity&lt;/div&gt;
+&lt;div data-usal="flip-120-60"&gt;120° angle, 60rem perspective&lt;/div&gt;
+
+&lt;!-- Timeline Animations --&gt;
+&lt;div data-usal="line-[o+0 s+0.5 | 50 s+1.2 | o+100 s+1] duration-2000"&gt;
+  Multi-keyframe timeline
+&lt;/div&gt;
+
+&lt;div data-usal="line-[p+150 ry+0 | 50 ry+180 | ry+360] duration-3000"&gt;
+  3D rotation timeline
+&lt;/div&gt;
+
+&lt;div data-usal="line-[
+  p+150 ry+0
+  | 20 ry+1440
+  | 50 ry+2160
+  | 80 ry+2340
+  | 95 ry+2430 rx+30
+  | ry+2440 rx+90
+] duration-5000 forwards"&gt;
+  Bang!
+&lt;/div&gt;</code></pre>
+            </div>
+          </section>
+
           <!-- Dynamic Content Section -->
           <section id="dynamic" class="docs-section">
             <div class="section">
-              <h2 class="section-title" data-usal="flip-u duration-800 delay-400 blur">
+              <h2 class="section-title" data-usal="flip-u-100 duration-800 delay-400 blur">
                 Dynamic Content Test
               </h2>
 
@@ -614,13 +701,13 @@ parent.appendChild(item);</code></pre>
           <!-- API Section -->
           <section id="api" class="docs-section">
             <div class="section">
-              <h2 class="section-title" data-usal="fade-dr duration-800 delay-400 blur">
+              <h2 class="section-title" data-usal="fade-dr-10 duration-800 delay-400 blur">
                 API Documentation
               </h2>
 
               <div class="grid-2">
                 <!-- Properties -->
-                <div class="card" data-usal="fade-u threshold-10">
+                <div class="card" data-usal="fade-u-5 threshold-2">
                   <h3>Property Values</h3>
 
                   <div class="animation-item">
@@ -702,8 +789,17 @@ duration-500, duration-1000, duration-2000
 // Delay in milliseconds
 delay-200, delay-500, delay-1000
 
-// Other modifiers
-blur, once, threshold-50</code></pre>
+// Threshold (percentage of element visible)
+threshold-10, threshold-30, threshold-50
+
+// Blur effect
+blur           // Default blur (0.625rem)
+blur-2         // Custom blur (2rem)
+
+// Behavior modifiers
+once           // Run animation only once
+loop           // Run animation continuously
+forwards       // Keep final animation state</code></pre>
                   </div>
 
                   <div class="animation-item">
@@ -727,7 +823,7 @@ text-fluid      // Morphing font weight
                   </div>
                 </div>
 
-                <div class="card" data-usal="fade-u threshold-10">
+                <div class="card" data-usal="fade-u-5 threshold-2">
                   <h3>Property Names</h3>
 
                   <div class="animation-item">
@@ -772,11 +868,96 @@ text-fluid      // Morphing font weight
                     <strong>Tip:</strong> For large elements (>100vh), use lower thresholds like
                     threshold-5 or threshold-10 to ensure animations trigger properly.
                   </div>
+
+                  <h3>Advanced</h3>
+                  <div class="animation-item">
+                    <div class="animation-name">Animation Tuning</div>
+                    <div class="animation-desc">Fine-tune animations with numeric values</div>
+                    <pre><code class="javascript">// Syntax: {animation}-{direction}-{value1}-{value2}-{value3}
+
+// Fade: controls movement distance
+fade-40         // 40% movement (default: 15% normal, 50% split(word/letter))
+fade-30-60      // X: 30%, Y: 60%
+
+// Zoom: controls scale and movement
+zoomin-30       // 30% intensity (default: 15% normal, 50% split(word/letter))
+zoomin-40-60    // movement: 40%, intensity: 60%
+zoomin-30-50-80 // X: 30%, Y: 50%, intensity: 80%
+
+// Flip: controls rotation and perspective
+flip-120        // 120° angle (default: 90°)
+flip-90-60      // angle: 90°, perspective: 60rem (default: 25rem)</code></pre>
+                  </div>
+
+                  <div class="animation-item">
+                    <div class="animation-name">Custom Timeline</div>
+                    <div class="animation-desc">Create precise keyframe animations</div>
+                    <pre><code class="javascript">// Syntax: line-[{timeline}]
+// Case-insensitive, spaces/linebreaks allowed for readability
+
+// PROPERTIES REFERENCE:
+// o±value  = Opacity (0-100, auto-clamped to 0-1)
+// s±value  = Scale (X and Y axes)
+// sx/sy/sz = Scale individual axes
+// t±value  = Translate (X only, %)
+// tx/ty/tz = Translate individual axes (%)
+// r±value  = Rotate (Z-axis, degrees)
+// rx/ry/rz = Rotate individual axes (degrees)
+// b±value  = Blur (rem, negatives become 0)
+// p±value  = Perspective (rem)
+
+// KEYFRAME BEHAVIORS:
+
+// No pipes: FROM value TO original state
+line-[o+0]                    // Opacity: 0 → 1 (original)
+line-[s+0.5]                  // Scale: 0.5 → 1 (original)
+line-[o+0 s+0.3 tx+50]        // Multiple: all start from values → original
+
+// One pipe: FROM original TO value
+line-[|o+50]                  // Opacity: 1 → 0.5
+line-[|60s+1.5]               // At 60%: scale to 1.5, holds to 100%
+line-[|o+20 s+1.5]            // Multiple: original → final values
+
+// Multiple pipes (2+): Copies first to 0%, last to 100%
+line-[|25o+30|50o+60|75o+90]
+// 0%: o+30, 25%: o+30, 50%: o+60, 75%: o+90, 100%: o+90
+
+// COMPLEX EXAMPLES:
+
+// Multi-property animation
+line-[o+0 s+0.5 tx+50 | 50 s+1.2 tx+25 | o+100 s+1 tx+0]
+// 0%: opacity 0, scale 0.5, translateX 50%
+// 50%: scale 1.2, translateX 25%
+// 100%: opacity 1, scale 1, translateX 0
+
+// 3D transformations (order matters!)
+line-[rx+90 p+50]             // Flip X with perspective
+line-[p+100 ry+180 sx+0.5]    // Perspective first, then rotate & scale
+
+// Multi-line for readability
+line-[
+  o+0 sx+0.2 sy+0.2 tx+70 |
+  40 o+50 sx+0.8 sy+0.8 tx+35 |
+  70 o+90 sx+0.95 sy+0.95 tx+5 |
+  o+100 sx+1 sy+1 tx+0
+]
+
+// Combine with modifiers
+line-[o+0s+0.5] duration-2000 forwards
+line-[|50s+1.5] loop blur-2
+line-[rx+360] easing-[cubic-bezier(0.4,0,0.2,1)]
+
+// IMPORTANT NOTES:
+// - Transform order affects result (rotate then translate ≠ translate then rotate)
+// - Don't mix general & specific (s+0.5 with sx+0.8 = conflict)
+// - Duplicate properties: last value wins
+// - Overrides standard animations (fade, zoomin, etc.)</code></pre>
+                  </div>
                 </div>
               </div>
 
               <!-- JavaScript API -->
-              <div class="card" data-usal="fade-u threshold-10">
+              <div class="card" data-usal="fade-u-5 threshold-2">
                 <h3>JavaScript API</h3>
                 <div class="animation-item">
                   <div class="animation-name">window.USAL.config(options)</div>
@@ -790,8 +971,9 @@ window.USAL.config({
     delay: 0,               // Animation delay (ms)
     threshold: 10,          // Viewport threshold (%)
     splitDelay: 30,         // Delay between split items (ms)
+    forwards: false,        // Keep final animation state
     easing: "ease-out",     // CSS easing function
-    blur: false             // Enable/disable blur effect
+    blur: false             // false, true (0.625rem), or number (rem)
   },
   observersDelay: 50,       // Delay for observers (ms)
   once: false               // Run animation only once
@@ -845,10 +1027,10 @@ console.log(window.USAL.version); // string</code></pre>
           <!-- Comparison Section -->
           <section id="comparison" class="docs-section">
             <div class="section">
-              <h2 class="section-title" data-usal="fade-dl duration-800 delay-400 blur">
+              <h2 class="section-title" data-usal="fade-dl-10 duration-800 delay-400 blur">
                 Framework Comparison
               </h2>
-              <div id="comparison-container" data-usal="fade-u threshold-2"></div>
+              <div id="comparison-container" data-usal="fade-u-5 threshold-2"></div>
             </div>
           </section>
 
@@ -860,8 +1042,61 @@ console.log(window.USAL.version); // string</code></pre>
               </h2>
 
               <div class="changelog-container">
-                <!-- v1.1.1 -->
+                <!-- v1.2.0 -->
                 <div class="changelog-entry" data-usal="fade-u">
+                  <div class="changelog-header">
+                    <h3 class="changelog-version">v1.2.0</h3>
+                    <span class="changelog-date">September 2025</span>
+                  </div>
+                  <div class="changelog-content">
+                    <h4>Advanced Animation Features</h4>
+                    <ul>
+                      <li>
+                        <strong>Loop animations:</strong> New <code>loop</code> modifier for
+                        continuous animation cycles
+                      </li>
+                      <li>
+                        <strong>Custom timeline animations:</strong> Advanced
+                        <code>line-[{timeline}]</code> syntax for precise keyframe control
+                      </li>
+                      <li>
+                        <strong>Animation tuning:</strong> Numeric parameters for fine-tuning
+                        standard animations (fade-40, zoomin-30-50, flip-120-60)
+                      </li>
+                      <li>
+                        <strong>Enhanced blur effects:</strong> Custom blur intensity with
+                        <code>blur-{value}</code> syntax
+                      </li>
+                      <li>
+                        <strong>Forwards modifier:</strong> <code>forwards</code> option to maintain
+                        final animation state
+                      </li>
+                    </ul>
+
+                    <h4>Timeline System</h4>
+                    <ul>
+                      <li>
+                        Support for opacity, scale, translate, rotate, blur, and perspective
+                        properties
+                      </li>
+                      <li>Multi-keyframe animations with percentage-based timing</li>
+                      <li>3D transformations with proper transform order handling</li>
+                      <li>Case-insensitive syntax with multi-line support for readability</li>
+                    </ul>
+
+                    <h4>Technical Updates</h4>
+                    <ul>
+                      <li>
+                        Bundle size updated to ~8KB gzipped (from ~5KB) due to advanced features
+                      </li>
+                      <li>Enhanced debug panel with comprehensive testing suite</li>
+                      <li>Improved element cleanup and animation state handling</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- v1.1.1 -->
+                <div class="changelog-entry" data-usal="fade-u delay-100">
                   <div class="changelog-header">
                     <h3 class="changelog-version">v1.1.1</h3>
                     <span class="changelog-date">September 2025</span>
@@ -898,7 +1133,7 @@ console.log(window.USAL.version); // string</code></pre>
                 </div>
 
                 <!-- v1.1.0 -->
-                <div class="changelog-entry" data-usal="fade-u delay-100">
+                <div class="changelog-entry" data-usal="fade-u delay-200">
                   <div class="changelog-header">
                     <h3 class="changelog-version">v1.1.0</h3>
                     <span class="changelog-date">September 2025</span>
@@ -931,7 +1166,7 @@ console.log(window.USAL.version); // string</code></pre>
                 </div>
 
                 <!-- v1.0.0 -->
-                <div class="changelog-entry" data-usal="fade-u delay-200">
+                <div class="changelog-entry" data-usal="fade-u delay-300">
                   <div class="changelog-header">
                     <h3 class="changelog-version">v1.0.0</h3>
                     <span class="changelog-date">September 2025</span>
@@ -952,7 +1187,7 @@ console.log(window.USAL.version); // string</code></pre>
                 </div>
               </div>
 
-              <div class="changelog-footer" data-usal="fade-u delay-300">
+              <div class="changelog-footer" data-usal="fade-u delay-400">
                 <a
                   href="https://github.com/italoalmeida0/usal/releases"
                   class="github-link"
@@ -963,8 +1198,6 @@ console.log(window.USAL.version); // string</code></pre>
               </div>
             </div>
           </section>
-
-
         </div>
 
         <!-- Top Bar -->
@@ -1023,6 +1256,7 @@ console.log(window.USAL.version); // string</code></pre>
           <a href="#modifiers" class="nav-item" data-section="modifiers">Modifiers & Options</a>
           <a href="#timing" class="nav-item" data-section="timing">Timing & Delays</a>
           <a href="#split" class="nav-item" data-section="split">Split Animations</a>
+          <a href="#timeline" class="nav-item" data-section="timeline">Advanced Timeline</a>
           <a href="#dynamic" class="nav-item" data-section="dynamic">Dynamic Content</a>
         </div>
 
@@ -1119,7 +1353,7 @@ console.log(window.USAL.version); // string</code></pre>
               title: 'Performance & Size Comparison',
               headers: [
                 'Framework',
-                'Bundle Size (min/gzip)',
+                'Bundle Size (gzip)',
                 'React',
                 'Vue',
                 'Angular',
@@ -1131,7 +1365,7 @@ console.log(window.USAL.version); // string</code></pre>
               rows: [
                 [
                   'USAL.js',
-                  '~10KB / ~5KB',
+                  '~8KB',
                   '✅ Native',
                   '✅ Native',
                   '✅ Native',
@@ -1141,11 +1375,11 @@ console.log(window.USAL.version); // string</code></pre>
                   '✅',
                 ],
                 ['Motion One', 'Variable (~small)', '✅', '✅', '❌', '❌', '❌', '❌', '✅'],
-                ['GSAP', '~60KB+', '✅', '✅', '✅', '✅', '✅', '✅', '✅'],
-                ['Anime.js v4', '~27KB / ~27KB', '✅', '✅', '✅', '✅', '✅', '✅', '✅'],
-                ['Lottie', '~237KB / ~60KB', '⚠️', '⚠️', '⚠️', '⚠️', '⚠️', '⚠️', '✅'],
-                ['AOS', '~75KB / ~18KB', '⚠️', '⚠️', '⚠️', '❌', '❌', '❌', '✅'],
-                ['SAL.js', '~2.5KB / ~1.2KB', '❌', '❌', '❌', '❌', '❌', '❌', '✅'],
+                ['GSAP', '~28KB', '✅', '✅', '✅', '✅', '✅', '✅', '✅'],
+                ['Anime.js v4', '~27KB', '✅', '✅', '✅', '✅', '✅', '✅', '✅'],
+                ['Lottie', '~60KB', '⚠️', '⚠️', '⚠️', '⚠️', '⚠️', '⚠️', '✅'],
+                ['AOS', '~8KB', '⚠️', '⚠️', '⚠️', '❌', '❌', '❌', '✅'],
+                ['SAL.js', '~2.7KB', '❌', '❌', '❌', '❌', '❌', '❌', '✅'],
               ],
             },
             features: {
@@ -1160,7 +1394,7 @@ console.log(window.USAL.version); // string</code></pre>
                 'Learning Curve',
               ],
               rows: [
-                ['USAL.js', '✅ Core', '✅ Core', '✅ Core', '❌', '❌', 'Very Easy'],
+                ['USAL.js', '✅ Core', '✅ Core', '✅ Core', '✅ Core', '❌', 'Very Easy'],
                 ['Motion One', '❌', '❌', '✅ Core', '⚠️ Variants', '✅ Core', 'Medium'],
                 [
                   'GSAP',
@@ -1214,8 +1448,7 @@ console.log(window.USAL.version); // string</code></pre>
                 else if (cell.includes('✅')) td.className = 'status-yes';
                 else if (cell.includes('⚠️')) td.className = 'status-partial';
                 else if (cell.includes('❌')) td.className = 'status-no';
-                else if (cell === '~10KB / ~5KB' && rowIndex === 0)
-                  td.className = 'highlight-value';
+                else if (cell === '~8KB' && rowIndex === 0) td.className = 'highlight-value';
                 else if (cellIndex === 1) td.className = 'size-value';
                 else if (cell === 'Very Easy' && rowIndex === 0) td.className = 'highlight-value2';
 
