@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.1] - 2025-09-09
 
-#### Fixed
+### Fixed
 
 - **Animation tuning**: Fixed parsing of tuning values when no direction is specified (e.g., `fade-50`, `flip-90` now work correctly)
 
