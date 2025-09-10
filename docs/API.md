@@ -76,12 +76,25 @@ split-flip-{direction}    // split-flip-d, split-flip-r
 ```
 
 #### Split Delay
-
 Control delay between split parts (milliseconds)
 
 ```
 split-delay-{value}
-// Examples: split-delay-30, split-delay-50, split-delay-100
+split-delay-{value}-{stagger}
+```
+
+**Stagger types:**
+- Default (by index): `split-delay-50`
+- Linear: `split-delay-50-linear`
+- Center (X/Y axes): `split-delay-50-center`
+- Edges (X/Y axes): `split-delay-50-edges`
+- Random: `split-delay-50-random`
+
+**Examples:**
+```
+split-delay-30
+split-delay-100-center
+split-delay-75-edges
 ```
 
 ```html
@@ -190,7 +203,7 @@ threshold-{value}
 ```
 blur / blur-{value}    // Add blur effect during animation (default: 0.625rem, custom: blur-2)
 once                   // Run animation only once
-loop                   // Run animation continuously (overrides 'once')
+loop / loop-{mirror/jump}   // Run animation continuously (overrides 'once') (default: mirror)
 forwards               // Keep final animation state (don't reset to original)
 ```
 
@@ -210,6 +223,7 @@ window.USAL.config({
     splitDelay: 30, // Delay between split items (ms)
     easing: 'ease-out', // CSS easing function
     blur: false, // Enable/disable blur effect (false, true, or numeric value in rem - default: 0.625rem when true)
+    loop: 'mirror',  // Default loop type (mirror, jump)
   },
   observersDelay: 50, // Delay for observers (ms)
   once: false, // Run animation only once

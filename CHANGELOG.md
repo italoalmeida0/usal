@@ -5,6 +5,30 @@ All notable changes to USAL.js will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+Analisando a diff da versão 1.2.2, aqui está o changelog:
+
+## [1.2.2] - 2025-09-10
+
+### Added
+
+- **Advanced loop types**: New `loop-mirror` and `loop-jump` modifiers for different loop behaviors
+  - `loop-mirror`: Back and forth animation (default behavior)
+  - `loop-jump`: Restart animation from beginning
+- **Enhanced split delay stagger patterns**: New stagger types for split animations
+  - `split-delay-{value}-linear`: Linear distance-based stagger
+  - `split-delay-{value}-center`: Center-outward stagger on X/Y axes
+  - `split-delay-{value}-edges`: Edges-inward stagger on X/Y axes
+  - `split-delay-{value}-random`: Random stagger pattern
+- **Improved blur precision**: Support for decimal blur values (e.g., `blur-0.5`, `blur-1.5`)
+- **Enhanced easing options**: Added `ease-in-out`, `step-start`, and `step-end` easing functions
+
+### Changed
+
+- **Loop configuration**: Default loop type can now be configured via `config.defaults.loop` (default: 'mirror')
+- **Playground improvements**: Enhanced controls and preset examples including new stagger effects
+- **Animation engine**: Refactored animation controller with better state management and performance
+- **Split animation syntax**: Improved parsing for split animations with tuning parameters
+
 ## [1.2.1] - 2025-09-09
 
 ### Fixed

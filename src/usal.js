@@ -37,6 +37,7 @@ const USAL = (() => {
       forwards: false,
       easing: 'ease-out',
       blur: false,
+      loop: 'mirror',
     },
     observersDelay: 50,
     once: false,
@@ -77,6 +78,7 @@ const USAL = (() => {
   const CONFIG_FORWARDS = 12;
   const CONFIG_TUNING = 13;
   const CONFIG_LINE = 14;
+  const CONFIG_STAGGER = 15;
 
   const DIRECTION_UP = 1;
   const DIRECTION_DOWN = 2;
@@ -88,12 +90,32 @@ const USAL = (() => {
   const STYLE_FILTER = 'filter';
   const STYLE_PERSPECTIVE = 'perspective';
   const STYLE_DISPLAY = 'display';
-  const STYLE_FONT_WEIGHT = 'fontWeight';
   const CSS_NONE = 'none';
   const CSS_INLINE_BLOCK = 'inline-block';
 
   const INTERSECTION_THRESHOLDS = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
   const ANIMATION_TYPES = ['fade', 'zoomin', 'zoomout', 'flip'];
+
+  const SHIMMER_KEYFRAMES = Array.from({ length: 17 }, (_, i) => {
+    const progress = i / 16;
+    const wave = (Math.sin(progress * Math.PI * 2) + 1) / 2;
+
+    return {
+      opacity: 0.5 + wave * 0.5,
+      filter: `brightness(${1 + wave * 0.3})`,
+      offset: progress,
+    };
+  });
+
+  const WEIGHT_KEYFRAMES = Array.from({ length: 17 }, (_, i) => {
+    const progress = i / 16;
+    const wave = (Math.sin(progress * Math.PI * 2) + 1) / 2;
+
+    return {
+      fontWeight: Math.round(100 + wave * 800).toString(),
+      offset: progress,
+    };
+  });
 
   // ============================================================================
   // Utilities
@@ -185,7 +207,7 @@ const USAL = (() => {
       span.textContent = '0';
     } else if (data.config[CONFIG_SPLIT]) {
       if (data.targets) {
-        data.targets.forEach((target) => {
+        data.targets().forEach(([target]) => {
           applyStyles(
             target,
             createKeyframes(data.config, target.__usalOriginals?.style || originalStyle)[0]
@@ -240,9 +262,11 @@ const USAL = (() => {
   };
 
   const parseClasses = (classString) => {
-    const config = new Array(15).fill(null);
-    config[CONFIG_LOOP] = false;
+    const config = new Array(16).fill(null);
     config[CONFIG_TUNING] = [];
+    config[CONFIG_STAGGER] = 'index';
+
+    classString = classString.replace(/\/\/[^\n\r]*/g, '').replace(/\/\*.*?\*\//gs, '');
     classString = classString.toLowerCase().trim();
 
     classString = extractAndSetConfig('count', config, CONFIG_COUNT, classString);
@@ -266,9 +290,6 @@ const USAL = (() => {
       }
 
       switch (token) {
-        case 'loop':
-          config[CONFIG_LOOP] = true;
-          break;
         case 'once':
           config[CONFIG_ONCE] = true;
           break;
@@ -294,10 +315,15 @@ const USAL = (() => {
               if (parts[1]) config[CONFIG_BLUR] = +parts[1];
               else config[CONFIG_BLUR] = true;
               break;
+            case 'loop':
+              if (parts[1] === 'mirror' || parts[1] === 'jump') {
+                config[CONFIG_LOOP] = parts[1];
+              } else config[CONFIG_LOOP] = true;
+              break;
             case 'text':
               if (parts[1] === 'shimmer' || parts[1] === 'fluid') {
                 config[CONFIG_TEXT] = parts[1];
-                config[CONFIG_LOOP] = true;
+                config[CONFIG_LOOP] = 'jump';
               }
               break;
             case 'duration':
@@ -305,6 +331,7 @@ const USAL = (() => {
               break;
             case 'delay':
               if (parts[1]) config[CONFIG_DELAY] = +parts[1];
+              if (parts[2]) config[CONFIG_STAGGER] = parts[2];
               break;
             case 'threshold':
               if (parts[1]) config[CONFIG_THRESHOLD] = +parts[1];
@@ -483,8 +510,77 @@ const USAL = (() => {
   // ============================================================================
   // Split Animation Setup
   // ============================================================================
+  function getStaggerFunction(targets, strategy = 'index') {
+    const targetsData = targets.map((target) => {
+      const rect = target.getBoundingClientRect();
+      return {
+        target,
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      };
+    });
 
-  const setupSplit = (element, splitBy) => {
+    const bounds = targetsData.reduce(
+      (acc, item) => ({
+        minX: Math.min(acc.minX, item.x),
+        maxX: Math.max(acc.maxX, item.x),
+        minY: Math.min(acc.minY, item.y),
+        maxY: Math.max(acc.maxY, item.y),
+      }),
+      { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity }
+    );
+
+    const centerX = (bounds.minX + bounds.maxX) / 2;
+    const centerY = (bounds.minY + bounds.maxY) / 2;
+
+    const metrics = targetsData.map((item, index) => {
+      let value;
+      switch (strategy) {
+        case 'linear':
+          value = Math.hypot(item.x, item.y);
+          break;
+        case 'center':
+          value = Math.hypot(item.x - centerX, item.y - centerY);
+          break;
+        case 'edges':
+          value = Math.min(
+            Math.abs(item.x - bounds.minX),
+            Math.abs(item.x - bounds.maxX),
+            Math.abs(item.y - bounds.minY),
+            Math.abs(item.y - bounds.maxY)
+          );
+          break;
+        case 'random':
+          value = Math.random();
+          break;
+        default: // index
+          value = index;
+      }
+      return value;
+    });
+
+    const min = Math.min(...metrics);
+    const max = Math.max(...metrics);
+    const range = max - min || 1;
+
+    return (totalDuration = 1000, elementDuration = 50) => {
+      if (elementDuration > totalDuration) {
+        elementDuration = totalDuration;
+      }
+
+      const maxDelay = totalDuration - elementDuration;
+
+      return targetsData.map((item, index) => {
+        const normalizedValue = (metrics[index] - min) / range;
+
+        const delay = normalizedValue * maxDelay;
+
+        return [item.target, delay];
+      });
+    };
+  }
+
+  const setupSplit = (element, splitBy, strategy) => {
     const targets = [];
 
     // Split by child elements
@@ -496,7 +592,7 @@ const USAL = (() => {
         };
         targets.push(child);
       });
-      return targets;
+      return getStaggerFunction(targets, strategy);
     }
 
     // Split by text
@@ -547,7 +643,7 @@ const USAL = (() => {
     });
 
     element.appendChild(wrapper);
-    return targets;
+    return getStaggerFunction(targets, strategy);
   };
 
   // ============================================================================
@@ -611,25 +707,51 @@ const USAL = (() => {
     return true;
   };
 
-  const animateCount = (data, resolve) => {
-    const { value, decimals, original, span, thousandSep, decimalSep } = data.countData;
-    const duration = data.config[CONFIG_DURATION] ?? instance.config.defaults.duration;
-    const delay = data.config[CONFIG_DELAY] ?? instance.config.defaults.delay;
-    const easing = data.config[CONFIG_EASING] ?? instance.config.defaults.easing;
-    let start = performance.now() + delay;
+  // ============================================================================
+  // Count Animation
+  // ============================================================================
 
-    const easingFunction =
-      easing === 'linear'
-        ? (t) => t
-        : easing === 'ease'
-          ? (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t)
-          : easing === 'ease-in'
-            ? (t) => t * t * t
-            : (t) => 1 - Math.pow(1 - t, 3);
+  const animateCount = (countData, options) => {
+    const { duration, easing, delay, iterations } = options;
+    const { value, decimals, original, span, thousandSep, decimalSep } = countData;
+
+    let startTime = null;
+    let currentTime = 0;
+    let playState = 'idle';
+    let playbackRate = 1;
+    let pausedTime = 0;
+    let currentIteration = 0;
+
+    const getEasingFunction = (easingType) => {
+      switch (easingType) {
+        case 'linear':
+          return (t) => t;
+
+        case 'ease':
+          return (t) => {
+            if (t === 0) return 0;
+            if (t === 1) return 1;
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          };
+
+        case 'ease-in':
+          return (t) => t * t * t;
+
+        case 'ease-out':
+          return (t) => 1 - Math.pow(1 - t, 3);
+
+        case 'ease-in-out':
+          return (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+        default:
+          return (t) => t;
+      }
+    };
+
+    const easingFunction = getEasingFunction(easing);
 
     const formatNumber = (val) => {
       const parts = (decimals > 0 ? val.toFixed(decimals) : Math.floor(val).toString()).split('.');
-
       if (thousandSep && parts[0].length > 3) {
         const reversed = parts[0].split('').reverse();
         parts[0] = reversed.reduce(
@@ -637,83 +759,333 @@ const USAL = (() => {
           ''
         );
       }
-
       return parts.length > 1 && decimalSep ? parts[0] + decimalSep + parts[1] : parts[0];
     };
 
-    const tick = () => {
-      const elapsed = Math.max(0, performance.now() - start);
-      const progress = Math.min(elapsed / duration, 1);
+    const updateValue = (time) => {
+      const progress = Math.max(0, Math.min(1, time / duration));
       const easedProgress = easingFunction(progress);
+      const currentValue = value * easedProgress;
 
-      span.textContent = progress >= 1 ? original : formatNumber(value * easedProgress);
-      if (data.stop) {
-        resolve();
-        return;
-      }
+      span.textContent = formatNumber(currentValue);
+
       if (progress >= 1) {
-        if (data.config[CONFIG_LOOP]) {
-          start = performance.now() + delay;
-          requestAnimationFrame(tick);
-          return;
+        span.textContent = original;
+
+        if (iterations === Infinity || currentIteration < iterations - 1) {
+          currentIteration++;
+          currentTime = 0;
+          pausedTime = 0;
+          startTime = performance.now();
+        } else {
+          playState = 'finished';
         }
-        resolve();
-        return;
+      } else if (progress <= 0 && playbackRate < 0) {
+        span.textContent = formatNumber(0);
+
+        if (iterations === Infinity || currentIteration < iterations - 1) {
+          currentIteration++;
+          currentTime = duration;
+          pausedTime = duration;
+          startTime = performance.now();
+        } else {
+          playState = 'finished';
+        }
       }
-      requestAnimationFrame(tick);
     };
 
-    requestAnimationFrame(tick);
-  };
+    return {
+      tick() {
+        if (playState === 'running') {
+          const now = performance.now();
+          const elapsed = now - startTime;
 
-  // ============================================================================
-  // Text Effects Animation
-  // ============================================================================
+          if (playbackRate > 0) {
+            currentTime = pausedTime + elapsed;
+          } else {
+            currentTime = pausedTime - elapsed;
+          }
 
-  const animateTextEffect = (data, targets, type, duration, splitDelay, resolve) => {
-    const animations = [];
+          if (iterations !== Infinity && currentIteration >= iterations - 1) {
+            currentTime = Math.max(0, Math.min(duration, currentTime));
+          }
 
-    targets.forEach((target, index) => {
-      const frames = Array.from({ length: 17 }, (_, i) => {
-        const progress = i / 16;
-        const wave = (Math.sin(progress * Math.PI * 2) + 1) / 2;
+          updateValue(currentTime);
 
-        if (type === 'shimmer') {
-          return {
-            [STYLE_OPACITY]: 0.5 + wave * 0.5,
-            [STYLE_FILTER]: `brightness(${1 + wave * 0.3})`,
-            offset: progress,
-          };
+          if (
+            iterations !== Infinity &&
+            currentIteration >= iterations - 1 &&
+            ((playbackRate > 0 && currentTime >= duration) ||
+              (playbackRate < 0 && currentTime <= 0))
+          ) {
+            playState = 'finished';
+          }
+        }
+      },
+
+      play() {
+        if (playState === 'finished') {
+          if (playbackRate > 0) {
+            currentTime = 0;
+            pausedTime = 0;
+          } else {
+            currentTime = duration;
+            pausedTime = duration;
+          }
+          currentIteration = 0;
+        } else if (playState === 'paused') {
+          pausedTime = currentTime;
+        } else if (playState === 'idle') {
+          pausedTime = playbackRate > 0 ? 0 : duration;
+          currentTime = pausedTime;
         }
 
-        return {
-          [STYLE_FONT_WEIGHT]: Math.round(100 + wave * 800).toString(),
-          offset: progress,
-        };
-      });
+        startTime = performance.now();
+        playState = 'running';
+      },
 
-      const animation = target.animate(frames, {
-        duration: duration,
-        iterations: Infinity,
-        delay: index * splitDelay,
-        easing: 'linear',
-        iterationStart: 0.5,
-      });
+      pause() {
+        if (playState === 'running') {
+          pausedTime = currentTime;
+          playState = 'paused';
+        }
+      },
 
-      animations.push(animation);
-    });
+      reset() {
+        currentTime = 0;
+        pausedTime = 0;
+        playState = 'idle';
+        startTime = null;
+        currentIteration = 0;
+        updateValue(0);
+      },
 
-    function checkStop() {
-      if (data.stop) {
-        animations.forEach((animation) => animation.cancel());
-        animations.length = 0;
-        resolve();
-        return;
-      }
-      requestAnimationFrame(checkStop);
-    }
-    requestAnimationFrame(checkStop);
+      persist() {},
+
+      effect: {
+        getTiming() {
+          return { duration, delay, easing, iterations };
+        },
+      },
+
+      get playState() {
+        return playState;
+      },
+
+      get currentTime() {
+        return currentTime;
+      },
+
+      set currentTime(time) {
+        currentTime = Math.max(0, Math.min(duration, time));
+        pausedTime = currentTime;
+        updateValue(currentTime);
+        if (playState === 'finished') {
+          playState = 'paused';
+        }
+      },
+
+      get playbackRate() {
+        return playbackRate;
+      },
+
+      set playbackRate(rate) {
+        if (playState === 'paused') {
+          pausedTime = currentTime;
+        }
+        playbackRate = rate;
+      },
+    };
   };
+  // ============================================================================
+  // Animation Controller
+  // ============================================================================
+
+  class AnimationController {
+    reset() {
+      this.rafId = null;
+      this.animations = new Map();
+    }
+
+    constructor(data) {
+      this.data = data;
+      this.reset();
+    }
+
+    add(element, config, delay, originalStyle) {
+      const duration = this.data.config[CONFIG_DURATION] ?? instance.config.defaults.duration;
+      const easing = this.data.config[CONFIG_EASING] ?? instance.config.defaults.easing;
+      const forwards = this.data.config[CONFIG_FORWARDS] ?? instance.config.defaults.forwards;
+      const loop =
+        this.data.config[CONFIG_LOOP] === true
+          ? (instance.config.defaults.loop ?? 'mirror')
+          : this.data.config[CONFIG_LOOP];
+
+      // Standard animation
+      let options = {
+        duration,
+        delay,
+        easing,
+        fill: 'forwards',
+      };
+
+      if (loop === 'jump') options.iterations = Infinity;
+
+      let keyframes = [];
+      if (this.data.config[CONFIG_TEXT]) {
+        options = {
+          duration: duration,
+          iterations: Infinity,
+          delay: delay,
+          easing: 'linear',
+          iterationStart: 0.5,
+        };
+        keyframes =
+          this.data.config[CONFIG_TEXT] === 'shimmer' ? SHIMMER_KEYFRAMES : WEIGHT_KEYFRAMES;
+      } else {
+        keyframes = createKeyframes(config, originalStyle);
+      }
+
+      if (forwards) originalStyle = keyframes[keyframes.length - 1];
+
+      const animation = this.data.countData
+        ? animateCount(this.data.countData, options)
+        : element.animate(keyframes, {
+            ...options,
+            id: genTmpId(),
+          });
+
+      animation.persist();
+      animation.pause();
+
+      this.animations.set(animation, {
+        animation,
+        element,
+        delay,
+        originalStyle,
+        loop,
+        playbackRate: -1,
+        waiting: true,
+      });
+    }
+
+    letsGo() {
+      const { element, config, targets, splitConfig } = this.data;
+      const delay = config[CONFIG_DELAY] ?? instance.config.defaults.delay;
+      const duration = config[CONFIG_DURATION] ?? instance.config.defaults.duration;
+      const originalStyle = element.__usalOriginals?.style;
+      const splitDelay = splitConfig[CONFIG_DELAY] ?? instance.config.defaults.splitDelay;
+
+      let notReadYet = targets?.()?.length || (originalStyle ? 0 : 1);
+
+      if (targets) {
+        targets(duration, splitDelay).forEach(([target, delay]) => {
+          const targetOriginalStyle = target.__usalOriginals?.style || originalStyle;
+          if (!targetOriginalStyle) return;
+          notReadYet--;
+          this.add(target, this.data.splitConfig, parseInt(delay), targetOriginalStyle);
+        });
+      } else if (originalStyle) {
+        this.add(element, config, delay, originalStyle);
+      }
+
+      if (notReadYet === 0 && !this.rafId) {
+        this.tick();
+      }
+    }
+
+    timeToSayGoodbye() {
+      if (this.animations.size !== 0) return false;
+      this.reset();
+      cancelAnimationFrame(this.rafId);
+      this.data.resolve();
+      return true;
+    }
+
+    tick() {
+      const { toCleanup, toAnimate } = this.prepare();
+
+      this.cleanupAnimation(toCleanup);
+
+      this.animate(toAnimate);
+
+      if (!this.timeToSayGoodbye()) {
+        this.rafId = requestAnimationFrame(() => this.tick());
+      }
+    }
+
+    prepare() {
+      const toCleanup = [];
+      const toAnimate = [];
+
+      for (const [animation, info] of this.animations) {
+        if (this.data.stop) {
+          toCleanup.push([animation, info]);
+          continue;
+        }
+
+        animation.tick?.();
+
+        if (info.loop !== 'mirror') {
+          if (animation.playState === 'finished') {
+            toCleanup.push([animation, info]);
+            continue;
+          }
+        } else {
+          const duration = animation.effect.getTiming().duration;
+          if (typeof duration === 'number' && duration > 0) {
+            const progress = animation.currentTime / duration;
+
+            if (
+              !isNaN(progress) &&
+              isFinite(progress) &&
+              !info.waiting &&
+              ((progress >= 0.95 && info.playbackRate > 0) ||
+                (progress <= 0.05 && info.playbackRate < 0))
+            ) {
+              animation.pause();
+              info.waiting = true;
+            }
+          }
+        }
+        toAnimate.push(info);
+      }
+
+      return { toCleanup, toAnimate };
+    }
+
+    animate(toAnimate) {
+      if (toAnimate.length > 0 && toAnimate.every((info) => info.waiting)) {
+        const currentDirection = toAnimate[0].playbackRate;
+        if (currentDirection > 0) {
+          toAnimate.sort((a, b) => b.delay - a.delay);
+        } else {
+          toAnimate.sort((a, b) => a.delay - b.delay);
+        }
+
+        toAnimate.forEach((next) => {
+          next.waiting = false;
+          next.playbackRate = -currentDirection;
+          next.animation.playbackRate = next.playbackRate;
+          next.animation.play();
+        });
+      }
+    }
+
+    cleanupAnimation(toCleanup) {
+      toCleanup.forEach(([animation, info]) => {
+        const clean = () => {
+          this.animations.delete(animation);
+          this.timeToSayGoodbye();
+        };
+        if (this.data.countData) clean();
+        else
+          cancelAllAnimations(this.data, info.element, info.originalStyle).then(() => {
+            clean();
+          });
+      });
+    }
+  }
 
   // ============================================================================
   // Main Animation Controller
@@ -724,98 +1096,8 @@ const USAL = (() => {
     data.hasAnimated = true;
 
     data.animating = new Promise((resolve) => {
-      const { config, element, targets, countData, splitConfig } = data;
-
-      const duration = config[CONFIG_DURATION] ?? instance.config.defaults.duration;
-      const delay = config[CONFIG_DELAY] ?? instance.config.defaults.delay;
-      const easing = config[CONFIG_EASING] ?? instance.config.defaults.easing;
-      const forwards = config[CONFIG_FORWARDS] ?? instance.config.defaults.forwards;
-      const splitDelay = splitConfig[CONFIG_DELAY] ?? instance.config.defaults.splitDelay;
-
-      const originalStyle = element.__usalOriginals?.style;
-
-      // Text effects
-      if (config[CONFIG_TEXT]) {
-        animateTextEffect(
-          data,
-          targets || [element],
-          config[CONFIG_TEXT],
-          duration,
-          splitDelay,
-          resolve
-        );
-        return;
-      }
-
-      // Count animation
-      if (countData) {
-        animateCount(data, resolve);
-        return;
-      }
-
-      // Standard animation
-      let options = {
-        duration,
-        delay,
-        easing,
-        fill: 'forwards',
-      };
-
-      if (config[CONFIG_LOOP]) options = { ...options, iterations: Infinity };
-
-      const letsGo = (element, config, options, originalStyle, resolve) => {
-        const keyframes = createKeyframes(config, originalStyle);
-        if (forwards) originalStyle = keyframes[keyframes.length - 1];
-        const animation = element.animate(keyframes, {
-          ...options,
-          id: genTmpId(),
-        });
-        animation.persist();
-
-        let cleanup = () => {
-          cleanup = () => {};
-          cancelAllAnimations(data, element, originalStyle).then(() => resolve());
-        };
-
-        animation.onfinish = () => cleanup();
-
-        function checkStop() {
-          if (data.stop) {
-            cleanup();
-            return;
-          }
-          if (animation.playState === 'running') {
-            requestAnimationFrame(checkStop);
-          }
-        }
-        requestAnimationFrame(checkStop);
-      };
-
-      // Animate split elements or single element
-      if (targets) {
-        const animationPromises = targets.map((target, index) => {
-          const targetOriginalStyle = target.__usalOriginals?.style || originalStyle;
-          if (!targetOriginalStyle) {
-            return Promise.resolve();
-          }
-
-          return new Promise((resolve) =>
-            letsGo(
-              target,
-              data.splitConfig,
-              {
-                ...options,
-                delay: delay + index * splitDelay,
-              },
-              targetOriginalStyle,
-              resolve
-            )
-          );
-        });
-        Promise.all(animationPromises).then(() => resolve());
-      } else {
-        letsGo(element, config, options, originalStyle, resolve);
-      }
+      data.resolve = resolve;
+      data.controller.letsGo();
     }).then(() => {
       data.onfinish();
       data.animating = null;
@@ -860,7 +1142,7 @@ const USAL = (() => {
         const splitByItem = data.config[CONFIG_SPLIT]?.includes('item');
 
         if (data.targets) {
-          data.targets.forEach((target) => {
+          data.targets().forEach(([target]) => {
             if (target.__usalOriginals?.style) {
               applyStyles(target, target.__usalOriginals.style, true);
             }
@@ -921,7 +1203,11 @@ const USAL = (() => {
       animating: null,
       countData: null,
       onfinish: () => {},
+      controller: null,
+      resolve: () => {},
     };
+
+    data.controller = new AnimationController(data);
 
     // Setup special animations
     if (config[CONFIG_COUNT]) {
@@ -932,7 +1218,7 @@ const USAL = (() => {
       ['word', 'letter', 'item'].includes(item)
     );
     if (splitBy) {
-      data.targets = setupSplit(element, splitBy);
+      data.targets = setupSplit(element, splitBy, config[CONFIG_STAGGER]);
       const splitOverrides = parseClasses(config[CONFIG_SPLIT]);
       data.splitConfig = config.map((value, index) => splitOverrides[index] ?? value);
     }

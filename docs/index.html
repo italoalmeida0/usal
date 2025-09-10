@@ -757,7 +757,13 @@ split-item
 split-fade-r, split-fade-u, split-zoomin
 
 // Split delay in milliseconds
-split-delay-50, split-delay-100</code></pre>
+split-delay-50, split-delay-100
+
+// Split delay with stagger types
+split-delay-50-linear
+split-delay-50-center  // X/Y axes
+split-delay-50-edges   // X/Y axes
+split-delay-50-random</code></pre>
                   </div>
 
                   <div class="animation-item">
@@ -798,7 +804,7 @@ blur-2         // Custom blur (2rem)
 
 // Behavior modifiers
 once           // Run animation only once
-loop           // Run animation continuously
+loop / loop-{mirror/jump}   // Run animation continuously (overrides 'once') (default: mirror)
 forwards       // Keep final animation state</code></pre>
                   </div>
 
@@ -974,6 +980,7 @@ window.USAL.config({
     forwards: false,        // Keep final animation state
     easing: "ease-out",     // CSS easing function
     blur: false             // false, true (0.625rem), or number (rem)
+    loop: 'mirror',         // Default loop type (mirror, jump)
   },
   observersDelay: 50,       // Delay for observers (ms)
   once: false               // Run animation only once
@@ -1041,9 +1048,65 @@ console.log(window.USAL.version); // string</code></pre>
                 Changelog
               </h2>
 
-
-
               <div class="changelog-container">
+                <!-- v1.2.2 -->
+                <div class="changelog-entry" data-usal="fade-u delay-100">
+                  <div class="changelog-header">
+                    <h3 class="changelog-version">v1.2.2</h3>
+                    <span class="changelog-date">September 2025</span>
+                  </div>
+                  <div class="changelog-content">
+                    <h4>Advanced Loop Controls</h4>
+                    <ul>
+                      <li>
+                        New <code>loop-mirror</code> and <code>loop-jump</code> modifiers for
+                        different loop behaviors
+                      </li>
+                      <li>
+                        Back and forth animations with <code>loop-mirror</code> (default behavior)
+                      </li>
+                      <li>Restart animations from beginning with <code>loop-jump</code></li>
+                      <li>Configurable default loop type via <code>config.defaults.loop</code></li>
+                    </ul>
+
+                    <h4>Enhanced Split Animation Stagger</h4>
+                    <ul>
+                      <li>
+                        Linear distance-based stagger with <code>split-delay-{value}-linear</code>
+                      </li>
+                      <li>
+                        Center-outward stagger on X/Y axes with
+                        <code>split-delay-{value}-center</code>
+                      </li>
+                      <li>
+                        Edges-inward stagger on X/Y axes with <code>split-delay-{value}-edges</code>
+                      </li>
+                      <li>Random stagger pattern with <code>split-delay-{value}-random</code></li>
+                    </ul>
+
+                    <h4>Precision & Performance</h4>
+                    <ul>
+                      <li>
+                        Support for decimal blur values (e.g., <code>blur-0.5</code>,
+                        <code>blur-1.5</code>)
+                      </li>
+                      <li>
+                        Added <code>ease-in-out</code>, <code>step-start</code>, and
+                        <code>step-end</code> easing functions
+                      </li>
+                      <li>Refactored animation controller with better state management</li>
+                      <li>Improved parsing for split animations with tuning parameters</li>
+                    </ul>
+
+                    <h4>Playground Enhancements</h4>
+                    <ul>
+                      <li>Enhanced controls with loop type selector and stagger pattern options</li>
+                      <li>New preset examples demonstrating stagger effects</li>
+                      <li>Updated debug panel with loop and stagger test cases</li>
+                    </ul>
+                  </div>
+                </div>
+
                 <!-- v1.2.1 -->
                 <div class="changelog-entry" data-usal="fade-u delay-100">
                   <div class="changelog-header">

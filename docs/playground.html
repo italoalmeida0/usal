@@ -168,6 +168,16 @@
                 step="10"
               />
             </label>
+            <label class="control-label" id="splitDelayStaggerSection" style="display: none">
+              Stagger Type
+              <select id="splitDelayStagger" class="control-select">
+                <option value="">Default (index)</option>
+                <option value="linear">Linear</option>
+                <option value="center">Center</option>
+                <option value="edges">Edges</option>
+                <option value="random">Random</option>
+              </select>
+            </label>
           </div>
 
           <div class="sidebar-section">
@@ -240,6 +250,9 @@
               <option value="ease">ease</option>
               <option value="ease-in">ease-in</option>
               <option value="ease-out">ease-out</option>
+              <option value="ease-in-out">ease-in-out</option>
+              <option value="step-start">step-start</option>
+              <option value="step-end">step-end</option>
               <option value="easing-[cubic-bezier(0.68,-0.55,0.265,1.55)]">elastic</option>
               <option value="easing-[steps(5)]">steps(5)</option>
               <option value="custom">Custom</option>
@@ -306,6 +319,8 @@
                 <option value="blur-1">1rem</option>
                 <option value="blur-2">2rem</option>
                 <option value="blur-3">3rem</option>
+                <option value="blur-0.5">0.5rem</option>
+                <option value="blur-1.5">1.5rem</option>
               </select>
             </label>
             <label class="control-checkbox">
@@ -315,6 +330,13 @@
             <label class="control-checkbox">
               <input type="checkbox" id="loop" />
               <span>Loop continuously</span>
+            </label>
+            <label class="control-label" id="loopTypeSection" style="display: none">
+              Loop Type
+              <select id="loopType" class="control-select">
+                <option value="mirror">Mirror (back and forth)</option>
+                <option value="jump">Jump (restart)</option>
+              </select>
             </label>
             <label class="control-checkbox">
               <input type="checkbox" id="forwards" />
@@ -333,6 +355,7 @@
             <button class="preset-btn" data-preset="timeline">Custom Timeline</button>
             <button class="preset-btn" data-preset="tuning">Tuned Animation</button>
             <button class="preset-btn" data-preset="loop">Loop Animation</button>
+            <button class="preset-btn" data-preset="stagger">Stagger Effect</button>
           </div>
         </aside>
 

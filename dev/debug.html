@@ -161,7 +161,12 @@
         <div class="test-box" data-usal="count-[999.99] duration-2000">999.99</div>
         <div class="test-box" data-usal="count-[1,234.56] duration-2500 loop">$1,234.56</div>
         <div class="test-box" data-usal="count-[42.5] duration-1500">Score: 42.5%</div>
-        <div class="test-box" data-usal="count-[1 234 567] duration-3000">1 234 567 units</div>
+        <div class="test-box" data-usal="count-[1 234 567] duration-3000 loop-jump">
+          1 234 567 units
+        </div>
+        <div class="test-box" data-usal="count-[1 234 567] duration-3000 loop-mirror">
+          1 234 567 units
+        </div>
       </div>
     </div>
 
@@ -200,10 +205,10 @@
       <h2>Loop & Blur Tests</h2>
       <div class="grid">
         <div class="test-box" data-usal="fade loop">Loop fade</div>
-        <div class="test-box" data-usal="zoomin loop blur">Loop + blur</div>
+        <div class="test-box" data-usal="zoomin loop-jump blur">Loop + blur</div>
         <div class="test-box" data-usal="fade blur">Default blur</div>
         <div class="test-box" data-usal="fade blur-2">Blur 2rem</div>
-        <div class="test-box" data-usal="flip loop duration-500">Fast loop</div>
+        <div class="test-box" data-usal="flip loop-mirror duration-500">Fast loop</div>
       </div>
     </div>
 
@@ -217,6 +222,88 @@
         <div class="test-box" data-usal="line-[|25o+30|50o+60|75o+10] forwards once">
           Multi-step
         </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Custom Timeline</h2>
+      <style>
+        .square-container {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr);
+          grid-template-rows: repeat(7, 1fr);
+          gap: 5px; /* espaçamento entre os elementos */
+          padding: 20px;
+          width: 100%;
+          height: 500px; /* ajuste conforme necessário */
+          box-sizing: border-box;
+        }
+      </style>
+      <div
+        class="square-container"
+        data-usal="split-item delay-100-edges duration-2000 loop-mirror fade]"
+      >
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <br />
+
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <br />
+
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <br />
+
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <br />
+
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <br />
+
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <br />
+
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
+        <div class="test-box"></div>
       </div>
     </div>
 
