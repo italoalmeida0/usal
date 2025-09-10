@@ -1,25 +1,31 @@
+type LoopType = 'mirror' | 'jump';
+type AnimationType = 'fade' | 'zoomin' | 'zoomout' | 'flip';
+type DirectionType = 'u' | 'd' | 'l' | 'r' | 'ul' | 'ur' | 'dl' | 'dr';
+
 export interface USALDefaults {
-  animation?: string;
-  direction?: string;
-  duration?: number;
-  delay?: number;
-  threshold?: number;
-  splitDelay?: number;
+  animation?: AnimationType;
+  direction?: DirectionType;
+  duration?: number; // ms
+  delay?: number; // ms
+  threshold?: number; // %
+  splitDelay?: number; // ms
   easing?: string;
-  blur?: boolean | number;
+  blur?: boolean | number; // rem
+  forwards?: boolean;
+  loop?: LoopType;
 }
 
 export interface USALConfig {
   defaults?: USALDefaults;
-  observersDelay?: number;
+  observersDelay?: number; // ms
   once?: boolean;
 }
 
 export interface USALInstance {
   config(): USALConfig;
-  config(newConfig: USALConfig): USALInstance;
-  destroy(): Promise<void>;
-  restart(): Promise<USALInstance>;
+  config(newConfig: Partial<USALConfig>): USALInstance;
+  destroy(): Promise<void>; //use only extreme cases, the system is reactive even in shadowRoot
+  restart(): Promise<USALInstance>; //use only extreme cases, the system is reactive even in shadowRoot
   initialized(): boolean;
   readonly version: string;
 }

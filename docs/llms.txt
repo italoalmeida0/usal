@@ -1,0 +1,185 @@
+# USAL.js
+
+> USAL.js is a lightweight, powerful JavaScript library that brings together scroll animations, text effects, number counters, and custom timelines into a single 8KB package. Framework-agnostic with native support for React, Solid, Svelte, Vue, Lit, Angular, and Vanilla JS. Uses Tailwind-inspired utility-first syntax for creating 60fps scroll-triggered animations.
+
+Things to remember when using USAL.js:
+
+- USAL.js uses data attributes for configuration, inspired by Tailwind CSS utility-first approach - no complex JavaScript initialization required
+- The library is framework-agnostic but provides native integrations for all major frameworks, not just compatibility wrappers
+- Split animations (word/letter/item) and number counters are built-in, unlike most animation libraries that require plugins
+- Custom timeline animations provide advanced control with `line-[{timeline}]` syntax for complex keyframe sequences
+- All animations are hardware-accelerated using CSS transforms and run at 60fps with automatic cleanup
+- Use `threshold-{value}` for large elements (>100vh height) to ensure proper trigger timing
+
+## Docs
+
+- [Complete API Documentation](https://github.com/italoalmeida0/usal/wiki/API-Documentation): Full reference with examples and advanced usage patterns
+- [API Summary](https://github.com/italoalmeida0/usal/wiki/API-Summary): Quick reference of all animations, modifiers, and syntax
+- [Interactive Playground](https://playground.usal.dev/): Live code editor to test animations and generate code
+- [Main Website](https://usal.dev/): Interactive demos with source code for every animation type
+
+## Installation & Setup
+
+### CDN (Quickstart)
+```html
+<script src="https://cdn.usal.dev/latest"></script>
+```
+
+### NPM
+```bash
+npm install usal                 # Core library
+npm install @usal/react          # React/Next.js
+npm install @usal/solid          # Solid/SolidStart
+npm install @usal/svelte         # Svelte/SvelteKit
+npm install @usal/vue            # Vue/Nuxt
+npm install @usal/lit            # Lit
+npm install @usal/angular        # Angular
+```
+
+## Minimal API Reference
+
+### Base Animations
+- **Fade:** `fade` | `fade-{direction}` | `fade-{distance}` | `fade-{distance}-{distance}` | `fade-{direction}-{distance}` | `fade-{direction}-{distance}-{distance}`
+- **Zoom In:** `zoomin` | `zoomin-{direction}` | `zoomin-{intensity}` | `zoomin-{distance}-{intensity}` | `zoomin-{distance}-{distance}-{intensity}` | `zoomin-{direction}-{intensity}` | `zoomin-{direction}-{distance}-{intensity}` | `zoomin-{direction}-{distance}-{distance}-{intensity}`
+- **Zoom Out:** `zoomout` | `zoomout-{direction}` | `zoomout-{intensity}` | `zoomout-{distance}-{intensity}` | `zoomout-{distance}-{distance}-{intensity}` | `zoomout-{direction}-{intensity}` | `zoomout-{direction}-{distance}-{intensity}` | `zoomout-{direction}-{distance}-{distance}-{intensity}`
+- **Flip:** `flip` | `flip-{direction}` | `flip-{angle}` | `flip-{angle}-{perspective}` | `flip-{direction}-{angle}` | `flip-{direction}-{angle}-{perspective}`
+
+**Directions:** u, d, l, r, ul, ur, dl, dr
+
+### Split Animations
+- **Types:** `split-word` | `split-letter` | `split-item`
+- **Combined:** `split-{animation}-{direction}` | `split-{animation}-{direction}-{values}`
+- **Delays:** `split-delay-{milliseconds}` | `split-delay-{milliseconds}-{stagger}`
+- **Stagger types:** linear, center, edges, random
+
+### Counters & Effects
+- **Count:** `count-[{target}]` (target: numbers, spaces, dots, commas only)
+- **Text Effects:** `text-shimmer` | `text-fluid` (requires split-letter)
+
+### Custom Timeline
+- **Syntax:** `line-[{timeline}]`
+- **Properties:** `o±{value}` (opacity 0-100) | `s±{value}` (scale) | `sx/sy/sz±{value}` (scale axis) | `t±{value}` (translateX %) | `tx/ty/tz±{value}` (translate axis %) | `r±{value}` (rotateZ °) | `rx/ry/rz±{value}` (rotate axis °) | `b±{value}` (blur rem) | `p±{value}` (perspective rem)
+- **Keyframes:** `|` (separator) | `|{percentage}` (% position)
+
+### Modifiers
+- **Timing:** `duration-{ms}` | `delay-{ms}`
+- **Easing:** `linear` | `ease` | `ease-in` | `ease-out` | `ease-in-out` | `step-start` | `step-end` | `easing-[{css-function}]`
+- **Trigger:** `threshold-{percentage}`
+- **Effects:** `blur` | `blur-{rem}` | `once` | `loop` | `loop-{type}` | `forwards`
+- **Loop types:** mirror, jump
+
+## Framework Usage Examples
+
+```html
+<!-- Vanilla JS -->
+<div data-usal="fade-u duration-500">Content</div>
+
+<!-- React/Next.js -->
+<div data-usal="fade-u duration-500">Content</div>
+
+<!-- Solid/SolidStart -->
+<div data-usal="fade-u duration-500">Content</div>
+
+<!-- Svelte/SvelteKit -->
+<div use:usal={'fade-u duration-500'}>Content</div>
+
+<!-- Vue/Nuxt -->
+<div v-usal="'fade-u duration-500'">Content</div>
+
+<!-- Lit -->
+<div ${usal('fade-u duration-500')}>Content</div>
+
+<!-- Angular -->
+<div [usal]="'fade-u duration-500'">Content</div>
+```
+
+## JavaScript API
+
+```javascript
+// Configuration
+window.USAL.config({
+  defaults: {
+    animation: 'fade',
+    direction: 'u',
+    duration: 1000,
+    delay: 0,
+    threshold: 10,
+    splitDelay: 30,
+    easing: 'ease-out',
+    blur: false,
+    loop: 'mirror'
+  },
+  observersDelay: 50,
+  once: false
+});
+
+// Control methods
+window.USAL.initialized()  // Check if running (auto initialized)
+window.USAL.restart()      // Restart USAL, use only extreme cases, the system is reactive even in shadowRoot
+window.USAL.destroy()      // Shut down, use only extreme cases, the system is reactive even in shadowRoot
+window.USAL.version        // Get version
+```
+
+## Performance Comparison (2025)
+
+| Framework | Bundle Size | Framework Support | Split Animations | Number Counters | Learning Curve |
+|-----------|-------------|-------------------|------------------|-----------------|----------------|
+| **USAL.js** | **~8KB** | **All major + native** | **✅ Core** | **✅ Core** | **Very Easy** |
+| GSAP | ~28KB | All major | ⚠️ Plugin | ⚠️ Plugin | Complex |
+| Anime.js v4 | ~27KB | All major | ✅ Core | ✅ Core | Medium |
+| Motion One | Variable | Limited | ❌ | ❌ | Medium |
+| Lottie | ~60KB | Limited | ⚠️ via AE | ⚠️ via AE | Complex |
+| AOS | ~8KB | ⚠️ Limited | ❌ | ❌ | Very Easy |
+
+## Key Features
+
+- **40+ animations** with directional variations (fade, zoom, flip)
+- **Text animations** (split by word/letter/item with stagger options)
+- **Number counters** with formatting preservation
+- **Text effects** (shimmer, fluid morphing)
+- **Custom timeline** system for complex keyframe animations
+- **Animation tuning** with numeric parameters
+- **Framework agnostic** with native integrations
+- **8KB gzipped** with zero dependencies
+- **60fps performance** with hardware acceleration
+- **CDN powered** by jsDelivr & Cloudflare
+
+## Use Cases
+
+- Landing pages and marketing sites with scroll-triggered reveals
+- Product showcases and portfolios with staggered animations
+- SaaS applications with smooth onboarding flows
+- E-commerce sites with product reveal animations
+- Blog and content sites with reading experience enhancements
+- Mobile-responsive applications with touch-optimized animations
+
+## Technical Details
+
+- Built with modern JavaScript (ES6+) and TypeScript support
+- Uses Intersection Observer API for optimal performance
+- CSS transform-based animations for hardware acceleration
+- Automatic cleanup and memory management
+- No jQuery or external dependencies
+- Graceful degradation for older browsers
+- Works with Web Components and Shadow DOM
+
+## Community & Support
+
+- **GitHub Repository:** https://github.com/italoalmeida0/usal
+- **Issues & Bug Reports:** https://github.com/italoalmeida0/usal/issues
+- **NPM Package:** https://npmjs.com/package/usal
+- **CDN:** https://cdn.usal.dev/latest
+- **Creator:** [@italoalmeida0](https://github.com/italoalmeida0)
+
+## Inspiration
+
+USAL.js was inspired by:
+- **AOS.js** - Pioneering attribute-based animations
+- **SAL.js** - Lightweight performance optimization
+- **Tailwind CSS** - Utility-first naming conventions
+
+The goal was to combine the best aspects of these libraries while adding modern framework support, advanced features like split animations and custom timelines, and maintaining minimal bundle size.
+
+## License
+
+MIT License © 2025 Italo Almeida
