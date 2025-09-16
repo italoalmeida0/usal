@@ -40,9 +40,11 @@ npm install @usal/angular        # Angular
 
 ### Base Animations
 - **Fade:** `fade` | `fade-{direction}` | `fade-{distance}` | `fade-{distance}-{distance}` | `fade-{direction}-{distance}` | `fade-{direction}-{distance}-{distance}`
+- **Slide:** `slide` | `slide-{direction}` | `slide-{distance}` | `slide-{distance}-{distance}` | `slide-{direction}-{distance}` | `slide-{direction}-{distance}-{distance}`
 - **Zoom In:** `zoomin` | `zoomin-{direction}` | `zoomin-{intensity}` | `zoomin-{distance}-{intensity}` | `zoomin-{distance}-{distance}-{intensity}` | `zoomin-{direction}-{intensity}` | `zoomin-{direction}-{distance}-{intensity}` | `zoomin-{direction}-{distance}-{distance}-{intensity}`
 - **Zoom Out:** `zoomout` | `zoomout-{direction}` | `zoomout-{intensity}` | `zoomout-{distance}-{intensity}` | `zoomout-{distance}-{distance}-{intensity}` | `zoomout-{direction}-{intensity}` | `zoomout-{direction}-{distance}-{intensity}` | `zoomout-{direction}-{distance}-{distance}-{intensity}`
 - **Flip:** `flip` | `flip-{direction}` | `flip-{angle}` | `flip-{angle}-{perspective}` | `flip-{direction}-{angle}` | `flip-{direction}-{angle}-{perspective}`
+
 
 **Directions:** u, d, l, r, ul, ur, dl, dr
 
