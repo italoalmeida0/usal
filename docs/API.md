@@ -34,6 +34,13 @@ fade        fade-u      fade-d      fade-l      fade-r
 fade-ul     fade-ur     fade-dl     fade-dr
 ```
 
+#### Slide Animations
+
+```
+slide       slide-u     slide-d     slide-l     slide-r
+slide-ul    slide-ur    slide-dl    slide-dr
+```
+
 #### Zoom In Animations
 
 ```
@@ -76,6 +83,7 @@ split-flip-{direction}    // split-flip-d, split-flip-r
 ```
 
 #### Split Delay
+
 Control delay between split parts (milliseconds)
 
 ```
@@ -84,6 +92,7 @@ split-delay-{value}-{stagger}
 ```
 
 **Stagger types:**
+
 - Default (by index): `split-delay-50`
 - Linear: `split-delay-50-linear`
 - Center (X/Y axes): `split-delay-50-center`
@@ -91,6 +100,7 @@ split-delay-{value}-{stagger}
 - Random: `split-delay-50-random`
 
 **Examples:**
+
 ```
 split-delay-30
 split-delay-100-center
@@ -223,12 +233,11 @@ window.USAL.config({
     splitDelay: 30, // Delay between split items (ms)
     easing: 'ease-out', // CSS easing function
     blur: false, // Enable/disable blur effect (false, true, or numeric value in rem - default: 0.625rem when true)
-    loop: 'mirror',  // Default loop type (mirror, jump)
+    loop: 'mirror', // Default loop type (mirror, jump)
   },
   observersDelay: 50, // Delay for observers (ms)
   once: false, // Run animation only once
 });
-
 
 // Get current configuration
 const currentConfig = window.USAL.config();
@@ -250,7 +259,6 @@ window.USAL.config({
     direction: 'l',
   },
 });
-
 ```
 
 #### Control Methods
@@ -270,19 +278,20 @@ window.USAL.destroy();
 // Get version
 console.log(window.USAL.version);
 ```
+
 #### Blur Effect
 
 ```javascript
 // Blur can be boolean or numeric value in rem
 window.USAL.config({
   defaults: {
-    blur: false,           // No blur effect
+    blur: false, // No blur effect
     // or
-    blur: true,            // Default blur (0.625rem)
+    blur: true, // Default blur (0.625rem)
     // or
-    blur: 2,               // Custom blur (2rem)
+    blur: 2, // Custom blur (2rem)
     // or
-    blur: 0.5,             // Custom blur (0.5rem)
+    blur: 0.5, // Custom blur (0.5rem)
   },
 });
 ```
@@ -320,6 +329,7 @@ window.USAL.config({ defaults: { duration: 500 } })
 <!-- Fixed ID (prevents re-animation) -->
 <div data-usal="fade-u" data-usal-id="hero-section">Fixed ID</div>
 ```
+
 # 🚀 Advanced Options
 
 #### Custom Timeline Animation
@@ -331,12 +341,14 @@ line-[{timeline}]
 ```
 
 **Timeline Syntax:**
+
 - Properties (case-insensitive): `o` (opacity), `s/sx/sy/sz` (scale), `t/tx/ty/tz` (translate), `r/rx/ry/rz` (rotate), `b` (blur), `p` (perspective)
 - Values: `+` or `-` followed by number
 - Keyframes: Use `|` to separate, with optional percentage prefix
 - Formatting: Spaces and line breaks are allowed for better organization
 
 **Property Reference:**
+
 - `o±value`: Opacity (0-100, auto-clamped, divided by 100)
 - `s±value`: Scale (X and Y axes)
 - `sx±value`: ScaleX only
@@ -356,6 +368,7 @@ line-[{timeline}]
 **⚠️ Important Notes:**
 
 **Order Matters:** Transforms are applied in the order they appear
+
 ```html
 <!-- Different results! -->
 <div data-usal="line-[r+45tx+50]">Rotate then translate</div>
@@ -363,6 +376,7 @@ line-[{timeline}]
 ```
 
 **Avoid Conflicts:** Don't mix general and axis-specific properties
+
 ```html
 <!-- ❌ Conflict: s and sx both affect X scale -->
 <div data-usal="line-[s+0.5sx+0.8]">Conflicting scales</div>
@@ -372,6 +386,7 @@ line-[{timeline}]
 ```
 
 **Duplicate Properties:** Last value wins
+
 ```html
 <!-- Final opacity will be 0.8 -->
 <div data-usal="line-[o+50o+80]">Duplicate opacity</div>
@@ -383,28 +398,31 @@ line-[{timeline}]
 **Keyframe Rules:**
 
 1. **No pipes:** Animates FROM specified value TO original state
+
    ```html
    <!-- 0%: opacity 0, 100%: original -->
    <div data-usal="line-[o+0]">Fade in</div>
-   
+
    <!-- 0%: scale 0.3 (X and Y), 100%: original -->
    <div data-usal="line-[s+0.3]">Scale up</div>
    ```
 
 2. **One pipe:** Animates FROM original state TO specified value
+
    ```html
    <!-- 0%: original, 100%: opacity 0.2 -->
    <div data-usal="line-[|o+20]">Fade to 20%</div>
-   
+
    <!-- With percentage: 0%: original, 60%: opacity 0.4, 100%: opacity 0.4 -->
    <div data-usal="line-[|60o+40]">Fade at 60%</div>
    ```
 
 3. **Multiple pipes (2+):** Multi-step animation with auto-copy behavior
+
    ```html
-    <!-- 0%: opacity 0.3 (copy of 40%), 40%: opacity 0.3, 100%: opacity 0.7 -->
-    <div data-usal="line-[|40o+30|o+70]">Two pipes</div>
-   
+   <!-- 0%: opacity 0.3 (copy of 40%), 40%: opacity 0.3, 100%: opacity 0.7 -->
+   <div data-usal="line-[|40o+30|o+70]">Two pipes</div>
+
    <!-- 0%: opacity 0.1 (copy of 20%), 20%: opacity 0.1, 50%: opacity 0.6, 70%: opacity 0.8, 100%: opacity 0.8 (copy of 70%) -->
    <div data-usal="line-[|20o+10|50o+60|70o+80]">Multi-step fade</div>
    ```
@@ -413,21 +431,29 @@ line-[{timeline}]
 
 ```html
 <!-- Multi-line formatting for readability -->
-<div data-usal="line-[
+<div
+  data-usal="line-[
   O+0 SX+0.2 SY+0.2 TX+70 |
   40 O+50 SX+0.8 SY+0.8 TX+35 |
   70 O+90 SX+0.95 SY+0.95 TX+5 |
   O+100 SX+1 SY+1 TX+0
-]">Complex entrance (case-insensitive)</div>
+]"
+>
+  Complex entrance (case-insensitive)
+</div>
 
 <!-- 3D transformation with order consideration -->
-<div data-usal="line-[
+<div
+  data-usal="line-[
   p+100 rx+0 ry+0 sx+0.3 sy+0.3 |
   25 rx+90 sx+0.6 sy+0.6 |
   50 rx+180 ry+90 sx+1 sy+1 |
   75 rx+270 ry+180 |
   rx+360 ry+360
-]">3D flip sequence</div>
+]"
+>
+  3D flip sequence
+</div>
 
 <!-- Combine with other modifiers -->
 <div data-usal="line-[o+0s+0.5|50s+1.2|o+100s+1] duration-2000 easing-[cubic-bezier(0.4,0,0.2,1)]">
@@ -450,28 +476,32 @@ Fine-tune standard animations with numeric parameters.
 ```
 
 **Default Values:**
+
 - **Normal animations:**
-   - Fade/Zoom movement: 15%
-   - Zoom intensity: 15%
+  - Fade/Zoom movement: 15%
+  - Zoom intensity: 15%
 - **Split animations (word/letter):**
-   - Fade/Zoom movement: 50%
-   - Zoom intensity: 50%
+  - Fade/Zoom movement: 50%
+  - Zoom intensity: 50%
 - **Flip (both):**
-   - Angle: 90°
-   - Perspective: 25rem
+  - Angle: 90°
+  - Perspective: 25rem
 
 **Parameter Interpretation:**
 
 **Fade:** Controls movement distance
+
 - 1 value: `fade-40` → 40% distance (default: 25%)
 - 2 values: `fade-30-60` → X: 30%, Y: 60%
 
 **Zoom:** Controls scale and movement
+
 - 1 value: `zoomin-30` → 30% intensity (default: 25%)
 - 2 values: `zoomin-40-60` → movement: 40%, intensity: 60%
 - 3 values: `zoomin-30-50-80` → X: 30%, Y: 50%, intensity: 80%
 
 **Flip:** Controls rotation and 3D depth
+
 - 1 value: `flip-120` → 120° angle (default: 90°)
 - 2 values: `flip-90-60` → angle: 90°, perspective: 60rem (default: 25rem)
 

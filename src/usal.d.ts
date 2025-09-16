@@ -1,5 +1,5 @@
 type LoopType = 'mirror' | 'jump';
-type AnimationType = 'fade' | 'zoomin' | 'zoomout' | 'flip';
+type AnimationType = 'fade' | 'zoomin' | 'zoomout' | 'flip' | 'slide';
 type DirectionType = 'u' | 'd' | 'l' | 'r' | 'ul' | 'ur' | 'dl' | 'dr';
 
 export interface USALDefaults {

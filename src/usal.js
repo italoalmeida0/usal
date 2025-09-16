@@ -94,7 +94,7 @@ const USAL = (() => {
   const CSS_INLINE_BLOCK = 'inline-block';
 
   const INTERSECTION_THRESHOLDS = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
-  const ANIMATION_TYPES = ['fade', 'zoomin', 'zoomout', 'flip'];
+  const ANIMATION_TYPES = ['fade', 'zoomin', 'zoomout', 'flip', 'slide'];
 
   const SHIMMER_KEYFRAMES = Array.from({ length: 17 }, (_, i) => {
     const progress = i / 16;
@@ -190,7 +190,16 @@ const USAL = (() => {
           .filter((animation) => animation.id && animation.id.startsWith('__usal'))
           .forEach((animation) => {
             animation.cancel();
-            if (originalStyle) applyStyles(element, originalStyle);
+            animation.effect = null;
+            animation.timeline = null;
+            if (originalStyle) {
+              if (data?.config?.[CONFIG_SPLIT] && !data.config[CONFIG_SPLIT].includes('item'))
+                originalStyle = {
+                  ...originalStyle,
+                  [STYLE_DISPLAY]: CSS_INLINE_BLOCK,
+                };
+              applyStyles(element, originalStyle);
+            }
           });
         resolve();
       }, 0);
@@ -210,7 +219,10 @@ const USAL = (() => {
         data.targets().forEach(([target]) => {
           applyStyles(
             target,
-            createKeyframes(data.config, target.__usalOriginals?.style || originalStyle)[0]
+            createKeyframes(
+              data.splitConfig || data.config,
+              target.__usalOriginals?.style || originalStyle
+            )[0]
           );
         });
       }
@@ -261,10 +273,15 @@ const USAL = (() => {
     return direction > 0 ? direction : fallback;
   };
 
-  const parseClasses = (classString) => {
+  const genEmptyConfig = () => {
     const config = new Array(16).fill(null);
     config[CONFIG_TUNING] = [];
     config[CONFIG_STAGGER] = 'index';
+    return config;
+  };
+
+  const parseClasses = (classString) => {
+    const config = genEmptyConfig();
 
     classString = classString.replace(/\/\/[^\n\r]*/g, '').replace(/\/\*.*?\*\//gs, '');
     classString = classString.toLowerCase().trim();
@@ -279,14 +296,16 @@ const USAL = (() => {
       const parts = token.split('-');
       const firstPart = parts[0];
 
-      config[CONFIG_ANIMATION] = extractAnimation(firstPart);
-      if (config[CONFIG_ANIMATION] !== null) {
-        config[CONFIG_DIRECTION] = extractDirection(parts[1]);
-        config[CONFIG_TUNING] = parts
-          .slice(1 + (config[CONFIG_DIRECTION] ? 1 : 0))
-          .filter((item) => !isNaN(item) && item !== '')
-          .map((item) => +item);
-        continue;
+      if (config[CONFIG_ANIMATION] === null) {
+        config[CONFIG_ANIMATION] = extractAnimation(firstPart);
+        if (config[CONFIG_ANIMATION] !== null) {
+          config[CONFIG_DIRECTION] = extractDirection(parts[1]);
+          config[CONFIG_TUNING] = parts
+            .slice(1 + (config[CONFIG_DIRECTION] ? 1 : 0))
+            .filter((item) => !isNaN(item) && item !== '')
+            .map((item) => +item);
+          continue;
+        }
       }
 
       switch (token) {
@@ -440,9 +459,8 @@ const USAL = (() => {
 
   const createKeyframes = (config, originalStyle) => {
     if (!originalStyle) return;
-    const splitByNotItem = config[CONFIG_SPLIT] && !config[CONFIG_SPLIT]?.includes('item');
-    if (config[CONFIG_LINE])
-      return parseTimeline(config[CONFIG_LINE], originalStyle, splitByNotItem);
+    const isSplitText = config[CONFIG_SPLIT] && !config[CONFIG_SPLIT]?.includes('item');
+    if (config[CONFIG_LINE]) return parseTimeline(config[CONFIG_LINE], originalStyle, isSplitText);
 
     const animationType =
       config[CONFIG_ANIMATION] ?? extractAnimation(instance.config.defaults.animation, 0);
@@ -457,8 +475,9 @@ const USAL = (() => {
     let secondTuning = tuning?.at(1);
 
     let fromTimeline = 'o+0';
+    if (animationType === 4) fromTimeline = `o+${parseFloat(originalStyle[STYLE_OPACITY]) * 100}`;
 
-    const defaultDelta = splitByNotItem ? 50 : 15;
+    const defaultDelta = isSplitText ? 50 : 15;
     const intensity = (lastTuning ?? defaultDelta) / 100;
 
     if (animationType === 1 || animationType === 2) {
@@ -504,7 +523,7 @@ const USAL = (() => {
       fromTimeline += `b+${blurValue}`;
     }
 
-    return parseTimeline(fromTimeline, originalStyle, splitByNotItem);
+    return parseTimeline(fromTimeline, originalStyle, isSplitText);
   };
 
   // ============================================================================
@@ -602,47 +621,76 @@ const USAL = (() => {
       return span;
     };
 
-    const text = element.textContent || '';
-    const words = text.split(/(\s+)/);
-    element.innerHTML = '';
+    const processTextContent = (text) => {
+      if (!text?.trim()) return text ? document.createTextNode(text) : null;
 
-    const wrapper = document.createElement('span');
-    words.forEach((word) => {
-      if (!word) return;
+      const wrapper = document.createElement('span');
+      const words = text.split(/(\s+)/);
 
-      if (/\s/.test(word)) {
-        wrapper.appendChild(document.createTextNode(word));
-        return;
-      }
-      const container = document.createElement('span');
-      applyStyles(container, {
-        [STYLE_DISPLAY]: CSS_INLINE_BLOCK,
-        whiteSpace: 'nowrap',
-      });
+      words.forEach((word) => {
+        if (!word) return;
 
-      let chars = [word];
-      if (splitBy === 'letter') {
+        if (/\s/.test(word)) {
+          wrapper.appendChild(document.createTextNode(word));
+          return;
+        }
+
+        // Split Word
+        if (splitBy === 'word') {
+          const span = createSpan(word);
+          applyStyles(span, { [STYLE_DISPLAY]: CSS_INLINE_BLOCK });
+          wrapper.appendChild(span);
+          targets.push(span);
+          return;
+        }
+
+        // Split letter
+        const container = document.createElement('span');
+        applyStyles(container, { [STYLE_DISPLAY]: CSS_INLINE_BLOCK, whiteSpace: 'nowrap' });
+
+        let chars;
         if (typeof Intl !== 'undefined' && Intl.Segmenter) {
           const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
           chars = Array.from(segmenter.segment(word), (s) => s.segment);
         } else {
-          // noinspection RegExpUnnecessaryNonCapturingGroup
           chars = word.match(
             /\p{RI}\p{RI}|(?:\p{Emoji}(?:\u200D\p{Emoji})*)|(?:\P{M}\p{M}*)|./gsu
           ) || [word];
         }
-      }
 
-      chars.forEach((char) => {
-        const span = createSpan(char);
-        container.appendChild(span);
-        targets.push(span);
+        chars.forEach((char) => {
+          const span = createSpan(char);
+          container.appendChild(span);
+          targets.push(span);
+        });
+
+        wrapper.appendChild(container);
       });
 
-      wrapper.appendChild(container);
-    });
+      return wrapper;
+    };
 
-    element.appendChild(wrapper);
+    const processNode = (node, parent) => {
+      const processed =
+        node.nodeType === Node.TEXT_NODE
+          ? processTextContent(node.textContent)
+          : node.nodeType === Node.ELEMENT_NODE
+            ? (() => {
+                const clone = node.cloneNode(false);
+                Array.from(node.childNodes).forEach((child) => processNode(child, clone));
+                return clone;
+              })()
+            : null;
+
+      if (processed) parent.appendChild(processed);
+    };
+
+    const fragment = document.createDocumentFragment();
+    Array.from(element.childNodes).forEach((node) => processNode(node, fragment));
+
+    element.innerHTML = '';
+    element.appendChild(fragment);
+
     return getStaggerFunction(targets, strategy);
   };
 
@@ -651,10 +699,6 @@ const USAL = (() => {
   // ============================================================================
 
   const setupCount = (element, config, data) => {
-    const text = element.textContent || '';
-    const parts = text.split(config[CONFIG_COUNT]);
-    if (parts.length !== 2) return false;
-
     const original = config[CONFIG_COUNT].trim();
     const clean = original.replace(/[^\d\s,.]/g, '');
 
@@ -692,16 +736,39 @@ const USAL = (() => {
       decimals = clean.substring(sepPositions[0].p + 1).replace(/\D/g, '').length;
     }
 
-    const wrapper = document.createElement('span');
-    wrapper.appendChild(document.createTextNode(parts[0]));
+    let span = null;
 
-    const span = document.createElement('span');
-    wrapper.appendChild(span);
+    const findAndReplace = (node) => {
+      if (span) return;
 
-    wrapper.appendChild(document.createTextNode(parts[1]));
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent;
+        const index = text.indexOf(config[CONFIG_COUNT]);
 
-    element.innerHTML = '';
-    element.appendChild(wrapper);
+        if (index !== -1) {
+          const before = text.substring(0, index);
+          const after = text.substring(index + config[CONFIG_COUNT].length);
+
+          const fragment = document.createDocumentFragment();
+
+          if (before) fragment.appendChild(document.createTextNode(before));
+
+          span = document.createElement('span');
+          span.textContent = original;
+          fragment.appendChild(span);
+
+          if (after) fragment.appendChild(document.createTextNode(after));
+
+          node.parentNode.replaceChild(fragment, node);
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        Array.from(node.childNodes).forEach(findAndReplace);
+      }
+    };
+
+    findAndReplace(element);
+
+    if (!span) return false;
 
     data.countData = { value, decimals, original, span, thousandSep, decimalSep };
     return true;
@@ -1220,7 +1287,15 @@ const USAL = (() => {
     if (splitBy) {
       data.targets = setupSplit(element, splitBy, config[CONFIG_STAGGER]);
       const splitOverrides = parseClasses(config[CONFIG_SPLIT]);
-      data.splitConfig = config.map((value, index) => splitOverrides[index] ?? value);
+      const emptyConfig = genEmptyConfig();
+      data.splitConfig = config.map((value, index) => {
+        const override = splitOverrides[index];
+        const empty = emptyConfig[index];
+        if (Array.isArray(override) && Array.isArray(empty)) {
+          return override.length > 0 ? override : value;
+        }
+        return override !== empty ? override : value;
+      });
     }
 
     // Reset Style initially

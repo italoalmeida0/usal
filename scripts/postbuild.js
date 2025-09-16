@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -316,6 +317,7 @@ if (processed.readme && fs.existsSync(path.dirname(files.vanilla))) {
 // Format documents
 console.log(`\n${colorize.header('[FORMAT]')} Running format...`);
 try {
+  // eslint-disable-next-line sonarjs/no-os-command-from-path
   execSync('npm run format', { stdio: 'pipe' });
   console.log(`  ${colorize.success('[SUCCESS]')} Formatted`);
 } catch {

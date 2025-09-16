@@ -1,8 +1,11 @@
 #!/usr/bin/env node
+/* eslint-disable sonarjs/os-command */
+/* eslint-disable sonarjs/no-ignored-exceptions */
 
-import fs from 'fs';
 import { spawn, execSync } from 'child_process';
+import fs from 'fs';
 import path from 'path';
+
 import { colorize, colors } from './colorize.js';
 
 // Helper function to run commands

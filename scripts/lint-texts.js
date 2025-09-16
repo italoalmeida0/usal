@@ -1,3 +1,10 @@
+#!/usr/bin/env node
+/* eslint-disable no-empty */
+/* eslint-disable sonarjs/no-ignored-exceptions */
+/* eslint-disable no-useless-escape */
+/* eslint-disable sonarjs/slow-regex */
+/* eslint-disable sonarjs/no-control-regex */
+/* eslint-disable no-control-regex */
 import fs from 'fs';
 import path from 'path';
 

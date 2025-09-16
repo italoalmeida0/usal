@@ -243,10 +243,39 @@ export class AppComponent</code></pre>
                 <div class="box" data-usal="fade-dr">
                   Fade Down-Right <br /><span style="opacity: 50%">fade-dr</span>
                 </div>
+                <div class="box" data-usal="slide">
+                  Slide Center <br /><span style="opacity: 50%">slide</span>
+                </div>
+                <div class="box" data-usal="slide-u">
+                  Slide Up <br /><span style="opacity: 50%">slide-u</span>
+                </div>
+                <div class="box" data-usal="slide-d">
+                  Slide Down <br /><span style="opacity: 50%">slide-d</span>
+                </div>
+                <div class="box" data-usal="slide-l">
+                  Slide Left <br /><span style="opacity: 50%">slide-l</span>
+                </div>
+                <div class="box" data-usal="slide-r">
+                  Slide Right <br /><span style="opacity: 50%">slide-r</span>
+                </div>
+                <div class="box" data-usal="slide-ul">
+                  Slide Up-Left <br /><span style="opacity: 50%">slide-ul</span>
+                </div>
+                <div class="box" data-usal="slide-ur">
+                  Slide Up-Right <br /><span style="opacity: 50%">slide-ur</span>
+                </div>
+                <div class="box" data-usal="slide-dl">
+                  Slide Down-Left <br /><span style="opacity: 50%">slide-dl</span>
+                </div>
+                <div class="box" data-usal="slide-dr">
+                  Slide Down-Right <br /><span style="opacity: 50%">slide-dr</span>
+                </div>
               </div>
 
               <pre><code class="html">&lt;div data-usal="fade-u">Fade Up&lt;/div>
-&lt;div data-usal="fade-dr duration-800">Fade Down-Right&lt;/div></code></pre>
+&lt;div data-usal="slide-dr duration-800">Slide Down-Right&lt;/div>
+&lt;div data-usal="fade-l delay-200">Fade Left with Delay&lt;/div>
+&lt;div data-usal="slide-r forwards">Slide Right (stays)&lt;/div></code></pre>
             </div>
           </section>
 
@@ -717,6 +746,10 @@ parent.appendChild(item);</code></pre>
 fade, fade-u, fade-d, fade-l, fade-r
 fade-ul, fade-ur, fade-dl, fade-dr
 
+// Slide animations
+slide, slide-u, slide-d, slide-l, slide-r
+slide-ul, slide-ur, slide-dl, slide-dr
+
 // Zoom in animations
 zoomin, zoomin-u, zoomin-d, zoomin-l, zoomin-r
 zoomin-ul, zoomin-ur, zoomin-dl, zoomin-dr
@@ -1049,6 +1082,65 @@ console.log(window.USAL.version); // string</code></pre>
               </h2>
 
               <div class="changelog-container">
+                <!-- v1.2.3 -->
+                <div class="changelog-entry" data-usal="fade-u delay-100">
+                  <div class="changelog-header">
+                    <h3 class="changelog-version">v1.2.3</h3>
+                    <span class="changelog-date">September 2025</span>
+                  </div>
+                  <div class="changelog-content">
+                    <h4>New Slide Animation</h4>
+                    <ul>
+                      <li>Pure movement animation with <code>slide</code> - no opacity changes</li>
+                      <li>
+                        All directional variants supported (<code>slide-u</code>,
+                        <code>slide-d</code>, <code>slide-l</code>, <code>slide-r</code>, etc.)
+                      </li>
+                      <li>Maintains original element opacity throughout animation</li>
+                      <li>Perfect for elements that need to stay fully visible during entrance</li>
+                    </ul>
+
+                    <h4>Critical Bug Fixes</h4>
+                    <ul>
+                      <li>
+                        <strong>HTML Preservation</strong>: Split and count animations now correctly
+                        preserve HTML structure (bold, italic, nested elements)
+                      </li>
+                      <li>
+                        <strong>Animation Persistence</strong>: Fixed parser bug that was resetting
+                        all animations to fade
+                      </li>
+                      <li>
+                        <strong>Split Tuning</strong>: Tuning parameters like
+                        <code>fade-u-200</code>
+                        now work correctly with split animations
+                      </li>
+                      <li>
+                        <strong>Letter Animation</strong>: Fixed inline-block display and "snap"
+                        effect after animation completion
+                      </li>
+                    </ul>
+
+                    <h4>Performance & Compatibility</h4>
+                    <ul>
+                      <li>Improved animation cleanup with better garbage collection hints</li>
+                      <li>More efficient memory management for long-running applications</li>
+                      <li>Fixed Node.js version compatibility issues in build script</li>
+                      <li>Works seamlessly across Node.js versions 18-24</li>
+                    </ul>
+
+                    <h4>Internal Improvements</h4>
+                    <ul>
+                      <li>
+                        Refactored configuration generation with <code>genEmptyConfig()</code>
+                      </li>
+                      <li>Clearer variable naming throughout the codebase</li>
+                      <li>Better separation of concerns in animation setup functions</li>
+                      <li>Enhanced recursive processing for DOM manipulation</li>
+                    </ul>
+                  </div>
+                </div>
+
                 <!-- v1.2.2 -->
                 <div class="changelog-entry" data-usal="fade-u delay-100">
                   <div class="changelog-header">

@@ -1,8 +1,12 @@
-import esbuild from 'esbuild';
+#!/usr/bin/env node
+/* eslint-disable no-empty */
+import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { spawn } from 'child_process';
+
+import esbuild from 'esbuild';
+
 import { colorize } from './colorize.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -111,7 +115,7 @@ async function setupDevDependencies() {
 
     if (config.dependencies) {
       for (const [dep, depConfig] of Object.entries(config.dependencies)) {
-        const [version, isOptional] = Array.isArray(depConfig) ? depConfig : [depConfig, false];
+        const version = Array.isArray(depConfig) ? depConfig[0] : depConfig;
 
         if (!rootPackageJson.devDependencies[dep]) {
           rootPackageJson.devDependencies[dep] = version;
@@ -317,7 +321,7 @@ async function postProcessAngularBuild(packageDir, framework) {
             );
           } else if (newFileName.endsWith('.map')) {
             content = content.replace(new RegExp(rootPackageJson.name, 'g'), PROJECT_NAME);
-            let mapObj = JSON.parse(content);
+            const mapObj = JSON.parse(content);
             mapObj.sources = [`./${PROJECT_NAME}.mjs`, './core.mjs'];
             content = JSON.stringify(mapObj);
           }
@@ -331,7 +335,7 @@ async function postProcessAngularBuild(packageDir, framework) {
 
     const vanillaTypesPath = path.join('packages', 'vanilla', 'index.d.ts');
     if (fs.existsSync(vanillaTypesPath)) {
-      let typesContent = fs.readFileSync(vanillaTypesPath, 'utf-8');
+      const typesContent = fs.readFileSync(vanillaTypesPath, 'utf-8');
       fs.writeFileSync(path.join(coreDir, 'index.d.ts'), typesContent);
       console.log(`    ${colorize.success('✓')} Created core/index.d.ts`);
     }
@@ -361,7 +365,7 @@ async function postProcessAngularBuild(packageDir, framework) {
         // Update map content references
         mapContent = mapContent.replace(/index\.esm\.js/g, 'core.mjs');
 
-        let mapObj = JSON.parse(mapContent);
+        const mapObj = JSON.parse(mapContent);
         mapObj.sources = [`./core.mjs`];
         mapContent = JSON.stringify(mapObj);
 
@@ -598,7 +602,9 @@ async function build() {
     const modifiedFiles = [];
     for (const file of files) {
       if (file.isFile()) {
-        const filePath = path.join(file.path, file.name);
+        const filePath = file.path
+          ? path.join(file.path, file.name)
+          : path.join(directory, file.name);
         if (
           file.name.endsWith('.map') ||
           file.name.match(/\.(png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot)$/)
@@ -615,7 +621,7 @@ async function build() {
             replacedCount++;
             modifiedFiles.push(path.relative('packages', filePath));
           }
-        } catch (error) {}
+        } catch {}
       }
     }
     return { count: replacedCount, files: modifiedFiles };

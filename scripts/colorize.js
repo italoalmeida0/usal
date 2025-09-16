@@ -52,21 +52,17 @@ export const colors = {
 // Color helper functions
 export const colorize = (() => {
   // Helper function for simple colored text
-  const makeSimple = (color) => {
-    return (text) => `${color}${text}${colors.reset}`;
-  };
+  const makeSimple = (color) => (text) => `${color}${text}${colors.reset}`;
 
   // Helper function for tags with colored background
-  const makeTag = (bgColor, normalColor) => {
-    return (text) => {
-      // If starts with [ and ends with ], remove and add background
-      if (text.startsWith('[') && text.endsWith(']')) {
-        const cleanText = text.slice(1, -1);
-        return `${bgColor}${colors.brightWhite} ${cleanText} ${colors.reset}`;
-      }
-      // Otherwise, return with normal color only
-      return `${normalColor}${text}${colors.reset}`;
-    };
+  const makeTag = (bgColor, normalColor) => (text) => {
+    // If starts with [ and ends with ], remove and add background
+    if (text.startsWith('[') && text.endsWith(']')) {
+      const cleanText = text.slice(1, -1);
+      return `${bgColor}${colors.brightWhite} ${cleanText} ${colors.reset}`;
+    }
+    // Otherwise, return with normal color only
+    return `${normalColor}${text}${colors.reset}`;
   };
 
   return {

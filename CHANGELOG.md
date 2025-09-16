@@ -5,7 +5,54 @@ All notable changes to USAL.js will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-Analisando a diff da versão 1.2.2, aqui está o changelog:
+## [1.2.3] - 2025-09-16
+
+### Added
+
+- **Slide animation**: New `slide` animation type for pure movement without opacity changes
+  - Supports all directional variants (slide-u, slide-d, slide-l, slide-r, etc.)
+  - Maintains original element opacity throughout animation
+  - Useful for elements that need to stay fully visible during entrance
+
+### Fixed
+
+- **Split text HTML preservation**: Split animations now correctly preserve HTML structure
+  - Bold, italic, and other inline elements are maintained during split
+  - Nested HTML elements remain properly formatted
+  - Fixed issue where `textContent` was destroying HTML tags
+- **Count animation HTML preservation**: Count animations now work with formatted text
+  - Preserves surrounding HTML elements when replacing numbers
+  - Works correctly with nested HTML structures
+
+- **Animation type persistence**: Fixed parser bug that reset animation types
+  - Animation configuration no longer lost when processing subsequent tokens
+  - Fixed issue where all animations were defaulting to fade
+
+- **Split animation tuning**: Fixed issue where split animations lost tuning values
+  - Tuning parameters (e.g., fade-u-200) now correctly preserved with split text
+  - Empty configuration arrays no longer override valid tuning values
+
+- **Letter animation display**: Fixed inline-block application for split letter animations
+  - Letters now animate correctly with proper display properties
+  - Fixed "snap" effect when animations complete
+  - Proper cleanup maintains inline-block for split elements
+
+- **Build script compatibility**: Fixed Node.js version compatibility in build script
+  - Added fallback for `file.path` in recursive directory reading
+  - Works across Node.js versions 18-24
+
+### Changed
+
+- **Internal refactoring**: Improved code organization
+  - Extracted `genEmptyConfig()` function for configuration generation
+  - Renamed `splitByNotItem` to `isSplitText` for clarity
+  - Better separation of concerns in split and count setup functions
+
+### Performance
+
+- **Animation cleanup**: Improved cleanup of cancelled animations
+  - Better garbage collection hints with effect/timeline nullification
+  - More efficient memory management for long-running applications
 
 ## [1.2.2] - 2025-09-10
 
@@ -129,6 +176,8 @@ Analisando a diff da versão 1.2.2, aqui está o changelog:
 - Threshold controls
 - Duration and delay modifiers
 
+[1.2.3]: https://github.com/italoalmeida0/usal/compare/v1.2.2...v1.2.3
+[1.2.2]: https://github.com/italoalmeida0/usal/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/italoalmeida0/usal/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/italoalmeida0/usal/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/italoalmeida0/usal/compare/v1.1.0...v1.1.1
