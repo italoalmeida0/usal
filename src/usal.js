@@ -96,27 +96,6 @@ const USAL = (() => {
   const INTERSECTION_THRESHOLDS = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
   const ANIMATION_TYPES = ['fade', 'zoomin', 'zoomout', 'flip', 'slide'];
 
-  const SHIMMER_KEYFRAMES = Array.from({ length: 17 }, (_, i) => {
-    const progress = i / 16;
-    const wave = (Math.sin(progress * Math.PI * 2) + 1) / 2;
-
-    return {
-      opacity: 0.5 + wave * 0.5,
-      filter: `brightness(${1 + wave * 0.3})`,
-      offset: progress,
-    };
-  });
-
-  const WEIGHT_KEYFRAMES = Array.from({ length: 17 }, (_, i) => {
-    const progress = i / 16;
-    const wave = (Math.sin(progress * Math.PI * 2) + 1) / 2;
-
-    return {
-      fontWeight: Math.round(100 + wave * 800).toString(),
-      offset: progress,
-    };
-  });
-
   // ============================================================================
   // Utilities
   // ============================================================================
@@ -173,14 +152,14 @@ const USAL = (() => {
       element.__usalFragment = 1;
     } else {
       delete element.__usalFragment;
-      delete element.__usalOriginals;
+      delete element.__usalOGStyle;
       delete element.__usalID;
     }
   }
 
   const cancelAllAnimations = (data, element, originalStyle) =>
     new Promise((resolve) => {
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         if (!element) {
           resolve();
           return;
@@ -202,18 +181,17 @@ const USAL = (() => {
             }
           });
         resolve();
-      }, 0);
+      });
     });
 
   const resetStyle = (data) => {
     if (data.config[CONFIG_LOOP]) return;
-    const originalStyle = data.element.__usalOriginals?.style;
+    const originalStyle = data.element.__usalOGStyle;
     if (data.countData) {
       const span = data.countData.span;
       applyStyles(span, {
         [STYLE_DISPLAY]: 'inline',
       });
-      span.textContent = '0';
     } else if (data.config[CONFIG_SPLIT]) {
       if (data.targets) {
         data.targets().forEach(([target]) => {
@@ -221,7 +199,7 @@ const USAL = (() => {
             target,
             createKeyframes(
               data.splitConfig || data.config,
-              target.__usalOriginals?.style || originalStyle
+              target.__usalOGStyle || originalStyle
             )[0]
           );
         });
@@ -340,10 +318,7 @@ const USAL = (() => {
               } else config[CONFIG_LOOP] = true;
               break;
             case 'text':
-              if (parts[1] === 'shimmer' || parts[1] === 'fluid') {
-                config[CONFIG_TEXT] = parts[1];
-                config[CONFIG_LOOP] = 'jump';
-              }
+              if (parts[1] === 'shimmer' || parts[1] === 'fluid') config[CONFIG_TEXT] = parts[1];
               break;
             case 'duration':
               if (parts[1]) config[CONFIG_DURATION] = +parts[1];
@@ -380,8 +355,10 @@ const USAL = (() => {
 
       let transforms = '';
       let opacity = null;
-      let filter = null;
+      let blur = null;
       let perspective = null;
+      let glow = null;
+      let fontWeight = null;
 
       let match;
       while ((match = regex.exec(str)) !== null) {
@@ -404,7 +381,13 @@ const USAL = (() => {
             opacity = Math.max(0, Math.min(100, num)) / 100;
             break;
           case 'b':
-            filter = `blur(${Math.max(0, num)}rem)`;
+            blur = `blur(${Math.max(0, num)}rem)`;
+            break;
+          case 'g':
+            glow = `brightness(${Math.max(0, num) / 100})`;
+            break;
+          case 'w':
+            fontWeight = Math.max(0, num).toString();
             break;
           case 'p':
             perspective = `${num}rem`;
@@ -415,7 +398,10 @@ const USAL = (() => {
       const result = {};
       if (transforms) result[STYLE_TRANSFORM] = transforms.trim();
       if (opacity !== null) result[STYLE_OPACITY] = opacity;
-      if (filter) result[STYLE_FILTER] = filter;
+      if (blur || glow) {
+        result[STYLE_FILTER] = [blur, glow].filter(Boolean).join(' ');
+      }
+      if (fontWeight) result.fontWeight = fontWeight;
       if (perspective) result[STYLE_PERSPECTIVE] = perspective;
       return result;
     };
@@ -447,19 +433,32 @@ const USAL = (() => {
       keyframes.set(100, keyframes.get(maxKey));
     }
 
-    return Array.from(keyframes.entries())
+    const sorted = Array.from(keyframes.entries())
       .filter(([_, frame]) => Object.keys(frame).length > 0)
-      .sort((a, b) => a[0] - b[0])
-      .map(([offset, frame]) => ({
-        offset: offset / 100,
-        ...frame,
-        ...(inlineBlock && { display: 'inline-block' }),
-      }));
+      .sort((a, b) => a[0] - b[0]);
+
+    const compressed = sorted.map(([percent, frame]) => ({
+      offset: (5 + percent * 0.9) / 100,
+      ...frame,
+      ...(inlineBlock && { display: 'inline-block' }),
+    }));
+
+    const first = { ...sorted[0][1], ...(inlineBlock && { display: 'inline-block' }) };
+    const last = {
+      ...sorted[sorted.length - 1][1],
+      ...(inlineBlock && { display: 'inline-block' }),
+    };
+
+    return [{ offset: 0, ...first }, ...compressed, { offset: 1, ...last }];
   }
 
   const createKeyframes = (config, originalStyle) => {
     if (!originalStyle) return;
     const isSplitText = config[CONFIG_SPLIT] && !config[CONFIG_SPLIT]?.includes('item');
+
+    if (config[CONFIG_TEXT] === 'shimmer') config[CONFIG_LINE] = 'o+50g+100|50o+100g+130|o+50g+100';
+    else if (config[CONFIG_TEXT] === 'fluid') config[CONFIG_LINE] = 'w+100|50w+900|w+100';
+
     if (config[CONFIG_LINE]) return parseTimeline(config[CONFIG_LINE], originalStyle, isSplitText);
 
     const animationType =
@@ -519,7 +518,11 @@ const USAL = (() => {
 
     if (blur) {
       const blurValue =
-        blur === true ? 0.625 : typeof blur === 'number' && !isNaN(blur) ? blur : 0.625;
+        blur === true
+          ? 0.625
+          : typeof blur === 'number' && !isNaN(blur)
+            ? Math.max(0, blur)
+            : 0.625;
       fromTimeline += `b+${blurValue}`;
     }
 
@@ -582,36 +585,31 @@ const USAL = (() => {
     const max = Math.max(...metrics);
     const range = max - min || 1;
 
-    return (totalDuration = 1000, elementDuration = 50) => {
-      if (elementDuration > totalDuration) {
-        elementDuration = totalDuration;
-      }
-
-      const maxDelay = totalDuration - elementDuration;
-
-      return targetsData.map((item, index) => {
+    return (splitDelay = 50) =>
+      targetsData.map((item, index) => {
         const normalizedValue = (metrics[index] - min) / range;
 
-        const delay = normalizedValue * maxDelay;
+        let delay;
+        if (strategy === 'index') {
+          delay = index * splitDelay;
+        } else {
+          delay = normalizedValue * (targets.length - 1) * splitDelay;
+        }
 
         return [item.target, delay];
       });
-    };
   }
 
-  const setupSplit = (element, splitBy, strategy) => {
+  const setupSplit = (element, splitBy, strategy, resolve) => {
     const targets = [];
 
     // Split by child elements
     if (splitBy === 'item') {
       Array.from(element.children).forEach((child) => {
-        child.__usalOriginals = {
-          style: captureComputedStyle(child),
-          innerHTML: null,
-        };
+        child.__usalOGStyle = captureComputedStyle(child);
         targets.push(child);
       });
-      return getStaggerFunction(targets, strategy);
+      return [getStaggerFunction(targets, strategy), null];
     }
 
     // Split by text
@@ -670,35 +668,42 @@ const USAL = (() => {
       return wrapper;
     };
 
-    const processNode = (node, parent) => {
-      const processed =
-        node.nodeType === Node.TEXT_NODE
-          ? processTextContent(node.textContent)
-          : node.nodeType === Node.ELEMENT_NODE
-            ? (() => {
-                const clone = node.cloneNode(false);
-                Array.from(node.childNodes).forEach((child) => processNode(child, clone));
-                return clone;
-              })()
-            : null;
+    const textNodes = [];
+    let countTextNodes = 0;
+    let wrappers = null;
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
 
-      if (processed) parent.appendChild(processed);
-    };
+    while (walker.nextNode()) {
+      if (walker.currentNode.textContent.trim()) {
+        textNodes.push(walker.currentNode);
+        countTextNodes++;
+      }
+    }
 
-    const fragment = document.createDocumentFragment();
-    Array.from(element.childNodes).forEach((node) => processNode(node, fragment));
+    if (textNodes.length) wrappers = [];
+    textNodes.forEach((textNode) => {
+      const processed = processTextContent(textNode.textContent);
+      wrappers.push(processed);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          textNode.parentNode.replaceChild(processed, textNode);
+          countTextNodes--;
 
-    element.innerHTML = '';
-    element.appendChild(fragment);
+          if (countTextNodes === 0) {
+            resolve();
+          }
+        });
+      });
+    });
 
-    return getStaggerFunction(targets, strategy);
+    return [getStaggerFunction(targets, strategy), wrappers];
   };
 
   // ============================================================================
   // Count Animation Setup
   // ============================================================================
 
-  const setupCount = (element, config, data) => {
+  const setupCount = (element, config, data, resolve) => {
     const original = config[CONFIG_COUNT].trim();
     const clean = original.replace(/[^\d\s,.]/g, '');
 
@@ -737,6 +742,7 @@ const USAL = (() => {
     }
 
     let span = null;
+    let wrapper = null;
 
     const findAndReplace = (node) => {
       if (span) return;
@@ -749,17 +755,23 @@ const USAL = (() => {
           const before = text.substring(0, index);
           const after = text.substring(index + config[CONFIG_COUNT].length);
 
-          const fragment = document.createDocumentFragment();
+          wrapper = document.createElement('span');
 
-          if (before) fragment.appendChild(document.createTextNode(before));
+          if (before) wrapper.appendChild(document.createTextNode(before));
 
           span = document.createElement('span');
           span.textContent = original;
-          fragment.appendChild(span);
+          wrapper.appendChild(span);
 
-          if (after) fragment.appendChild(document.createTextNode(after));
+          if (after) wrapper.appendChild(document.createTextNode(after));
 
-          node.parentNode.replaceChild(fragment, node);
+          data.textWrappers = [wrapper];
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              node.parentNode.replaceChild(wrapper, node);
+              resolve();
+            });
+          });
         }
       } else if (node.nodeType === Node.ELEMENT_NODE) {
         Array.from(node.childNodes).forEach(findAndReplace);
@@ -768,9 +780,12 @@ const USAL = (() => {
 
     findAndReplace(element);
 
-    if (!span) return false;
+    if (!span) {
+      resolve();
+      return false;
+    }
 
-    data.countData = { value, decimals, original, span, thousandSep, decimalSep };
+    data.countData = { value, decimals, span, thousandSep, decimalSep };
     return true;
   };
 
@@ -779,15 +794,13 @@ const USAL = (() => {
   // ============================================================================
 
   const animateCount = (countData, options) => {
-    const { duration, easing, delay, iterations } = options;
-    const { value, decimals, original, span, thousandSep, decimalSep } = countData;
+    const { duration, easing } = options;
+    const { value, decimals, span, thousandSep, decimalSep } = countData;
 
-    let startTime = null;
+    let tickTime = null;
     let currentTime = 0;
     let playState = 'idle';
     let playbackRate = 1;
-    let pausedTime = 0;
-    let currentIteration = 0;
 
     const getEasingFunction = (easingType) => {
       switch (easingType) {
@@ -811,7 +824,7 @@ const USAL = (() => {
           return (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
         default:
-          return (t) => t;
+          return (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
       }
     };
 
@@ -831,109 +844,61 @@ const USAL = (() => {
 
     const updateValue = (time) => {
       const progress = Math.max(0, Math.min(1, time / duration));
-      const easedProgress = easingFunction(progress);
-      const currentValue = value * easedProgress;
 
-      span.textContent = formatNumber(currentValue);
-
-      if (progress >= 1) {
-        span.textContent = original;
-
-        if (iterations === Infinity || currentIteration < iterations - 1) {
-          currentIteration++;
-          currentTime = 0;
-          pausedTime = 0;
-          startTime = performance.now();
-        } else {
-          playState = 'finished';
-        }
-      } else if (progress <= 0 && playbackRate < 0) {
+      if (progress <= 0.06) {
         span.textContent = formatNumber(0);
+      } else if (progress >= 0.94) {
+        span.textContent = formatNumber(value);
+      } else {
+        const adjustedProgress = (progress - 0.05) / 0.9;
+        const easedProgress = easingFunction(adjustedProgress);
+        const currentValue = value * easedProgress;
+        span.textContent = formatNumber(currentValue);
+      }
 
-        if (iterations === Infinity || currentIteration < iterations - 1) {
-          currentIteration++;
-          currentTime = duration;
-          pausedTime = duration;
-          startTime = performance.now();
-        } else {
-          playState = 'finished';
-        }
+      if ((progress >= 1 && playbackRate > 0) || (progress <= 0 && playbackRate < 0)) {
+        playState = 'finished';
       }
     };
 
     return {
-      tick() {
-        if (playState === 'running') {
-          const now = performance.now();
-          const elapsed = now - startTime;
+      tick(now, loop = false) {
+        if ((loop && playState !== 'paused') || playState === 'running') {
+          playState = 'running';
+          let elapsed = now - tickTime;
 
-          if (playbackRate > 0) {
-            currentTime = pausedTime + elapsed;
-          } else {
-            currentTime = pausedTime - elapsed;
+          const maxElapsed = 100;
+          if (elapsed > maxElapsed) {
+            elapsed = 16.67;
           }
+          currentTime = currentTime + (playbackRate > 0 ? elapsed : -elapsed);
+          currentTime = Math.max(0, Math.min(duration, currentTime));
 
-          if (iterations !== Infinity && currentIteration >= iterations - 1) {
-            currentTime = Math.max(0, Math.min(duration, currentTime));
-          }
-
+          tickTime = now;
           updateValue(currentTime);
-
-          if (
-            iterations !== Infinity &&
-            currentIteration >= iterations - 1 &&
-            ((playbackRate > 0 && currentTime >= duration) ||
-              (playbackRate < 0 && currentTime <= 0))
-          ) {
-            playState = 'finished';
-          }
         }
       },
 
       play() {
-        if (playState === 'finished') {
-          if (playbackRate > 0) {
-            currentTime = 0;
-            pausedTime = 0;
-          } else {
-            currentTime = duration;
-            pausedTime = duration;
-          }
-          currentIteration = 0;
-        } else if (playState === 'paused') {
-          pausedTime = currentTime;
-        } else if (playState === 'idle') {
-          pausedTime = playbackRate > 0 ? 0 : duration;
-          currentTime = pausedTime;
-        }
+        if (playState === 'finished' || playState === 'running') return;
 
-        startTime = performance.now();
+        tickTime = performance.now();
         playState = 'running';
       },
 
       pause() {
         if (playState === 'running') {
-          pausedTime = currentTime;
           playState = 'paused';
         }
       },
 
-      reset() {
-        currentTime = 0;
-        pausedTime = 0;
-        playState = 'idle';
-        startTime = null;
-        currentIteration = 0;
-        updateValue(0);
+      cancel() {
+        currentTime = duration * 0.95;
+        updateValue(currentTime);
+        playState = 'finished';
       },
 
       persist() {},
-
-      effect: {
-        getTiming() {
-          return { duration, delay, easing, iterations };
-        },
-      },
 
       get playState() {
         return playState;
@@ -945,11 +910,7 @@ const USAL = (() => {
 
       set currentTime(time) {
         currentTime = Math.max(0, Math.min(duration, time));
-        pausedTime = currentTime;
         updateValue(currentTime);
-        if (playState === 'finished') {
-          playState = 'paused';
-        }
       },
 
       get playbackRate() {
@@ -957,9 +918,6 @@ const USAL = (() => {
       },
 
       set playbackRate(rate) {
-        if (playState === 'paused') {
-          pausedTime = currentTime;
-        }
         playbackRate = rate;
       },
     };
@@ -979,109 +937,31 @@ const USAL = (() => {
       this.reset();
     }
 
-    add(element, config, delay, originalStyle) {
-      const duration = this.data.config[CONFIG_DURATION] ?? instance.config.defaults.duration;
-      const easing = this.data.config[CONFIG_EASING] ?? instance.config.defaults.easing;
-      const forwards = this.data.config[CONFIG_FORWARDS] ?? instance.config.defaults.forwards;
-      const loop =
-        this.data.config[CONFIG_LOOP] === true
-          ? (instance.config.defaults.loop ?? 'mirror')
-          : this.data.config[CONFIG_LOOP];
-
-      // Standard animation
-      let options = {
-        duration,
-        delay,
-        easing,
-        fill: 'forwards',
-      };
-
-      if (loop === 'jump') options.iterations = Infinity;
-
-      let keyframes = [];
-      if (this.data.config[CONFIG_TEXT]) {
-        options = {
-          duration: duration,
-          iterations: Infinity,
-          delay: delay,
-          easing: 'linear',
-          iterationStart: 0.5,
-        };
-        keyframes =
-          this.data.config[CONFIG_TEXT] === 'shimmer' ? SHIMMER_KEYFRAMES : WEIGHT_KEYFRAMES;
-      } else {
-        keyframes = createKeyframes(config, originalStyle);
-      }
-
-      if (forwards) originalStyle = keyframes[keyframes.length - 1];
-
-      const animation = this.data.countData
-        ? animateCount(this.data.countData, options)
-        : element.animate(keyframes, {
-            ...options,
-            id: genTmpId(),
-          });
-
-      animation.persist();
-      animation.pause();
-
-      this.animations.set(animation, {
-        animation,
-        element,
-        delay,
-        originalStyle,
-        loop,
-        playbackRate: -1,
-        waiting: true,
-      });
-    }
-
-    letsGo() {
-      const { element, config, targets, splitConfig } = this.data;
-      const delay = config[CONFIG_DELAY] ?? instance.config.defaults.delay;
-      const duration = config[CONFIG_DURATION] ?? instance.config.defaults.duration;
-      const originalStyle = element.__usalOriginals?.style;
-      const splitDelay = splitConfig[CONFIG_DELAY] ?? instance.config.defaults.splitDelay;
-
-      let notReadYet = targets?.()?.length || (originalStyle ? 0 : 1);
-
-      if (targets) {
-        targets(duration, splitDelay).forEach(([target, delay]) => {
-          const targetOriginalStyle = target.__usalOriginals?.style || originalStyle;
-          if (!targetOriginalStyle) return;
-          notReadYet--;
-          this.add(target, this.data.splitConfig, parseInt(delay), targetOriginalStyle);
-        });
-      } else if (originalStyle) {
-        this.add(element, config, delay, originalStyle);
-      }
-
-      if (notReadYet === 0 && !this.rafId) {
-        this.tick();
-      }
-    }
-
     timeToSayGoodbye() {
       if (this.animations.size !== 0) return false;
-      this.reset();
       cancelAnimationFrame(this.rafId);
+      this.reset();
       this.data.resolve();
       return true;
     }
 
-    tick() {
-      const { toCleanup, toAnimate } = this.prepare();
-
-      this.cleanupAnimation(toCleanup);
-
-      this.animate(toAnimate);
-
-      if (!this.timeToSayGoodbye()) {
-        this.rafId = requestAnimationFrame(() => this.tick());
-      }
+    cleanupAnimation(toCleanup) {
+      toCleanup.forEach(([animation, info]) => {
+        const clean = () => {
+          this.animations.delete(animation);
+          this.timeToSayGoodbye();
+        };
+        if (this.data.countData) {
+          animation.cancel();
+          clean();
+        } else
+          cancelAllAnimations(this.data, info.element, info.originalStyle).then(() => {
+            clean();
+          });
+      });
     }
 
-    prepare() {
+    prepare(tickTime) {
       const toCleanup = [];
       const toAnimate = [];
 
@@ -1091,29 +971,27 @@ const USAL = (() => {
           continue;
         }
 
-        animation.tick?.();
+        animation.tick?.(tickTime, info.loop);
 
-        if (info.loop !== 'mirror') {
-          if (animation.playState === 'finished') {
-            toCleanup.push([animation, info]);
-            continue;
-          }
-        } else {
-          const duration = animation.effect.getTiming().duration;
-          if (typeof duration === 'number' && duration > 0) {
-            const progress = animation.currentTime / duration;
+        const progress = animation.currentTime / info.duration;
 
-            if (
-              !isNaN(progress) &&
-              isFinite(progress) &&
-              !info.waiting &&
-              ((progress >= 0.95 && info.playbackRate > 0) ||
-                (progress <= 0.05 && info.playbackRate < 0))
-            ) {
-              animation.pause();
-              info.waiting = true;
-            }
-          }
+        if (!info.loop && (progress >= 0.95 || animation.playState === 'finished')) {
+          toCleanup.push([animation, info]);
+          continue;
+        } else if (
+          !info.waiting &&
+          !info.pendingPlay &&
+          ((progress >= 0.95 && info.playbackRate > 0) ||
+            (progress <= 0.05 && info.playbackRate < 0))
+        ) {
+          if (info.playbackRate < 0) animation.currentTime = info.duration * 0.03;
+          else animation.currentTime = info.duration * 0.97;
+          animation.pause();
+          info.waiting = true;
+        }
+        if (info.pendingPlay && tickTime >= info.playAt) {
+          info.pendingPlay = false;
+          animation.play();
         }
         toAnimate.push(info);
       }
@@ -1121,36 +999,139 @@ const USAL = (() => {
       return { toCleanup, toAnimate };
     }
 
-    animate(toAnimate) {
+    animate(toAnimate, tickTime) {
       if (toAnimate.length > 0 && toAnimate.every((info) => info.waiting)) {
-        const currentDirection = toAnimate[0].playbackRate;
-        if (currentDirection > 0) {
-          toAnimate.sort((a, b) => b.delay - a.delay);
-        } else {
-          toAnimate.sort((a, b) => a.delay - b.delay);
-        }
+        const isJump = toAnimate[0].loop === 'jump';
+        const newPlaybackRate = isJump ? 1 : -toAnimate[0].playbackRate;
+
+        const delays = toAnimate.map((info) => info.staggerDelay);
+        const maxDelay = Math.max(...delays);
 
         toAnimate.forEach((next) => {
+          if (isJump) next.animation.currentTime = next.duration * 0.03;
+          next.animation.playbackRate = newPlaybackRate;
+          next.playbackRate = newPlaybackRate;
           next.waiting = false;
-          next.playbackRate = -currentDirection;
-          next.animation.playbackRate = next.playbackRate;
-          next.animation.play();
+
+          let delay = next.staggerDelay;
+          if (newPlaybackRate < 0) {
+            delay = maxDelay - next.staggerDelay;
+          }
+
+          if (!next.hasStarted && next.initialDelay > 0) {
+            next.hasStarted = true;
+            delay += next.initialDelay;
+          }
+
+          if (delay === 0) {
+            next.animation.play();
+          } else {
+            next.playAt = tickTime + delay;
+            next.pendingPlay = true;
+          }
         });
       }
     }
 
-    cleanupAnimation(toCleanup) {
-      toCleanup.forEach(([animation, info]) => {
-        const clean = () => {
-          this.animations.delete(animation);
-          this.timeToSayGoodbye();
-        };
-        if (this.data.countData) clean();
-        else
-          cancelAllAnimations(this.data, info.element, info.originalStyle).then(() => {
-            clean();
-          });
+    tick() {
+      const tickTime = performance.now();
+      const { toCleanup, toAnimate } = this.prepare(tickTime);
+
+      this.cleanupAnimation(toCleanup);
+
+      this.animate(toAnimate, tickTime);
+
+      if (!this.timeToSayGoodbye()) {
+        this.rafId = requestAnimationFrame(() => this.tick());
+      }
+    }
+
+    add(element, config, originalStyle, initialDelay = 0, staggerDelay = 0) {
+      const duration = Math.max(
+        0,
+        ((this.data.config[CONFIG_DURATION] ?? instance.config.defaults.duration ?? 1000) + 1) / 0.9
+      );
+      const easing = this.data.config[CONFIG_EASING] ?? instance.config.defaults.easing;
+      const forwards =
+        this.data.config[CONFIG_FORWARDS] ?? instance.config.defaults.forwards ?? false;
+      const loopDefaults = instance.config.defaults.loop ?? 'mirror';
+      let loop =
+        this.data.config[CONFIG_LOOP] === true ? loopDefaults : this.data.config[CONFIG_LOOP];
+
+      let options = {
+        duration,
+        easing,
+        fill: 'forwards',
+      };
+
+      let keyframes = [];
+
+      if (this.data.config[CONFIG_TEXT]) {
+        loop = loop ?? loopDefaults;
+        options.easing = this.data.config[CONFIG_EASING] ?? 'linear';
+      }
+
+      keyframes = createKeyframes(config, originalStyle);
+      if (forwards) originalStyle = keyframes[keyframes.length - 1];
+
+      options = {
+        ...options,
+        delay: 0,
+        id: genTmpId(),
+      };
+      const animation = this.data.countData
+        ? animateCount(this.data.countData, options)
+        : element.animate(keyframes, options);
+
+      animation.persist();
+      animation.currentTime = duration * 0.03;
+      animation.pause();
+
+      this.animations.set(animation, {
+        animation,
+        element,
+        duration,
+        staggerDelay,
+        initialDelay,
+        originalStyle,
+        loop,
+        playbackRate: -1,
+        waiting: true,
+        hasStarted: false,
       });
+    }
+
+    letsGo() {
+      const { element, config, targets, splitConfig } = this.data;
+      const initialDelay = Math.max(0, config[CONFIG_DELAY] ?? instance.config.defaults.delay ?? 0);
+      const originalStyle = element.__usalOGStyle;
+      const splitDelay = Math.max(
+        0,
+        splitConfig[CONFIG_DELAY] ?? instance.config.defaults.splitDelay ?? 0
+      );
+
+      let notReadYet = targets?.()?.length || (originalStyle ? 0 : 1);
+
+      if (targets) {
+        targets(splitDelay).forEach(([target, staggerDelay]) => {
+          const targetOriginalStyle = target.__usalOGStyle || originalStyle;
+          if (!targetOriginalStyle) return;
+          notReadYet--;
+          this.add(
+            target,
+            this.data.splitConfig,
+            targetOriginalStyle,
+            initialDelay,
+            parseInt(staggerDelay)
+          );
+        });
+      } else if (originalStyle) {
+        this.add(element, config, originalStyle, initialDelay);
+      }
+
+      if (notReadYet === 0 && !this.rafId) {
+        this.tick();
+      }
     }
   }
 
@@ -1158,24 +1139,24 @@ const USAL = (() => {
   // Main Animation Controller
   // ============================================================================
 
-  const animate = (data) => {
+  const tryAnimate = (data) => {
     if (data.stop) return;
     data.hasAnimated = true;
 
-    data.animating = new Promise((resolve) => {
+    data.processing = new Promise((resolve) => {
       data.resolve = resolve;
       data.controller.letsGo();
     }).then(() => {
       data.onfinish();
-      data.animating = null;
+      data.processing = null;
       data.stop = true;
     });
   };
 
-  const animateIfVisible = (data, ratio = null) => {
+  const tryAnimateIfVisible = (data, ratio = null) => {
     if (
       data.config[CONFIG_LOOP] ||
-      data.animating !== null ||
+      data.processing !== null ||
       (data.hasAnimated && (data.config[CONFIG_ONCE] ?? instance.config.once))
     )
       return;
@@ -1193,7 +1174,7 @@ const USAL = (() => {
     );
 
     if (_ratio >= threshold) {
-      animate(data);
+      tryAnimate(data);
     }
   };
 
@@ -1206,49 +1187,58 @@ const USAL = (() => {
       data.onfinish = () => {
         data.onfinish = () => {};
 
-        const splitByItem = data.config[CONFIG_SPLIT]?.includes('item');
-
-        if (data.targets) {
-          data.targets().forEach(([target]) => {
-            if (target.__usalOriginals?.style) {
-              applyStyles(target, target.__usalOriginals.style, true);
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => {
+            if (data.targets) {
+              data.targets().forEach(([target]) => {
+                if (target.__usalOGStyle) {
+                  applyStyles(target, target.__usalOGStyle, true);
+                }
+              });
             }
-          });
-        }
 
-        const innerHTML = data.element.__usalOriginals?.innerHTML;
-        if (innerHTML && !splitByItem && (data.config[CONFIG_SPLIT] || data.countData)) {
-          data.element.innerHTML = innerHTML;
-        }
+            if (data.textWrappers) {
+              data.textWrappers.forEach((wrapper) => {
+                if (wrapper?.parentNode) {
+                  wrapper.parentNode.replaceChild(
+                    document.createTextNode(wrapper.textContent),
+                    wrapper
+                  );
+                }
+              });
+            }
 
-        if (data.element.__usalOriginals?.style) {
-          applyStyles(data.element, data.element.__usalOriginals.style, true);
-        }
+            if (data.element.__usalOGStyle) {
+              applyStyles(data.element, data.element.__usalOGStyle, true);
+            }
 
-        requestAnimationFrame(() => resolve());
+            resolve();
+          })
+        );
       };
 
-      if (data.animating === null) data.onfinish();
+      if (data.processing === null) data.onfinish();
       else data.stop = true;
     });
 
   const processElement = (element, elementObserver) => {
+    if (element.__usalProcessing) return;
+
     if (!element.__usalID) {
-      element.__usalOriginals = {
-        style: captureComputedStyle(element),
-        innerHTML: element.innerHTML,
-      };
+      element.__usalOGStyle = captureComputedStyle(element);
       element.__usalID = element.getAttribute(DATA_USAL_ID) ?? genTmpId();
     }
 
     const classes = element.getAttribute(DATA_USAL_ATTRIBUTE) || '';
 
-    const existing = instance.elements.get(element.__usalID);
-    if (existing) {
-      if (classes !== existing.configString) {
+    const existingData = instance.elements.get(element.__usalID);
+    if (existingData) {
+      if (classes !== existingData.configString) {
+        element.__usalProcessing = true;
         instance.elements.delete(element.__usalID);
         elementObserver.unobserve(element);
-        cleanupElement(existing).then(() => {
+        cleanupElement(existingData).then(() => {
+          delete element.__usalProcessing;
           processElement(element, elementObserver);
         });
       }
@@ -1267,49 +1257,64 @@ const USAL = (() => {
       state: null,
       stop: false,
       hasAnimated: false,
-      animating: null,
+      processing: null,
       countData: null,
       onfinish: () => {},
       controller: null,
       resolve: () => {},
+      textWrappers: null,
     };
 
-    data.controller = new AnimationController(data);
-
-    // Setup special animations
-    if (config[CONFIG_COUNT]) {
-      setupCount(element, config, data);
-    }
+    instance.elements.set(element.__usalID, {
+      configString: classes,
+    });
 
     const splitBy = config[CONFIG_SPLIT]?.split(' ').find((item) =>
       ['word', 'letter', 'item'].includes(item)
     );
-    if (splitBy) {
-      data.targets = setupSplit(element, splitBy, config[CONFIG_STAGGER]);
-      const splitOverrides = parseClasses(config[CONFIG_SPLIT]);
-      const emptyConfig = genEmptyConfig();
-      data.splitConfig = config.map((value, index) => {
-        const override = splitOverrides[index];
-        const empty = emptyConfig[index];
-        if (Array.isArray(override) && Array.isArray(empty)) {
-          return override.length > 0 ? override : value;
-        }
-        return override !== empty ? override : value;
-      });
-    }
 
-    // Reset Style initially
-    resetStyle(data);
-
-    instance.elements.set(element.__usalID, data);
-
-    requestAnimationFrame(async () => {
-      if (config[CONFIG_LOOP]) {
-        animate(data);
-      } else {
-        animateIfVisible(data);
-        elementObserver.observe(element);
+    data.processing = new Promise((resolve) => {
+      let resolveNow = false;
+      if (config[CONFIG_COUNT]) {
+        setupCount(element, config, data, resolve);
+      } else if (splitBy) {
+        const splitOverrides = parseClasses(config[CONFIG_SPLIT]);
+        const emptyConfig = genEmptyConfig();
+        data.splitConfig = config.map((value, index) => {
+          const override = splitOverrides[index];
+          const empty = emptyConfig[index];
+          if (Array.isArray(override) && Array.isArray(empty)) {
+            return override.length > 0 ? override : value;
+          }
+          return override !== empty ? override : value;
+        });
+        const [targets, textWrappers] = setupSplit(
+          element,
+          splitBy,
+          data.splitConfig[CONFIG_STAGGER],
+          resolve
+        );
+        data.targets = targets;
+        data.textWrappers = textWrappers;
+        resolveNow = textWrappers === null;
+      } else resolveNow = true;
+      if (resolveNow) resolve();
+    }).then(() => {
+      if (data.stop) data.onfinish();
+      else {
+        instance.elements.set(element.__usalID, data);
+        data.controller = new AnimationController(data);
+        resetStyle(data);
+        requestAnimationFrame(async () => {
+          if (config[CONFIG_LOOP]) {
+            tryAnimate(data);
+          } else {
+            tryAnimateIfVisible(data);
+            elementObserver.observe(element);
+          }
+        });
       }
+      data.processing = null;
     });
   };
 
@@ -1331,7 +1336,7 @@ const USAL = (() => {
             entry.target.__usalID || entry.target.getAttribute(DATA_USAL_ID)
           );
           if (data) {
-            animateIfVisible(data, entry.intersectionRatio);
+            tryAnimateIfVisible(data, entry.intersectionRatio);
           }
         }
       },
@@ -1370,16 +1375,20 @@ const USAL = (() => {
 
     const scanAllDOMs = () => {
       // Clean disconnected elements
-      instance.elements.forEach((data, id) => {
+      for (const [id, data] of instance.elements) {
+        if (!data || !data.element) {
+          instance.elements.delete(id);
+          continue;
+        }
         if (!data.element.isConnected) {
           elementObserver.unobserve(data.element);
           cleanupElement(data).then(() => {
             instance.elements.delete(id);
           });
         } else {
-          animateIfVisible(data);
+          tryAnimateIfVisible(data);
         }
-      });
+      }
 
       // Process new elements
       const allDOMs = collectAllDOMs();
@@ -1467,22 +1476,39 @@ const USAL = (() => {
   const publicAPI = {
     config(newConfig = {}) {
       if (arguments.length === 0) return { ...instance.config };
+
+      if (newConfig.defaults) {
+        newConfig.defaults = {
+          ...instance.config.defaults,
+          ...newConfig.defaults,
+        };
+      }
+
       Object.assign(instance.config, newConfig);
       return publicAPI;
     },
-
     async destroy() {
       if (!instance.initialized) return Promise.resolve();
       if (instance.destroying != null) return instance.destroying;
+      if (instance.destroyTimer) {
+        clearTimeout(instance.destroyTimer);
+      }
 
-      instance.observers();
-      const elements = Array.from(instance.elements.values());
+      instance.destroying = new Promise((resolve) => {
+        instance.destroyTimer = setTimeout(async () => {
+          instance.destroyTimer = null;
 
-      instance.destroying = Promise.all(elements.map((data) => cleanupElement(data))).then(() => {
-        instance.elements.clear();
-        instance.observers = () => {};
-        instance.initialized = false;
-        instance.destroying = null;
+          instance.observers();
+          const elements = Array.from(instance.elements.values());
+
+          await Promise.all(elements.map((data) => cleanupElement(data)));
+
+          instance.elements.clear();
+          instance.observers = () => {};
+          instance.initialized = false;
+          instance.destroying = null;
+          resolve();
+        }, 50);
       });
 
       return instance.destroying;
@@ -1490,33 +1516,47 @@ const USAL = (() => {
 
     async restart() {
       if (instance.restarting != null) return instance.restarting;
-      if (instance.destroying != null) return instance.destroying.then(() => publicAPI.restart());
 
-      instance.restarting = publicAPI
-        .destroy()
-        .then(
-          () =>
-            new Promise((resolve) => {
-              requestAnimationFrame(() => {
-                if (document.readyState === 'loading') {
-                  document.addEventListener(
-                    'DOMContentLoaded',
-                    () => {
+      if (instance.destroyTimer) {
+        clearTimeout(instance.destroyTimer);
+        instance.destroyTimer = null;
+      }
+      if (instance.restartTimer) {
+        clearTimeout(instance.restartTimer);
+      }
+
+      instance.restarting = new Promise((resolve) => {
+        instance.restartTimer = setTimeout(() => {
+          instance.restartTimer = null;
+
+          publicAPI
+            .destroy()
+            .then(
+              () =>
+                new Promise((resolveInit) => {
+                  requestAnimationFrame(() => {
+                    if (document.readyState === 'loading') {
+                      document.addEventListener(
+                        'DOMContentLoaded',
+                        () => {
+                          autoInit();
+                          resolveInit(publicAPI);
+                        },
+                        { once: true }
+                      );
+                    } else {
                       autoInit();
-                      resolve(publicAPI);
-                    },
-                    { once: true }
-                  );
-                } else {
-                  autoInit();
-                  resolve(publicAPI);
-                }
-              });
-            })
-        )
-        .finally(() => {
-          instance.restarting = null;
-        });
+                      resolveInit(publicAPI);
+                    }
+                  });
+                })
+            )
+            .then(resolve)
+            .finally(() => {
+              instance.restarting = null;
+            });
+        }, 50);
+      });
 
       return instance.restarting;
     },

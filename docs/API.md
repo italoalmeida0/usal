@@ -22,7 +22,7 @@
 <div ${usal('fade duration-500')}>Content</div>
 
 <!-- Angular -->
-<div [usal]="'fade duration-500'">Content</div>
+<div usal="fade duration-500">Content</div>
 ```
 
 ### 🎨 Available Animations
@@ -363,6 +363,8 @@ line-[{timeline}]
 - `ry±value`: RotateY (degrees)
 - `rz±value`: RotateZ (degrees)
 - `b±value`: Blur (rem, negatives become 0)
+- `g±value`: Glow (brightness) (%, negatives become 0)
+- `w±value`: Weight (font weight) (100-900, negatives become 0)
 - `p±value`: Perspective (rem)
 
 **⚠️ Important Notes:**
@@ -430,6 +432,10 @@ line-[{timeline}]
 **Complex Examples:**
 
 ```html
+<!-- Text Effects -->
+<div data-usal="line-[w+100|50w+900|w+100] loop linear split-letter">Fluid Text</div>
+<div data-usal="line-[o+50g+100|50o+100g+130|o+50g+100] loop linear split-letter">Shimmer Text</div>
+
 <!-- Multi-line formatting for readability -->
 <div
   data-usal="line-[

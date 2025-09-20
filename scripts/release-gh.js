@@ -83,12 +83,82 @@ function checkGitHubCLI() {
   }
 }
 
+// Check for uncommitted changes
+function hasUncommittedChanges() {
+  try {
+    const status = execSync('git status --porcelain', { encoding: 'utf-8' });
+    return status.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
+
+// Commit all changes
+function commitChanges(version) {
+  if (isDryRun) {
+    hLog(2, false, 'brightBlack', '→', `Would commit all changes for v${version}`);
+    return;
+  }
+
+  try {
+    execSync('git add .', { stdio: 'inherit' });
+    execSync(`git commit -m "chore: release v${version}"`, { stdio: 'inherit' });
+    hLog(0, false, 'success', '✓', 'Changes committed');
+  } catch (error) {
+    throw new Error(`Failed to commit changes: ${error.message}`);
+  }
+}
+
+// Create and push tag
+function createTag(version) {
+  const tagName = `v${version}`;
+
+  if (isDryRun) {
+    hLog(2, false, 'brightBlack', '→', `Would create and push tag ${tagName}`);
+    return;
+  }
+
+  try {
+    // Check if tag already exists locally
+    try {
+      execSync(`git rev-parse ${tagName}`, { stdio: 'pipe' });
+      hLog(0, false, 'info', 'ℹ', `Tag ${tagName} already exists locally`);
+    } catch {
+      // Tag doesn't exist, create it
+      execSync(`git tag -a ${tagName} -m "Release ${tagName}"`, { stdio: 'inherit' });
+      hLog(0, false, 'success', '✓', `Tag ${tagName} created`);
+    }
+
+    // Push the tag
+    execSync(`git push origin ${tagName}`, { stdio: 'inherit' });
+    hLog(0, false, 'success', '✓', `Tag ${tagName} pushed to origin`);
+  } catch (error) {
+    throw new Error(`Failed to create/push tag: ${error.message}`);
+  }
+}
+
+// Push commits to origin
+function pushCommits() {
+  if (isDryRun) {
+    hLog(2, false, 'brightBlack', '→', 'Would push commits to origin');
+    return;
+  }
+
+  try {
+    execSync('git push origin main', { stdio: 'inherit' });
+    hLog(0, false, 'success', '✓', 'Commits pushed to origin');
+  } catch (error) {
+    // Non-fatal, release can still be created
+    hLog(0, true, 'warning', 'warning', `Failed to push commits: ${error.message}`);
+  }
+}
+
 // Create GitHub release
 async function createGitHubRelease(version, releaseNotes, isDraft = false) {
   const tagName = `v${version}`;
 
   if (isDryRun) {
-    hLog(2, false, 'brightBlack', '→', `Would create GitHub release /#tag ${tagName} #/`);
+    hLog(2, false, 'brightBlack', '→', `Would create GitHub release ${tagName}`);
     console.log('');
     hLog(2, false, 'brightBlack', 'Release notes preview:');
     console.log('----------------------------------------');
@@ -120,6 +190,8 @@ async function main() {
   const helpFlag = process.argv.includes('--help') || process.argv.includes('-h');
   const draftFlag = process.argv.includes('--draft');
   const forceFlag = process.argv.includes('--force') || process.argv.includes('-f');
+  const skipCommitFlag = process.argv.includes('--skip-commit');
+  const skipTagFlag = process.argv.includes('--skip-tag');
   const skipChangelogFlag = process.argv.includes('--skip-changelog');
   isDryRun = process.argv.includes('--dry-run') || process.argv.includes('-d');
 
@@ -132,48 +204,45 @@ async function main() {
 /#highlight GitHub Release Creator #/
 
 /#info Description: #/
-Creates GitHub releases from CHANGELOG.md entries. Requires changelog entry
-for the current version unless explicitly skipped.
+Complete release workflow: commits changes, creates tag, and publishes GitHub release.
 
-/#info Usage: #/ npm run create-release [options]
+/#info Usage: #/ npm run release:github [options]
 
 /#info Options: #/
-  --dry-run, -d        Preview without creating release
+  --dry-run, -d        Preview all actions without executing
   --draft              Create as draft release
   --force, -f          Overwrite existing release
-  --skip-changelog     Skip changelog requirement (not recommended)
+  --skip-commit        Skip git commit step
+  --skip-tag           Skip tag creation step
+  --skip-changelog     Skip changelog requirement
   --version, -v        Use specific version instead of package.json
   --help, -h           Show this help message
+
+/#info Workflow: #/
+  1. Commit all changes (if any)
+  2. Create and push git tag
+  3. Create GitHub release from changelog
 
 /#info Requirements: #/
   • GitHub CLI (gh) installed and authenticated
   • CHANGELOG.md with proper format
-  • Git tag for the version (created by promote-to-stable)
-
-/#info Changelog Format: #/
-  ## [1.2.3] - 2025-09-16
-  
-  ### Added
-  - New features...
-  
-  ### Fixed
-  - Bug fixes...
+  • Clean or committable working directory
 
 /#info Examples: #/
-  npm run create-release                    # Create release from changelog
-  npm run create-release -- --dry-run       # Preview release
-  npm run create-release -- --draft         # Create draft release
-  npm run create-release -- --version 1.2.3 # Specific version
+  npm run release:github                    # Full release workflow
+  npm run release:github -- --dry-run       # Preview all actions
+  npm run release:github -- --draft         # Create draft release
+  npm run release:github -- --skip-commit   # Already committed
 `);
     process.exit(0);
   }
 
   hLog(0, false, 'header', '==================================================', '', '\n');
   if (isDryRun) {
-    hLog(0, true, 'brightBlack', 'dry run', 'No release will be created');
+    hLog(0, true, 'brightBlack', 'DRY RUN', 'No changes will be made');
     console.log('');
   }
-  hLog(0, false, 'highlight', 'GITHUB RELEASE CREATOR');
+  hLog(0, false, 'highlight', 'GITHUB RELEASE WORKFLOW');
   hLog(0, false, 'header', '==================================================\n');
 
   try {
@@ -187,101 +256,68 @@ for the current version unless explicitly skipped.
     if (customVersion) {
       version = customVersion.replace(/^v/, ''); // Remove v prefix if present
       hLog(0, false, 'info', 'Version:', `/#version ${version} #/ (custom)`);
-
-      if (!skipChangelogFlag) {
-        // Try to find this version in changelog
-        try {
-          const changelog = parseChangelog();
-          if (changelog.version === version) {
-            changelogEntry = changelog;
-          } else {
-            throw new Error(`Version ${version} not found in CHANGELOG.md`);
-          }
-        } catch (error) {
-          hLog(0, true, 'error', 'error', error.message);
-          hLog(2, false, 'dim', '', 'Use --skip-changelog to skip this check');
-          process.exit(1);
-        }
-      }
     } else {
       const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
       version = packageJson.version;
       hLog(0, false, 'info', 'Version:', `/#version ${version} #/`);
+    }
 
-      if (!skipChangelogFlag) {
-        // Parse changelog
-        try {
-          changelogEntry = parseChangelog();
+    // Parse changelog if not skipped
+    if (!skipChangelogFlag) {
+      try {
+        changelogEntry = parseChangelog();
 
-          // Verify changelog version matches package.json
-          if (changelogEntry.version !== version) {
-            hLog(0, true, 'error', 'error', `Version mismatch!`);
-            hLog(2, false, 'info', 'Package.json:', `/#version ${version} #/`);
-            hLog(2, false, 'info', 'Changelog:', `/#version ${changelogEntry.version} #/`);
-            console.log('');
-            hLog(
-              0,
-              true,
-              'info',
-              'tip',
-              'Update CHANGELOG.md with current version before releasing'
-            );
-            hLog(
-              2,
-              false,
-              'dim',
-              '',
-              'Or use --skip-changelog to skip this check (not recommended)'
-            );
-            process.exit(1);
-          }
-        } catch (error) {
-          hLog(0, true, 'error', 'error', error.message);
+        // Verify changelog version matches
+        if (changelogEntry.version !== version) {
+          hLog(0, true, 'error', 'ERROR', `Version mismatch!`);
+          hLog(2, false, 'info', 'Package.json:', `/#version ${version} #/`);
+          hLog(2, false, 'info', 'Changelog:', `/#version ${changelogEntry.version} #/`);
           console.log('');
-          hLog(
-            0,
-            true,
-            'info',
-            'tip',
-            'Add an entry for version /#version ' + version + ' #/ to CHANGELOG.md'
-          );
-          hLog(
-            2,
-            false,
-            'dim',
-            '',
-            'Format: ## [' + version + '] - ' + new Date().toISOString().split('T')[0]
-          );
+          hLog(0, true, 'info', 'TIP', 'Update CHANGELOG.md with current version before releasing');
           process.exit(1);
         }
+        hLog(0, false, 'success', '✓', `Changelog entry found for ${version}`);
+      } catch (error) {
+        hLog(0, true, 'error', 'ERROR', error.message);
+        console.log('');
+        hLog(0, true, 'info', 'TIP', `Add an entry for version ${version} to CHANGELOG.md`);
+        process.exit(1);
       }
     }
 
-    // Check if tag exists
-    const tagName = `v${version}`;
-    try {
-      execSync(`git rev-parse ${tagName}`, { stdio: 'pipe' });
-      hLog(0, false, 'success', '✓', `Git tag /#tag ${tagName} #/ exists`);
-    } catch {
-      hLog(0, true, 'error', 'error', `Git tag /#tag ${tagName} #/ not found`);
-      hLog(
-        2,
-        false,
-        'info',
-        '',
-        'Run /#command npm run promote-to-stable #/ first to create the tag'
-      );
-      if (!isDryRun) process.exit(1);
+    // Step 1: Commit changes if needed and not skipped
+    if (!skipCommitFlag) {
+      if (hasUncommittedChanges()) {
+        console.log('');
+        hLog(0, true, 'header', 'STEP 1: Committing changes');
+        commitChanges(version);
+      } else {
+        hLog(0, false, 'info', 'ℹ', 'No uncommitted changes');
+      }
     }
 
-    // Check if release already exists
+    // Step 2: Create and push tag if not skipped
+    if (!skipTagFlag) {
+      console.log('');
+      hLog(0, true, 'header', 'STEP 2: Creating tag');
+      createTag(version);
+
+      // Also push commits if we have any
+      if (!skipCommitFlag) {
+        pushCommits();
+      }
+    }
+
+    const tagName = `v${version}`;
+
+    // Step 3: Check if release already exists
     if (await releaseExists(tagName)) {
       if (!forceFlag) {
-        hLog(0, true, 'warning', 'exists', `GitHub release /#tag ${tagName} #/ already exists`);
+        hLog(0, true, 'warning', 'EXISTS', `GitHub release ${tagName} already exists`);
         hLog(2, false, 'dim', '', 'Use --force to recreate the release');
         process.exit(1);
       } else {
-        hLog(0, true, 'warning', 'warning', `Deleting existing release /#tag ${tagName} #/...`);
+        hLog(0, true, 'warning', 'WARNING', `Deleting existing release ${tagName}...`);
         if (!isDryRun) {
           execSync(`gh release delete ${tagName} --yes`, { stdio: 'inherit' });
         }
@@ -292,16 +328,14 @@ for the current version unless explicitly skipped.
     let releaseNotes = '';
     if (changelogEntry) {
       releaseNotes = changelogEntry.content;
-      hLog(0, false, 'success', '✓', `Changelog entry found for /#version ${version} #/`);
     } else if (skipChangelogFlag) {
-      // Generate minimal release notes
       releaseNotes = `Release ${version}\n\nNo changelog entry provided.`;
-      hLog(0, true, 'warning', 'warning', 'Creating release without changelog entry');
+      hLog(0, true, 'warning', 'WARNING', 'Creating release without changelog entry');
     }
 
-    // Show what we're about to do
+    // Step 4: Create the release
     console.log('');
-    hLog(0, true, 'header', 'creating release');
+    hLog(0, true, 'header', 'STEP 3: Creating GitHub release');
 
     if (draftFlag) {
       hLog(2, false, 'info', 'Mode:', 'Draft release');
@@ -312,22 +346,22 @@ for the current version unless explicitly skipped.
       hLog(2, false, 'info', 'Type:', 'Stable release');
     }
 
-    // Create the release
     console.log('');
     await createGitHubRelease(version, releaseNotes, draftFlag);
 
     if (!isDryRun) {
-      hLog(0, true, 'success', 'success', `GitHub release /#tag ${tagName} #/ created!`);
+      console.log('');
+      hLog(0, true, 'success', 'SUCCESS', `Complete release workflow finished for ${tagName}!`);
       console.log('');
       hLog(0, false, 'dim', 'View at:', `/#command gh release view ${tagName} --web #/`);
     } else {
       console.log('');
-      hLog(0, true, 'brightBlack', 'dry run complete', 'No release was created');
+      hLog(0, true, 'brightBlack', 'DRY RUN COMPLETE', 'No actions were performed');
     }
 
     // Show helpful commands
     console.log('');
-    hLog(0, true, 'info', 'helpful commands', '', '\n');
+    hLog(0, true, 'info', 'HELPFUL COMMANDS', '', '\n');
     hLog(2, false, 'dim', 'View release:', `/#command gh release view ${tagName} #/`);
     hLog(2, false, 'dim', 'Open in browser:', `/#command gh release view ${tagName} --web #/`);
     hLog(2, false, 'dim', 'List all releases:', `/#command gh release list #/`);
@@ -341,12 +375,12 @@ for the current version unless explicitly skipped.
       );
     }
   } catch (error) {
-    hLog(0, true, 'error', 'error', error.message);
+    hLog(0, true, 'error', 'ERROR', error.message);
     process.exit(1);
   }
 }
 
 main().catch((error) => {
-  hLog(0, true, 'error', 'error', `Script failed: ${error}`, '\n');
+  hLog(0, true, 'error', 'ERROR', `Script failed: ${error}`, '\n');
   process.exit(1);
 });

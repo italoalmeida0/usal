@@ -1,6 +1,13 @@
 <div align="center">
 
-![Logo USAL.js](https://github.com/italoalmeida0/usal/raw/main/assets/logo.png)
+  <picture>
+    <source media="(prefers-color-scheme: dark)" 
+            srcset="https://raw.githubusercontent.com/italoalmeida0/usal/refs/heads/main/assets/brand/usal_logo_dark.svg">
+    <img src="https://raw.githubusercontent.com/italoalmeida0/usal/refs/heads/main/assets/brand/usal_logo.svg" alt="USAL.js">
+  </picture>
+  <picture>
+    <img src="https://raw.githubusercontent.com/italoalmeida0/usal/refs/heads/main/assets/brand/usal_icon_144.webp" alt="⚡">
+  </picture>
 
 **Ultimate Scroll Animation Library - Lightweight, powerful, wonderfully simple ✨**
 
@@ -75,8 +82,12 @@ import { usal } from '@usal/svelte';
 ### 🟩 Vue (Nuxt)
 
 ```js
+import { USALPlugin } from '@usal/vue';
+createApp(App).use(USALPlugin).mount('#app');
+//for Nuxt
 export default defineNuxtConfig({
 modules: ['@usal/vue/nuxt']
+//...
 ```
 
 ### 🟪 Lit
@@ -112,6 +123,8 @@ export class AppComponent
 ## 🎲 Demos
 
 ![Animations](https://github.com/italoalmeida0/usal/raw/main/assets/all.gif)
+
+![Text Animations](https://github.com/italoalmeida0/usal/raw/main/assets/text.gif)
 
 ![Count Animations](https://github.com/italoalmeida0/usal/raw/main/assets/count.gif)
 

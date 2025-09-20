@@ -651,10 +651,16 @@ p {
   z-index: 120;
 }
 .sidebar-logo {
-  width: 120px;
-  height: auto;
-  margin-bottom: 0.5rem;
+  display: flex;
+  margin-block: auto;
+  margin-bottom: 1rem;
 }
+
+.sidebar-logo img {
+  width: auto;
+  height: 48px;
+}
+
 .nav-section {
   padding: 1rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
@@ -754,17 +760,41 @@ p {
   text-align: center;
   padding: 5rem 0;
 }
+
+.hero-logo {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
 .hero-title {
-  font-size: 3.5rem;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  margin-bottom: 1.5rem;
+  font-family: 'Raleway', serif;
+  font-style: italic;
+  font-size: 8rem;
+  font-weight: 100;
   color: #fff;
+  position: relative;
+  width: fit-content;
+  line-height: 0.75;
+
+  .js {
+    font-size: 1.5rem;
+    font-style: normal;
+    position: absolute;
+    right: 0rem;
+    bottom: 1.8rem;
+    font-weight: 900;
+  }
 }
 .hero-subtitle {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   color: #9ca3af;
+  margin-bottom: 2rem;
+  margin-top: 1rem;
+  font-weight: thin;
+  text-transform: uppercase;
 }
 .docs-section {
   display: none;
@@ -800,7 +830,20 @@ p {
     display: block;
   }
   .hero-title {
-    font-size: 2.5rem;
+    font-size: 6rem;
+  }
+  .hero-logo {
+    flex-direction: column-reverse;
+    margin-bottom: 1rem;
+    .js {
+      right: -0.3rem;
+      bottom: 1.5rem;
+    }
+  }
+  .hero-subtitle {
+    flex-direction: column-reverse;
+    font-size: 0.8rem;
+    margin-bottom: 2rem;
   }
   .top-bar {
     padding: 1rem;

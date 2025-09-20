@@ -1,75 +1,77 @@
+import { isPlatformBrowser } from '@angular/common';
 import {
   Directive,
   ElementRef,
   Input,
   OnInit,
-  OnChanges,
   Injectable,
   NgModule,
+  Renderer2,
+  Inject,
+  PLATFORM_ID,
 } from '@angular/core';
 
-import USALLib, { type USALConfig } from '~/usal';
-
-@Injectable({
-  providedIn: 'root',
-})
-export class USALService {
-  config(configOptions?: USALConfig): USALConfig | void {
-    if (configOptions === undefined) {
-      return USALLib.config();
-    }
-    USALLib.config(configOptions);
-  }
-
-  destroy() {
-    return USALLib.destroy();
-  }
-
-  restart() {
-    return USALLib.restart();
-  }
-}
+import USALLib, {
+  type LoopType,
+  type AnimationType,
+  type DirectionType,
+  type USALDefaults,
+  type USALConfig,
+  type USALInstance,
+} from '~/usal';
 
 @Directive({
   selector: '[usal], [data-usal]',
-  standalone: false,
+  standalone: true,
 })
-export class USALDirective implements OnInit, OnChanges {
-  @Input('usal') usalValue: string = 'fade';
-  @Input('data-usal') dataUsalValue: string = 'fade';
+export class USALDirective implements OnInit {
+  @Input() usal: string = 'fade';
 
-  constructor(private el: ElementRef) {}
+  constructor(
+    private el: ElementRef,
+    private renderer: Renderer2,
+    @Inject(PLATFORM_ID) private platformId: object
+  ) {}
 
   ngOnInit() {
-    this.updateAttribute();
+    if (isPlatformBrowser(this.platformId)) {
+      this.renderer.setAttribute(this.el.nativeElement, 'data-usal', this.usal || 'fade');
+    }
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class USALService {
+  config(newConfig: Partial<USALConfig> | undefined): USALInstance | USALConfig {
+    if (newConfig) return USALLib.config(newConfig) as USALInstance;
+    return USALLib.config() as USALConfig;
   }
 
-  ngOnChanges() {
-    this.updateAttribute();
+  destroy(): Promise<void> {
+    return USALLib.destroy();
   }
 
-  private updateAttribute() {
-    const value = this.usalValue || this.dataUsalValue || 'fade';
-    this.el.nativeElement.setAttribute('data-usal', value);
+  restart(): Promise<USALInstance> {
+    return USALLib.restart();
+  }
+  initialized(): boolean {
+    return USALLib.initialized();
   }
 }
 
 @NgModule({
-  declarations: [USALDirective],
+  imports: [USALDirective],
   exports: [USALDirective],
   providers: [USALService],
 })
 export class USALModule {}
 
-export const useUSAL = () => ({
-  config: (configOptions?: USALConfig): USALConfig | void => {
-    if (configOptions === undefined) {
-      return USALLib.config();
-    }
-    USALLib.config(configOptions);
-  },
-  destroy: () => USALLib.destroy(),
-  restart: () => USALLib.restart(),
-});
+export type { LoopType, AnimationType, DirectionType, USALDefaults, USALConfig, USALInstance };
 
 export default USALLib;
+
+declare global {
+  interface Window {
+    USAL: USALInstance;
+  }
+}

@@ -5,6 +5,71 @@ All notable changes to USAL.js will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-09-20
+
+### Added
+
+- **Brand identity refresh**: New logos and icon set with dark mode support
+  - SVG logos with automatic dark/light theme switching
+  - Complete icon set in multiple sizes (16px to 512px) and formats (PNG, WebP, GIF)
+  - Updated favicon and social media assets
+
+- **Text animation effects via timeline**: Shimmer and fluid effects now use timeline syntax
+  - `text-shimmer`: Converted to `line-[o+50g+100|50o+100g+130|o+50g+100]`
+  - `text-fluid`: Converted to `line-[w+100|50w+900|w+100]`
+  - Effects can now be customized and combined with other timeline properties
+
+- **Timeline property extensions**: New animation properties for advanced effects
+  - `g±value`: Glow/brightness control (0-100+)
+  - `w±value`: Font weight morphing (100-900)
+
+- **Comprehensive test suites**: Added integration tests for all major frameworks
+  - Angular, React/Next.js, Vue/Nuxt, Svelte/SvelteKit, Solid, Lit
+  - Framework-specific examples and edge case testing
+
+### Fixed
+
+- **SSR compatibility**: Complete overhaul for server-side rendering safety
+  - HTML structure preservation during split/count animations
+  - No element cloning or reconstruction
+  - Only text nodes modified for text/count animations
+  - Eliminated hydration mismatches in SSR frameworks
+
+- **Animation synchronization**: Fixed 5-95% progress bug causing visual artifacts
+  - Animations now use full 0-100% range with proper edge handling
+  - Eliminated "snap" effect at animation boundaries
+  - Improved timing precision and synchronization
+
+- **Angular integration**: Resolved directive compatibility issues
+  - Migrated to standalone directive architecture
+  - Fixed attribute binding with proper `usal="value"` syntax
+  - Added platform browser checks for SSR safety
+
+- **Default configuration**: Improved configuration inheritance system
+  - `config.defaults` now properly cascades through all animation types
+  - Consistent application of default values across split animations
+  - Better respect for user-defined defaults
+
+### Changed
+
+- **Documentation improvements**: Reorganized for better discoverability
+  - Framework usage examples moved directly below installation
+  - Added Vue.js plugin setup alongside Nuxt configuration
+  - Updated API documentation with new timeline properties
+
+- **Animation engine robustness**: Enhanced safety and error handling
+  - Added processing locks to prevent race conditions
+  - Improved cleanup with proper promise chains
+  - Better memory management with element state tracking
+  - Enhanced edge case handling for complex DOM mutations
+
+### Performance
+
+- **DOM manipulation optimization**: Reduced layout thrashing
+  - Text node replacement instead of innerHTML manipulation
+  - RequestAnimationFrame batching for DOM updates
+  - Eliminated unnecessary style recalculations
+
 ## [1.2.3] - 2025-09-16
 
 ### Added
@@ -176,6 +241,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Threshold controls
 - Duration and delay modifiers
 
+[1.3.0]: https://github.com/italoalmeida0/usal/compare/v1.2.3...v1.3.0
 [1.2.3]: https://github.com/italoalmeida0/usal/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/italoalmeida0/usal/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/italoalmeida0/usal/compare/v1.2.0...v1.2.1

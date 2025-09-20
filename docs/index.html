@@ -4,7 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>USAL.js - Ultimate Scroll Animation Library</title>
-    <link rel="icon" type="image/png" href="https://usal.dev/favicon.png" />
+    <link
+      rel="icon"
+      href="https://raw.githubusercontent.com/italoalmeida0/usal/refs/heads/main/assets/brand/usal_icon_48.png"
+      type="image/png"
+    />
+    <link
+      rel="apple-touch-icon"
+      href="https://raw.githubusercontent.com/italoalmeida0/usal/refs/heads/main/assets/brand/usal_icon_192.png"
+    />
 
     <!-- SEO -->
     <meta
@@ -31,7 +39,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
   </head>
@@ -43,19 +51,27 @@
           <!-- Home Section -->
           <section id="home" class="docs-section active">
             <div class="hero-section" data-usal="fade-d-10 duration-1000">
-              <h1
-                class="hero-title"
-                data-usal="text-fluid split-letter duration-2000 split-delay-200"
-                style="font-family: 'Montserrat', serif"
-              >
-                USAL.js
-              </h1>
+              <div class="hero-logo">
+                <div
+                  class="hero-title"
+                  data-usal="text-fluid split-letter duration-1500 split-delay-100"
+                >
+                  USAL
+                  <span class="js">JS</span>
+                </div>
+                <img
+                  src="https://raw.githubusercontent.com/italoalmeida0/usal/refs/heads/main/assets/brand/usal_icon_144.webp"
+                  alt="Icon USAL.js"
+                />
+              </div>
+
               <p
                 class="hero-subtitle"
-                data-usal="text-shimmer split-letter duration-3000 split-delay-50"
+                data-usal="text-shimmer split-letter duration-1000 split-delay-30 loop-jump"
               >
                 Ultimate Scroll Animation Library
               </p>
+
               <div class="badges">
                 <img
                   src="https://badge.usal.dev/?p=%40usal%2Freact&color=grey"
@@ -105,7 +121,7 @@
 
               <div class="specs" data-usal="fade-d split-item split-delay-300">
                 <div class="spec-item">
-                  <div class="spec-value" data-usal="count-[5] duration-500 linear">~8KB</div>
+                  <div class="spec-value" data-usal="count-[8] duration-500 linear">~8KB</div>
                   <div class="spec-label">Gzipped Size</div>
                 </div>
                 <div class="spec-item">
@@ -193,8 +209,12 @@ import { usal } from &#39;@usal/svelte&#39;;
 // USAL auto-initializes globally
 
 // Vue (Nuxt)
+import { USALPlugin } from &#39;@usal/vue&#39;;
+createApp(App).use(USALPlugin).mount(&#39;#app&#39;);
+//for Nuxt
 export default defineNuxtConfig({
 modules: [&#39;@usal/vue/nuxt&#39;]
+//...
 
 // Lit
 import { usal } from &#39;@usal/lit&#39;;
@@ -204,6 +224,32 @@ import { usal } from &#39;@usal/lit&#39;;
 import { USALModule } from &#39;@usal/angular&#39;;
 @Component({imports: [USALModule]})
 export class AppComponent</code></pre>
+
+                <div class="animation-item">
+                  <div class="animation-name">See how simple it is to use</div>
+                  <div class="animation-desc">Main animation attribute</div>
+                  <pre><code class="html">&lt;!-- Vanilla JS --&gt;
+&lt;div data-usal=&quot;fade duration-500&quot;&gt;Content&lt;/div&gt;
+
+&lt;!-- React/Next.js --&gt;
+&lt;div data-usal=&quot;fade duration-500&quot;&gt;Content&lt;/div&gt;
+
+&lt;!-- Solid/SolidStart --&gt;
+&lt;div data-usal=&quot;fade duration-500&quot;&gt;Content&lt;/div&gt;
+
+&lt;!-- Svelte/SvelteKit --&gt;
+&lt;div use:usal={&#39;fade duration-500&#39;}&gt;Content&lt;/div&gt;
+
+&lt;!-- Vue/Nuxt --&gt;
+&lt;div v-usal=&quot;&#39;fade duration-500&#39;&quot;&gt;Content&lt;/div&gt;
+
+&lt;!-- Lit --&gt;
+&lt;div ${usal(&#39;fade duration-500&#39;)}&gt;Content&lt;/div&gt;
+
+&lt;!-- Angular --&gt;
+&lt;div usal=&quot;fade duration-500&quot;&gt;Content&lt;/div&gt;
+</code></pre>
+                </div>
               </div>
             </div>
           </section>
@@ -420,7 +466,7 @@ export class AppComponent</code></pre>
               <h3
                 data-usal="text-fluid split-letter duration-2000 split-delay-50"
                 style="
-                  font-family: 'Raleway', serif;
+                  font-family: 'Montserrat', serif;
                   font-size: 2.5rem;
                   text-align: center;
                   margin: 2rem 0;
@@ -767,11 +813,12 @@ flip-ul, flip-ur, flip-dl, flip-dr</code></pre>
                     <div class="animation-name">Easing Functions</div>
                     <div class="animation-desc">Control animation acceleration</div>
                     <pre><code class="javascript">// Preset easing
-linear, ease, ease-in, ease-out
+linear, ease, ease-in, ease-out, ease-in-out, step-start, step-end
 
-// Custom easing with easing-[value]
-easing-[cubic-bezier(0.4,0,0.2,1)]
-easing-[steps(10, jump-both)]</code></pre>
+easing-[{value}] // Custom easing: easing-[cubic-bezier(0.4,0,0.2,1)]
+// Other custom possibilities
+linear(0, 0.25, 1)
+steps(4, end)</code></pre>
                   </div>
 
                   <div class="animation-item">
@@ -860,36 +907,15 @@ text-fluid      // Morphing font weight
   Beautiful
 &lt;/h1&gt;</code></pre>
                   </div>
+
+                  <div class="tip">
+                    <strong>Tip:</strong> For large elements (>100vh), use lower thresholds like
+                    threshold-5 or threshold-10 to ensure animations trigger properly.
+                  </div>
                 </div>
 
                 <div class="card" data-usal="fade-u-5 threshold-2">
-                  <h3>Property Names</h3>
-
-                  <div class="animation-item">
-                    <div class="animation-name">data-usal</div>
-                    <div class="animation-desc">Main animation attribute</div>
-                    <pre><code class="html">&lt;!-- Vanilla JS --&gt;
-&lt;div data-usal=&quot;fade duration-500&quot;&gt;Content&lt;/div&gt;
-
-&lt;!-- React/Next.js --&gt;
-&lt;div data-usal=&quot;fade duration-500&quot;&gt;Content&lt;/div&gt;
-
-&lt;!-- Solid/SolidStart --&gt;
-&lt;div data-usal=&quot;fade duration-500&quot;&gt;Content&lt;/div&gt;
-
-&lt;!-- Svelte/SvelteKit --&gt;
-&lt;div use:usal={&#39;fade duration-500&#39;}&gt;Content&lt;/div&gt;
-
-&lt;!-- Vue/Nuxt --&gt;
-&lt;div v-usal=&quot;&#39;fade duration-500&#39;&quot;&gt;Content&lt;/div&gt;
-
-&lt;!-- Lit --&gt;
-&lt;div ${usal(&#39;fade duration-500&#39;)}&gt;Content&lt;/div&gt;
-
-&lt;!-- Angular --&gt;
-&lt;div [usal]=&quot;&#39;fade duration-500&#39;&quot;&gt;Content&lt;/div&gt;
-</code></pre>
-                  </div>
+                  <h3>Advanced</h3>
 
                   <div class="animation-item">
                     <div class="animation-name">data-usal-id</div>
@@ -903,12 +929,6 @@ text-fluid      // Morphing font weight
 &lt;div data-usal="fade-u" data-usal-id="unique-element">Fixed ID&lt;/div></code></pre>
                   </div>
 
-                  <div class="tip">
-                    <strong>Tip:</strong> For large elements (>100vh), use lower thresholds like
-                    threshold-5 or threshold-10 to ensure animations trigger properly.
-                  </div>
-
-                  <h3>Advanced</h3>
                   <div class="animation-item">
                     <div class="animation-name">Animation Tuning</div>
                     <div class="animation-desc">Fine-tune animations with numeric values</div>
@@ -943,6 +963,8 @@ flip-90-60      // angle: 90°, perspective: 60rem (default: 25rem)</code></pre>
 // r±value  = Rotate (Z-axis, degrees)
 // rx/ry/rz = Rotate individual axes (degrees)
 // b±value  = Blur (rem, negatives become 0)
+// g±value  = Glow (brightness) (%, negatives become 0)
+// w±value  = Weight (font weight) (100-900, negatives become 0)
 // p±value  = Perspective (rem)
 
 // KEYFRAME BEHAVIORS:
@@ -981,9 +1003,15 @@ line-[
   o+100 sx+1 sy+1 tx+0
 ]
 
+// Fluid Text
+line-[w+100|50w+900|w+100] loop linear split-letter
+
+// Shimmer Text
+line-[o+50g+100|50o+100g+130|o+50g+100] loop linear split-letter
+
 // Combine with modifiers
 line-[o+0s+0.5] duration-2000 forwards
-line-[|50s+1.5] loop blur-2
+line-[|50s+1.5] loop
 line-[rx+360] easing-[cubic-bezier(0.4,0,0.2,1)]
 
 // IMPORTANT NOTES:
@@ -1082,6 +1110,94 @@ console.log(window.USAL.version); // string</code></pre>
               </h2>
 
               <div class="changelog-container">
+                <!-- v1.3.0 -->
+                <div class="changelog-entry" data-usal="fade-u delay-100">
+                  <div class="changelog-header">
+                    <h3 class="changelog-version">v1.3.0</h3>
+                    <span class="changelog-date">September 2025</span>
+                  </div>
+                  <div class="changelog-content">
+                    <h4>Brand Identity & Visual Refresh</h4>
+                    <ul>
+                      <li>
+                        <strong>New Logo System</strong>: Complete rebrand with automatic dark/light
+                        theme switching
+                      </li>
+                      <li>
+                        Full icon set in multiple formats (PNG, WebP, GIF) and sizes (16px to 512px)
+                      </li>
+                      <li>Updated favicon and social media assets for better brand consistency</li>
+                    </ul>
+
+                    <h4>SSR & Framework Compatibility</h4>
+                    <ul>
+                      <li>
+                        <strong>Complete SSR Overhaul</strong>: HTML structure now fully preserved
+                        during animations
+                      </li>
+                      <li>
+                        No element cloning or reconstruction - only text nodes modified for
+                        text/count animations
+                      </li>
+                      <li>
+                        <strong>Angular Fix</strong>: Migrated to standalone directive with proper
+                        <code>usal="value"</code> syntax
+                      </li>
+                      <li>Added Vue.js plugin setup alongside existing Nuxt configuration</li>
+                      <li>Eliminated hydration mismatches across all SSR frameworks</li>
+                    </ul>
+
+                    <h4>Animation Engine Improvements</h4>
+                    <ul>
+                      <li>
+                        <strong>Fixed 5-95% Progress Bug</strong>: Animations now use full 0-100%
+                        range, eliminating visual artifacts
+                      </li>
+                      <li>
+                        <strong>Text Effects via Timeline</strong>: <code>text-shimmer</code> and
+                        <code>text-fluid</code> now use timeline syntax
+                        <ul>
+                          <li>Shimmer: <code>line-[o+50g+100|50o+100g+130|o+50g+100]</code></li>
+                          <li>Fluid: <code>line-[w+100|50w+900|w+100]</code></li>
+                        </ul>
+                      </li>
+                      <li>
+                        New timeline properties: <code>g±value</code> (glow/brightness) and
+                        <code>w±value</code> (font weight morphing)
+                      </li>
+                      <li>
+                        Better synchronization with eliminated "snap" effect at animation boundaries
+                      </li>
+                    </ul>
+
+                    <h4>Testing & Documentation</h4>
+                    <ul>
+                      <li>
+                        <strong>Comprehensive Test Suites</strong>: Added integration tests for all
+                        major frameworks
+                      </li>
+                      <li>
+                        Framework usage examples moved directly below installation for better
+                        discoverability
+                      </li>
+                      <li>Updated API documentation with new timeline properties and examples</li>
+                    </ul>
+
+                    <h4>Robustness & Performance</h4>
+                    <ul>
+                      <li>
+                        Added processing locks to prevent race conditions during DOM mutations
+                      </li>
+                      <li>
+                        <strong>Configuration System</strong>: Improved
+                        <code>config.defaults</code> inheritance and cascading
+                      </li>
+                      <li>Optimized DOM manipulation with RequestAnimationFrame batching</li>
+                      <li>Enhanced memory management and cleanup with proper promise chains</li>
+                    </ul>
+                  </div>
+                </div>
+
                 <!-- v1.2.3 -->
                 <div class="changelog-entry" data-usal="fade-u delay-100">
                   <div class="changelog-header">
@@ -1396,11 +1512,17 @@ console.log(window.USAL.version); // string</code></pre>
       <!-- Sidebar -->
       <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-          <img
-            src="https://github.com/italoalmeida0/usal/raw/main/assets/logo.png"
-            alt="USAL.js"
-            class="sidebar-logo"
-          />
+          <a href="#home" class="sidebar-logo" data-section="home">
+            <img
+              src="https://raw.githubusercontent.com/italoalmeida0/usal/refs/heads/main/assets/brand/usal_logo_dark.svg"
+              alt="Icon USAL.js"
+            />
+            <img
+              src="https://raw.githubusercontent.com/italoalmeida0/usal/refs/heads/main/assets/brand/usal_icon_96.webp"
+              alt="Icon USAL.js"
+            />
+          </a>
+
           <div class="sidebar-version">
             <img
               src="https://badge.usal.dev/?ps=%40usal%2Freact%2C%40usal%2Fsolid%2C%40usal%2Fsvelte%2C%40usal%2Fvue%2C%40usal%2Flit%2C%40usal%2Fangular"
@@ -1445,9 +1567,9 @@ console.log(window.USAL.version); // string</code></pre>
 
     <script>
       document.addEventListener('DOMContentLoaded', function () {
-        window.USAL.config({ threshold: 10, delay: 100 });
+        window.USAL.config({ defaults: { threshold: 10, delay: 100 } });
 
-        const navItems = document.querySelectorAll('.nav-item, .quick-nav-item');
+        const navItems = document.querySelectorAll('.nav-item, .quick-nav-item, .sidebar-logo');
         const sections = document.querySelectorAll('.docs-section');
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');

@@ -198,6 +198,7 @@ export default [
       '**/*.min.js',
       '**/coverage/**',
       '**/*.d.ts',
+      '**/test/**',
     ],
   },
 ];

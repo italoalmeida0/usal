@@ -1,6 +1,6 @@
-type LoopType = 'mirror' | 'jump';
-type AnimationType = 'fade' | 'zoomin' | 'zoomout' | 'flip' | 'slide';
-type DirectionType = 'u' | 'd' | 'l' | 'r' | 'ul' | 'ur' | 'dl' | 'dr';
+export type LoopType = 'mirror' | 'jump';
+export type AnimationType = 'fade' | 'zoomin' | 'zoomout' | 'flip' | 'slide';
+export type DirectionType = 'u' | 'd' | 'l' | 'r' | 'ul' | 'ur' | 'dl' | 'dr';
 
 export interface USALDefaults {
   animation?: AnimationType;
