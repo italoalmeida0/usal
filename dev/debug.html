@@ -6,6 +6,13 @@
     <title>USAL.js Debug Panel</title>
     <link rel="icon" type="image/png" href="https://usal.dev/favicon.png" />
     <link rel="stylesheet" href="./debug.css" />
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <!-- Control Panel -->
@@ -145,10 +152,24 @@
         <div class="test-box">Item 2</div>
         <div class="test-box">Item 3</div>
       </div>
-      <h3 class="test-box" data-usal="text-fluid split-letter duration-2000 split-delay-50">
+      <h3
+        class="test-box"
+        style="font-family: 'Raleway', serif; font-size: 2.5rem; text-align: center; margin: 2rem 0"
+        data-usal="text-fluid split-letter duration-2000 split-delay-50"
+      >
         Fluid Weight Animation
       </h3>
-      <p class="test-box" data-usal="text-shimmer split-letter duration-2000 split-delay-100">
+      <p
+        class="test-box"
+        style="
+          font-family: 'Raleway', serif;
+          font-size: 2.5rem;
+          font-weight: bold;
+          text-align: center;
+          margin: 2rem 0;
+        "
+        data-usal="text-shimmer split-letter duration-2000 split-delay-100"
+      >
         SHIMMER EFFECT TEST
       </p>
     </div>
@@ -157,11 +178,13 @@
     <div class="section">
       <h2>Count Animations</h2>
       <div class="grid">
-        <div class="test-box" data-usal="count-[100] duration-1000">100</div>
+        <div class="test-box" data-usal="count-[100] duration-1000 loop-jump linear">100</div>
         <div class="test-box" data-usal="count-[999.99] duration-2000">999.99</div>
-        <div class="test-box" data-usal="count-[1,234.56] duration-2500 loop">$1,234.56</div>
+        <div class="test-box" data-usal="count-[1,234.56] duration-4000 loop ease-in-out">
+          $1,234.56
+        </div>
         <div class="test-box" data-usal="count-[42.5] duration-1500">Score: 42.5%</div>
-        <div class="test-box" data-usal="count-[1 234 567] duration-3000 loop-jump">
+        <div class="test-box" data-usal="count-[1 234 567] duration-30000 loop-jump">
           1 234 567 units
         </div>
         <div class="test-box" data-usal="count-[1 234 567] duration-3000 loop-mirror">
@@ -241,69 +264,47 @@
       </style>
       <div
         class="square-container"
-        data-usal="split-item delay-100-edges duration-2000 loop-mirror fade]"
+        data-usal="split-item split-delay-50-center duration-1000 loop-mirror fade"
       >
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <br />
+        <div class="test-box">1</div>
+        <div class="test-box">2</div>
+        <div class="test-box">3</div>
+        <div class="test-box">4</div>
+        <div class="test-box">5</div>
+        <div class="test-box">6</div>
+        <div class="test-box">7</div>
 
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <br />
+        <div class="test-box">1</div>
+        <div class="test-box">2</div>
+        <div class="test-box">3</div>
+        <div class="test-box">4</div>
+        <div class="test-box">5</div>
+        <div class="test-box">6</div>
+        <div class="test-box">7</div>
 
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <br />
+        <div class="test-box">1</div>
+        <div class="test-box">2</div>
+        <div class="test-box">3</div>
+        <div class="test-box">4</div>
+        <div class="test-box">5</div>
+        <div class="test-box">6</div>
+        <div class="test-box">7</div>
 
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <br />
+        <div class="test-box">1</div>
+        <div class="test-box">2</div>
+        <div class="test-box">3</div>
+        <div class="test-box">4</div>
+        <div class="test-box">5</div>
+        <div class="test-box">6</div>
+        <div class="test-box">7</div>
 
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <br />
-
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <br />
-
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
-        <div class="test-box"></div>
+        <div class="test-box">1</div>
+        <div class="test-box">2</div>
+        <div class="test-box">3</div>
+        <div class="test-box">4</div>
+        <div class="test-box">5</div>
+        <div class="test-box">6</div>
+        <div class="test-box">7</div>
       </div>
     </div>
 

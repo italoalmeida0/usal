@@ -11,12 +11,12 @@ const Debug = (() => {
   // Core Functions
   // ============================================================================
 
-  function loadUSALVersion() {
+  async function loadUSALVersion() {
     let versionInput = document.getElementById('usal-version-input').value.trim();
 
     if (!versionInput) {
-      document.getElementById('usal-version-input').value = '../packages/vanilla/usal.min.js';
-      versionInput = '../packages/vanilla/usal.min.js';
+      document.getElementById('usal-version-input').value = '../src/usal.js';
+      versionInput = '../src/usal.js';
     }
 
     const oldScript = document.getElementById('usal-script');
@@ -27,7 +27,6 @@ const Debug = (() => {
     if (window.USAL?.destroy) {
       window.USAL.destroy();
     }
-
     delete window.USAL;
 
     let scriptUrl;
@@ -43,24 +42,38 @@ const Debug = (() => {
       scriptUrl = `https://cdn.jsdelivr.net/npm/usal@${versionInput}/dist/usal.min.js`;
     }
 
-    const script = document.createElement('script');
-    script.id = 'usal-script';
-    script.src = scriptUrl;
+    const isModule =
+      !scriptUrl.includes('.min.js') && (scriptUrl.startsWith('../') || scriptUrl.startsWith('./'));
 
-    script.onload = () => {
-      if (window.USAL) {
-        log(`✓ USAL loaded: ${scriptUrl}`, 'pass');
+    if (isModule) {
+      try {
+        const module = await import(scriptUrl);
+        window.USAL = module.default || module.USAL || module;
+        log(`✓ USAL module loaded: ${scriptUrl}`, 'pass');
         log(`Version: ${window.USAL.version || 'Unknown'}`, 'pass');
-      } else {
-        log(`✗ USAL not defined after loading: ${scriptUrl}`, 'fail');
+      } catch (error) {
+        log(`✗ Error loading module: ${scriptUrl} - ${error.message}`, 'fail');
       }
-    };
+    } else {
+      const script = document.createElement('script');
+      script.id = 'usal-script';
+      script.src = scriptUrl;
 
-    script.onerror = () => {
-      log(`✗ Error loading: ${scriptUrl}`, 'fail');
-    };
+      script.onload = () => {
+        if (window.USAL) {
+          log(`✓ USAL script loaded: ${scriptUrl}`, 'pass');
+          log(`Version: ${window.USAL.version || 'Unknown'}`, 'pass');
+        } else {
+          log(`✗ USAL not defined after loading: ${scriptUrl}`, 'fail');
+        }
+      };
 
-    document.head.appendChild(script);
+      script.onerror = () => {
+        log(`✗ Error loading script: ${scriptUrl}`, 'fail');
+      };
+
+      document.head.appendChild(script);
+    }
   }
 
   function forceConfig() {
@@ -891,7 +904,7 @@ const Debug = (() => {
     setInterval(monitorInstance, 100);
     setInterval(updateAnimationStates, 100);
 
-    document.getElementById('usal-version-input').value = '../packages/vanilla/usal.min.js';
+    document.getElementById('usal-version-input').value = '../src/usal.js';
     loadUSALVersion();
     log('Debug panel initialized', 'pass');
 
