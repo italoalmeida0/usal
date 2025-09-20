@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* eslint-disable no-empty */
-/* eslint-disable sonarjs/no-ignored-exceptions */
+
 /* eslint-disable no-useless-escape */
 /* eslint-disable sonarjs/slow-regex */
 /* eslint-disable sonarjs/no-control-regex */
@@ -10,11 +10,20 @@ import path from 'path';
 
 import { detect } from 'langdetect';
 
-import { colorize } from './colorize.js';
+import { hLog } from './colorize.js';
 
 function findNonEnglishText(dir = '.') {
   const extensions = ['.js', '.jsx', '.ts', '.tsx', '.css', '.html', '.md', '.json'];
-  const skipDirs = ['node_modules', '.git', 'dist', 'build', '.next', 'coverage', 'packages'];
+  const skipDirs = [
+    'node_modules',
+    '.git',
+    'dist',
+    'build',
+    '.next',
+    'coverage',
+    'packages',
+    'test',
+  ];
   const skipFiles = ['.lock', 'package-lock.json', 'yarn.lock'];
 
   const nonEnglishTexts = [];
@@ -816,15 +825,21 @@ function findNonEnglishText(dir = '.') {
             });
           });
         }
-      } catch (err) {}
+      } catch {}
     });
   }
 
   scanDir(dir);
 
   if (nonEnglishTexts.length > 0) {
-    console.log(
-      `\n${colorize.error(`Found ${nonEnglishTexts.length} non-English text${nonEnglishTexts.length > 1 ? 's' : ''}:`)}\n`
+    const plural = nonEnglishTexts.length > 1 ? 's' : '';
+    hLog(
+      0,
+      true,
+      'warning',
+      'warning',
+      `Found ${nonEnglishTexts.length} non-English text${plural}:`,
+      '\n\n'
     );
 
     const byType = {
@@ -840,10 +855,15 @@ function findNonEnglishText(dir = '.') {
     Object.entries(byType).forEach(([type, texts]) => {
       if (texts.length === 0) return;
 
-      console.log(
-        `\n${colorize.highlight(`[${type.toUpperCase()}S]`)} ${colorize.dim(`(${texts.length} found)`)}`
+      hLog(
+        0,
+        true,
+        'highlight',
+        `${type.toUpperCase()}S`,
+        `/#dim (${texts.length} found) #/`,
+        '\n'
       );
-      console.log(`${colorize.dim('═'.repeat(60))}`);
+      hLog(0, false, 'dim', '═'.repeat(60));
 
       const byLanguage = texts.reduce((acc, text) => {
         if (!acc[text.language]) acc[text.language] = [];
@@ -852,24 +872,30 @@ function findNonEnglishText(dir = '.') {
       }, {});
 
       Object.entries(byLanguage).forEach(([language, langTexts]) => {
-        console.log(
-          `\n${colorize.accent(language)} ${colorize.dim(`(${langTexts.length} ${type}${langTexts.length > 1 ? 's' : ''})`)}`
+        const langPlural = langTexts.length > 1 ? 's' : '';
+        hLog(
+          0,
+          false,
+          'green',
+          language,
+          `/#dim (${langTexts.length} ${type}${langPlural}) #/`,
+          '\n'
         );
-        console.log(`${colorize.dim('─'.repeat(50))}`);
+        hLog(0, false, 'dim', '─'.repeat(50));
 
         langTexts.forEach((text) => {
-          console.log(`${colorize.file(`${text.file}:${text.line}`)}`);
-          console.log(
-            `   ${colorize.dim(text.content.substring(0, 100))}${text.content.length > 100 ? '...' : ''}`
-          );
-          console.log(`   ${colorize.warning(`→ "${text.extractedText}"`)}`);
+          hLog(0, false, 'file', `${text.file}:${text.line}`);
+          const truncated = text.content.substring(0, 100);
+          const ellipsis = text.content.length > 100 ? '...' : '';
+          hLog(2, false, 'dim', '', `${truncated}${ellipsis}`);
+          hLog(2, false, 'warning', '→', `/#warning "${text.extractedText}" #/`);
           console.log('');
         });
       });
     });
 
-    console.log(`\n${colorize.highlight('[SUMMARY]')}`);
-    console.log(`${colorize.dim('─'.repeat(50))}`);
+    hLog(0, true, 'highlight', 'summary', '', '\n');
+    hLog(0, false, 'dim', '─'.repeat(50));
 
     Object.entries(byType).forEach(([type, texts]) => {
       if (texts.length > 0) {
@@ -878,16 +904,23 @@ function findNonEnglishText(dir = '.') {
           return acc;
         }, {});
 
-        console.log(`\n${colorize.accent(type.toUpperCase() + 'S:')}`);
+        hLog(0, false, 'info', `${type.toUpperCase()}S:`, '', '\n');
         Object.entries(byLang).forEach(([lang, count]) => {
-          console.log(`   ${lang}: ${count}`);
+          hLog(2, false, '', lang, `/#red ${count} #/`);
         });
       }
     });
 
-    console.log(`\n${colorize.error(`Total: ${nonEnglishTexts.length} non-English texts found`)}`);
+    hLog(
+      0,
+      true,
+      'warning',
+      'warning',
+      `Total: /#red ${nonEnglishTexts.length} #/ non-English texts found`,
+      '\n'
+    );
   } else {
-    console.log(`\n${colorize.success('[OK]')} No non-English texts found!`);
+    hLog(0, true, 'success', 'ok', 'No non-English texts found!', '\n');
   }
 }
 

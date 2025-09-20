@@ -3,19 +3,19 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
-import { colorize } from './colorize.js';
+import { hLog } from './colorize.js';
 
 // Parse arguments
 const { projectName, packages, version } = JSON.parse(
   Buffer.from(process.argv[2], 'hex').toString('utf8')
 );
-
-console.log(`\n${colorize.header('[POSTBUILD]')} Starting documentation update process...`);
-console.log(`  ${colorize.info('Project:')} ${colorize.accent(projectName)}`);
-console.log(
-  `  ${colorize.info('Packages:')} ${packages.map((p) => colorize.package(p)).join(', ')}`
-);
-console.log(`  ${colorize.info('Version:')} ${version}`);
+const isSilent = process.argv.includes('--silent') || process.argv.includes('-s');
+if (!isSilent) {
+  hLog(0, true, 'header', 'postbuild', 'Starting documentation update process...');
+  hLog(2, false, 'info', 'Project:', `/#accent ${projectName} #/`);
+  hLog(2, false, 'info', 'Packages:', packages.map((p) => `/#package ${p} #/`).join(', '));
+  hLog(2, false, 'info', 'Version:', version);
+}
 
 // Track changes
 let updateCount = 0;
@@ -31,7 +31,7 @@ const files = {
 
 // Check README exists
 if (!fs.existsSync(files.readme)) {
-  console.log(`  ${colorize.error('[ERROR]')} README.md not found`);
+  hLog(2, true, 'error', 'error', 'README.md not found');
   process.exit(1);
 }
 
@@ -48,18 +48,17 @@ const { packages: packagesConfig = {} } = JSON.parse(fs.readFileSync('package.js
 
 // Generic update function
 function updateContent(content, updates, fileName) {
-  console.log(
-    `\n${colorize.header(`[${fileName.toUpperCase()} UPDATE]`)} Processing ${fileName}...`
-  );
+  if (!isSilent)
+    hLog(0, true, 'header', `${fileName.toUpperCase()} UPDATE`, `Processing ${fileName}...`, '\n');
 
   let result = content;
   updates.forEach(({ regex, replacement, name }) => {
     if (regex.test(result)) {
       result = result.replace(regex, replacement);
-      console.log(`  ${colorize.success('[SUCCESS]')} ${name}`);
+      if (!isSilent) hLog(2, false, 'success', '✓', name);
       updateCount++;
     } else {
-      console.log(`  ${colorize.error('[ERROR]')} ${name} not found`);
+      hLog(2, false, 'error', '✗', `${name} not found`);
       errorCount++;
     }
   });
@@ -302,54 +301,52 @@ Object.entries(originalStates).forEach(([key, content]) => {
   processed[key] = updateContent(content, updates, files[key]);
 });
 
+if (!isSilent) hLog(0, true, 'highlight', 'finishing', 'Latest processing...', '\n');
 // Save files
 Object.entries(processed).forEach(([key, content]) => {
   fs.writeFileSync(files[key], content);
-  console.log(`  ${colorize.info('[SAVED]')} ${files[key]}`);
+  if (!isSilent) hLog(2, true, 'info', 'saved', files[key]);
 });
 
 // Copy README to vanilla
 if (processed.readme && fs.existsSync(path.dirname(files.vanilla))) {
   fs.writeFileSync(files.vanilla, processed.readme);
-  console.log(`  ${colorize.info('[COPIED]')} README to vanilla package`);
+  if (!isSilent) hLog(2, true, 'info', 'copied', 'README to vanilla package');
 }
 
 // Format documents
-console.log(`\n${colorize.header('[FORMAT]')} Running format...`);
+if (!isSilent) hLog(0, true, 'header', 'format', 'Running format...', '\n');
 try {
   // eslint-disable-next-line sonarjs/no-os-command-from-path
   execSync('npm run format', { stdio: 'pipe' });
-  console.log(`  ${colorize.success('[SUCCESS]')} Formatted`);
+  if (!isSilent) hLog(2, true, 'success', 'success', 'Formatted');
 } catch {
-  console.log(`  ${colorize.warning('[WARNING]')} Format failed`);
+  hLog(2, true, 'warning', 'warning', 'Format failed');
 }
 
 // Check changes
-console.log(`\n${colorize.header('[COMPARISON]')} Checking changes...`);
+if (!isSilent) hLog(0, true, 'header', 'comparison', 'Checking changes...', '\n');
 const changes = [];
 
 Object.entries(originalStates).forEach(([key, original]) => {
   const current = fs.readFileSync(files[key], 'utf-8');
   const status = current !== original ? 'CHANGED' : 'NO CHANGE';
-  const color = current !== original ? 'success' : 'info';
+  const color = current !== original ? 'success' : 'yellow';
 
-  console.log(`  ${colorize[color](`[${status}]`)} ${files[key]}`);
+  if (!isSilent) hLog(2, true, color, status, files[key]);
   if (current !== original) changes.push(files[key]);
 });
 
-// Summary
-console.log(`\n${colorize.success('==================================================')}`);
-if (changes.length === 0) {
-  console.log(`${colorize.info('[POSTBUILD COMPLETE]')} All files up to date!`);
+if (changes.length === 0 && !isSilent) {
+  hLog(0, true, 'header', 'postbuild complete', 'All files up to date!', '\n');
 } else if (errorCount > 0) {
-  console.log(`${colorize.warning('[POSTBUILD COMPLETE WITH WARNINGS]')}`);
-  console.log(`  ${colorize.success('Updated:')} ${changes.join(', ')}`);
-  console.log(`  ${colorize.error('Errors:')} ${errorCount}`);
-} else {
-  console.log(`${colorize.highlight('[POSTBUILD SUCCESS]')}`);
-  console.log(`  ${colorize.success('Updated:')} ${changes.join(', ')}`);
-  console.log(`  ${colorize.success('Processed:')} ${updateCount} sections`);
+  hLog(0, true, 'warning', 'postbuild complete with warnings');
+  hLog(2, false, 'success', 'Updated:', changes.join(', '));
+  hLog(2, false, 'error', 'Errors:', errorCount.toString());
+} else if (!isSilent) {
+  hLog(0, true, 'highlight', 'postbuild success');
+  hLog(2, false, 'success', 'Updated:', changes.join(', '));
+  hLog(2, false, 'success', 'Processed:', `${updateCount} sections`);
 }
-console.log(`${colorize.success('==================================================')}\n`);
 
 process.exit(errorCount > 2 ? 1 : 0);
