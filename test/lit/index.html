@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>LitElement Starter Project</title>
+		<base href="/" />
+		<meta name="description" content="Template for LitElement Starter Project" />
+		<meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1" />
+		<!-- See https://goo.gl/OOhYW5 -->
+		<link rel="shortcut icon" type="image/svg+xml" href="/res/drawable/favicon.svg" />
+		<style>
+			html {
+				height: 100%;
+				width: 100%;
+				max-height: 100%;
+				max-width: 100%;
+			}
+
+			body,
+			html {
+				position: relative;
+				margin: 0;
+				padding: 0;
+				font-size: 14px;
+				background: var(--color-background, #fff);
+				height: 100%;
+				font-family: 'Roboto', sans-serif !important;
+			}
+		</style>
+	</head>
+
+	<body>
+		<lit-app></lit-app>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/6.8.3/system.min.js"></script>
+		<script type="module" src="/src/lit-app.ts"></script>
+	</body>
+</html>
