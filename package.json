@@ -1,6 +1,6 @@
 {
   "name": "usal-monorepo",
-  "version": "1.2.3",
+  "version": "0.0.0-dev.1758331558456",
   "private": true,
   "type": "module",
   "description": "Ultimate Scroll Animation Library - Lightweight, powerful, wonderfully simple ✨",
@@ -94,8 +94,8 @@
           "Nuxt"
         ],
         "file": "nuxt.config.ts",
-        "import": "export default defineNuxtConfig({",
-        "start": "modules: ['@usal/vue/nuxt']",
+        "import": "import { USALPlugin } from '@usal/vue';",
+        "start": "createApp(App).use(USALPlugin).mount('#app');\n//for Nuxt\nexport default defineNuxtConfig({\nmodules: ['@usal/vue/nuxt']\n//...",
         "prop": "v-usal=\"'VALUES'\""
       }
     },
@@ -133,20 +133,25 @@
         "file": "app.component.ts",
         "import": "import { USALModule } from '@usal/angular';",
         "start": "@Component({imports: [USALModule]})\nexport class AppComponent",
-        "prop": "[usal]=\"'VALUES'\""
+        "prop": "usal=\"VALUES\""
       }
     }
   },
   "scripts": {
-    "dev": "npm run build -- --watch",
+    "dev": "node scripts/build.js --watch --skip-angular",
+    "dev:with-angular": "node scripts/build.js --watch",
     "build": "npm run lint:fix && node scripts/build.js",
-    "version:all": "npm version --workspaces",
-    "update:tags": "node scripts/update-tags.js",
-    "publish:pkgs-beta": "npm run build && npm publish --workspaces --tag beta --access public",
-    "publish:all-beta": "npm run publish:pkgs-beta && npm run update:tags",
-    "publish:pkgs-stable": "npm run build && npm publish --workspaces --access public",
-    "publish:all-stable": "npm run publish:pkgs-stable && npm run update:tags",
-    "format": "prettier --write --ignore-path .gitignore **/*.{js,ts,jsx,tsx,html,css} && npm run format:doc",
+    "release:canary": "node scripts/publish.js --canary",
+    "release:canary:dry": "node scripts/publish.js --canary --dry-run",
+    "release:beta": "node scripts/publish.js --beta",
+    "release:beta:dry": "node scripts/publish.js --beta --dry-run",
+    "release:latest": "node scripts/publish.js --latest",
+    "release:latest:dry": "node scripts/publish.js --latest --dry-run",
+    "release:github": "node scripts/release-gh.js",
+    "release:github:dry": "node scripts/release-gh.js --dry-run",
+    "release:complete": "npm run release:latest && npm run release:github",
+    "release:complete:dry": "npm run release:latest:dry && npm run release:github:dry",
+    "format": "prettier --write --ignore-path .gitignore **/*.{js,ts,jsx,tsx,html,css} '!test/**' && npm run format:doc",
     "format:doc": "prettier --write --ignore-path .prettierignore *.{json,md} packages/**/*.{json,md}",
     "lint": "eslint src/**/*.{js,ts,jsx,tsx}",
     "lint:fix": "eslint src/**/*.{js,ts,jsx,tsx} --fix",
@@ -162,6 +167,8 @@
     "@typescript-eslint/eslint-plugin": "^8.42.0",
     "@typescript-eslint/parser": "^8.42.0",
     "browserslist-config-baseline": "^0.5.0",
+    "chokidar": "^4.0.3",
+    "dotenv-cli": "^10.0.0",
     "esbuild": "^0.25.9",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
