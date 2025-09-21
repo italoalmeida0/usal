@@ -60,7 +60,7 @@ npm install @usal/angular        # Angular
 
 ### Custom Timeline
 - **Syntax:** `line-[{timeline}]`
-- **Properties:** `o±{value}` (opacity 0-100) | `s±{value}` (scale) | `sx/sy/sz±{value}` (scale axis) | `t±{value}` (translateX %) | `tx/ty/tz±{value}` (translate axis %) | `r±{value}` (rotateZ °) | `rx/ry/rz±{value}` (rotate axis °) | `b±{value}` (blur rem) | `p±{value}` (perspective rem)
+- **Properties:** `o±{value}` (opacity 0-100) | `s±{value}` (scale) | `sx/sy/sz±{value}` (scale axis) | `t±{value}` (translateX %) | `tx/ty/tz±{value}` (translate axis %) | `r±{value}` (rotateZ °) | `rx/ry/rz±{value}` (rotate axis °) | `b±{value}` (blur rem) | `g±{value}` (glow/brightness %) | `w±{value}` (font weight 100-900) | `p±{value}` (perspective rem)
 - **Keyframes:** `|` (separator) | `|{percentage}` (% position)
 
 ### Modifiers
@@ -92,7 +92,7 @@ npm install @usal/angular        # Angular
 <div ${usal('fade-u duration-500')}>Content</div>
 
 <!-- Angular -->
-<div [usal]="'fade-u duration-500'">Content</div>
+<div usal="fade-u duration-500">Content</div>
 ```
 
 ## JavaScript API

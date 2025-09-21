@@ -342,7 +342,7 @@ line-[{timeline}]
 
 **Timeline Syntax:**
 
-- Properties (case-insensitive): `o` (opacity), `s/sx/sy/sz` (scale), `t/tx/ty/tz` (translate), `r/rx/ry/rz` (rotate), `b` (blur), `p` (perspective)
+- Properties (case-insensitive): `o` (opacity), `s/sx/sy/sz` (scale), `t/tx/ty/tz` (translate), `r/rx/ry/rz` (rotate), `b` (blur), `g` (glow), `w` (font weight), `p` (perspective)
 - Values: `+` or `-` followed by number
 - Keyframes: Use `|` to separate, with optional percentage prefix
 - Formatting: Spaces and line breaks are allowed for better organization
