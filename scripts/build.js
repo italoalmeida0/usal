@@ -643,7 +643,7 @@ async function isPackageLinkedLocally(packageName, projectPath) {
 }
 
 async function linkPackagesToTestProjects() {
-  if (!watchMode) hLog(0, true, 'header', 'npm link', 'Linking packages to test projects...', '\n');
+  if (!isSilent) hLog(0, true, 'header', 'npm link', 'Linking packages to test projects...', '\n');
   const testDir = path.join(process.cwd(), 'test');
   if (!fs.existsSync(testDir)) {
     hLog(2, true, 'warning', '!', 'No test directory found, skipping links');
@@ -655,7 +655,7 @@ async function linkPackagesToTestProjects() {
 
   const globalLinkedPackages = await getGlobalLinkedPackages();
 
-  if (!watchMode) hLog(2, false, 'info', '→', 'Registering packages globally...', '\n');
+  if (!isSilent) hLog(2, false, 'info', '→', 'Registering packages globally...', '\n');
 
   for (const pkg of packages) {
     const packagePath = path.join(packagesDir, pkg);
@@ -663,14 +663,14 @@ async function linkPackagesToTestProjects() {
       const packageName = pkg === 'vanilla' ? PROJECT_NAME : `@${PROJECT_NAME}/${pkg}`;
 
       if (globalLinkedPackages.has(packageName)) {
-        if (!watchMode)
+        if (!isSilent)
           hLog(4, false, 'yellow', '❉', `Already linked globally: /#package ${packageName} #/`);
         continue;
       }
 
       try {
         await runCommand('npm', ['link', '--silent'], packagePath);
-        if (!watchMode)
+        if (!isSilent)
           hLog(4, false, 'success', '✓', `Linked globally: /#package ${packageName} #/`);
       } catch (error) {
         hLog(4, true, 'error', 'error', `Failed to link ${pkg}: ${error.message}`);
@@ -678,7 +678,7 @@ async function linkPackagesToTestProjects() {
     }
   }
 
-  if (!watchMode) hLog(2, false, 'info', '→', 'Linking packages in test projects...', '\n');
+  if (!isSilent) hLog(2, false, 'info', '→', 'Linking packages in test projects...', '\n');
 
   const testProjects = fs.readdirSync(testDir);
 
@@ -687,7 +687,7 @@ async function linkPackagesToTestProjects() {
     if (!fs.statSync(testProjectPath).isDirectory()) continue;
     if (!fs.existsSync(path.join(testProjectPath, 'package.json'))) continue;
 
-    if (!watchMode) hLog(4, false, 'accent', '◆', `Test project: /#file ${testProject} #/`);
+    if (!isSilent) hLog(4, false, 'accent', '◆', `Test project: /#file ${testProject} #/`);
     const packagesToLink = [];
 
     if (packages.includes(testProject)) {
@@ -714,7 +714,7 @@ async function linkPackagesToTestProjects() {
       const alreadyLinkedLocally = await isPackageLinkedLocally(packageName, testProjectPath);
 
       if (alreadyLinkedLocally) {
-        if (!watchMode)
+        if (!isSilent)
           hLog(
             6,
             false,
@@ -727,7 +727,7 @@ async function linkPackagesToTestProjects() {
 
       try {
         await runCommand('npm', ['link', packageName, '--silent'], testProjectPath);
-        if (!watchMode)
+        if (!isSilent)
           hLog(
             6,
             false,
@@ -741,7 +741,7 @@ async function linkPackagesToTestProjects() {
     }
   }
 
-  if (!watchMode) hLog(0, true, 'highlight', 'done', 'Package linking finished!');
+  if (!isSilent) hLog(0, true, 'highlight', 'done', 'Package linking finished!');
 }
 
 function replaceVersionInAllFiles(directory, version) {
@@ -835,7 +835,7 @@ async function build() {
   const versionReplace = replaceVersionInAllFiles('packages', rootPackageJson.version);
 
   if (versionReplace.count > 0) {
-    if (!watchMode)
+    if (!isSilent)
       hLog(
         2,
         true,
