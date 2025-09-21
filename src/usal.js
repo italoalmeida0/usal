@@ -1,8 +1,8 @@
 // noinspection JSBitwiseOperatorUsage
 
 const USAL = (() => {
-  // Return existing instance if initialized
-  if (typeof window !== 'undefined' && window.USAL?.initialized()) {
+  // Return existing instance
+  if (typeof window !== 'undefined' && window.USAL) {
     return window.USAL;
   }
 
@@ -682,15 +682,23 @@ const USAL = (() => {
 
     if (textNodes.length) wrappers = [];
     textNodes.forEach((textNode) => {
+      if (!textNode.parentNode || !textNode.isConnected) {
+        countTextNodes--;
+        if (countTextNodes === 0) resolve();
+        return;
+      }
+
       const processed = processTextContent(textNode.textContent);
       wrappers.push(processed);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          textNode.parentNode.replaceChild(processed, textNode);
-          countTextNodes--;
-
-          if (countTextNodes === 0) {
-            resolve();
+          try {
+            if (textNode.parentNode) {
+              textNode.parentNode.replaceChild(processed, textNode);
+            }
+          } finally {
+            countTextNodes--;
+            if (countTextNodes === 0) resolve();
           }
         });
       });
@@ -768,8 +776,13 @@ const USAL = (() => {
           data.textWrappers = [wrapper];
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-              node.parentNode.replaceChild(wrapper, node);
-              resolve();
+              try {
+                if (node.parentNode) {
+                  node.parentNode.replaceChild(wrapper, node);
+                }
+              } finally {
+                resolve();
+              }
             });
           });
         }
@@ -1576,7 +1589,7 @@ const USAL = (() => {
 })();
 
 // Export for modules
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && !window.USAL) {
   window.USAL = USAL;
 }
 
