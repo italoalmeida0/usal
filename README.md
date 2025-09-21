@@ -6,7 +6,7 @@
     <img src="https://raw.githubusercontent.com/italoalmeida0/usal/refs/heads/main/assets/brand/usal_logo.svg" alt="USAL.js">
   </picture>
   <picture>
-    <img src="https://raw.githubusercontent.com/italoalmeida0/usal/refs/heads/main/assets/brand/usal_icon_144.webp" alt="⚡">
+    <img style="max-width: 144px" src="https://raw.githubusercontent.com/italoalmeida0/usal/refs/heads/main/assets/brand/usal_icon_512.webp" alt="⚡">
   </picture>
 
 **Ultimate Scroll Animation Library - Lightweight, powerful, wonderfully simple ✨**
