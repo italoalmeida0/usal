@@ -13,8 +13,8 @@ Things to remember when using USAL.js:
 
 ## Docs
 
-- [Complete API Documentation](https://github.com/italoalmeida0/usal/wiki/API-Documentation): Full reference with examples and advanced usage patterns
-- [API Summary](https://github.com/italoalmeida0/usal/wiki/API-Summary): Quick reference of all animations, modifiers, and syntax
+- [Complete API Documentation](https://github.com/usaljs/usal/wiki/API-Documentation): Full reference with examples and advanced usage patterns
+- [API Summary](https://github.com/usaljs/usal/wiki/API-Summary): Quick reference of all animations, modifiers, and syntax
 - [Interactive Playground](https://playground.usal.dev/): Live code editor to test animations and generate code
 - [Main Website](https://usal.dev/): Interactive demos with source code for every animation type
 
@@ -167,8 +167,8 @@ window.USAL.version        // Get version
 
 ## Community & Support
 
-- **GitHub Repository:** https://github.com/italoalmeida0/usal
-- **Issues & Bug Reports:** https://github.com/italoalmeida0/usal/issues
+- **GitHub Repository:** https://github.com/usaljs/usal
+- **Issues & Bug Reports:** https://github.com/usaljs/usal/issues
 - **NPM Package:** https://npmjs.com/package/usal
 - **CDN:** https://cdn.usal.dev/latest
 - **Creator:** [@italoalmeida0](https://github.com/italoalmeida0)

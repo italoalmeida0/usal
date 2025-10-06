@@ -27,6 +27,42 @@
     />
   </head>
   <body>
+    <div
+      id="betainfo"
+      style="
+        font-size: small;
+        padding: 0.5rem;
+        background: #ffd2001a;
+        border: 1px solid yellow;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      "
+    >
+      <span>The playground is in beta and may contain bugs.</span>
+
+      <svg
+        style="cursor: pointer"
+        onclick="document.getElementById('betainfo').remove()"
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+      >
+        <path
+          fill="none"
+          stroke="yellow"
+          stroke-dasharray="12"
+          stroke-dashoffset="12"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1"
+          d="M12 12l7 7M12 12l-7 -7M12 12l-7 7M12 12l7 -7"
+        >
+          <animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="12;0" />
+        </path>
+      </svg>
+    </div>
     <div class="playground-container">
       <!-- Header -->
       <header class="playground-header">
