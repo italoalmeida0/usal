@@ -173,16 +173,15 @@ function getUpdates(fileType, info) {
       });
 
     // Package table in Packages Overview section
-    let pkgTable = '| Package | Description | Version |\n|---------|-------------|---------|\n';
-    pkgTable += `| \`${projectName}\` | Core library (Vanilla JS) | ![npm](${getBadgeUrl(frameworkPackages, true)}) |\n`;
+    let pkgTable = '| Package | Version |\n|---------|---------|\n';
+    pkgTable += `| \`${projectName}\` | ![npm](${getBadgeUrl(frameworkPackages, true)}) |\n`;
 
     packages
       .filter((p) => p !== 'vanilla')
       .forEach((pkg) => {
         const name = `@${projectName}/${pkg}`;
-        const framework = pkg.charAt(0).toUpperCase() + pkg.slice(1);
         const color = packagesConfig[pkg]?.usage?.color || 'grey';
-        pkgTable += `| \`${name}\` | ${framework} integration | ![npm](${getBadgeUrl([], true, name, color)}) |\n`;
+        pkgTable += `| \`${name}\` | ![npm](${getBadgeUrl([], true, name, color)}) |\n`;
       });
 
     updates.push({

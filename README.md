@@ -2,11 +2,11 @@
 
   <picture>
     <source media="(prefers-color-scheme: dark)" 
-            srcset="https://raw.githubusercontent.com/italoalmeida0/usal/refs/heads/main/assets/brand/usal_logo_dark.svg">
-    <img src="https://raw.githubusercontent.com/italoalmeida0/usal/refs/heads/main/assets/brand/usal_logo.svg" alt="USAL.js">
+            srcset="https://raw.githubusercontent.com/usaljs/usal/refs/heads/main/assets/brand/usal_logo_dark.svg">
+    <img src="https://raw.githubusercontent.com/usaljs/usal/refs/heads/main/assets/brand/usal_logo.svg" alt="USAL.js">
   </picture>
   <picture>
-    <img width="144" height="144" src="https://raw.githubusercontent.com/italoalmeida0/usal/refs/heads/main/assets/brand/usal_icon_512.webp" alt="⚡">
+    <img width="144" height="144" src="https://raw.githubusercontent.com/usaljs/usal/refs/heads/main/assets/brand/usal_icon_512.webp" alt="⚡">
   </picture>
 
 **Ultimate Scroll Animation Library - Lightweight, powerful, wonderfully simple ✨**
@@ -15,9 +15,9 @@
 
 **[> usal.dev/](https://usal.dev/)**
 
-[![Powered by Cloudflare](https://img.shields.io/badge/Powered%20by-Cloudflare-orange)](https://cloudflare.com)
-[![Delivered by jsDelivr](https://img.shields.io/badge/Delivered%20by-jsDelivr-blue)](https://jsdelivr.com)
-[![Available on npm](https://img.shields.io/badge/Available%20on-npm-red)](https://npmjs.com/package/usal)
+[![Available On NPM](https://badgers.space/badge/AVAILABLE%20ON/NPM/red?icon=cssgg-npm&theme=tailwind)](https://npmjs.com/package/usal) [![Join The Community](https://badgers.space/badge/JOIN%20THE%20COMMUNITY/DISCORD/black?icon=feather-message-circle&theme=tailwind)](https://discord.usal.dev/)
+
+[![Powered by Cloudflare](https://badgers.space/badge/POWERED%20BY/CLOUDFLARE/orange?icon=feather-cloud-lightning&theme=tailwind)](https://www.cloudflare.com/) [![Delivered By JsDelivr](https://badgers.space/badge/DELIVERED%20BY/JSDELIVR/blue?icon=feather-download-cloud&theme=tailwind)](https://jsdelivr.com) [![Sponsor](https://badgers.space/badge/BECOMING%20A/SPONSOR/pink?icon=feather-heart&theme=tailwind)](https://github.com/sponsors/italoalmeida0)
 
 </div>
 
@@ -118,29 +118,29 @@ export class AppComponent
 <div data-usal="flip-r delay-500 blur once">Flip from right</div>
 ```
 
-## [📖 Complete API Documentation](https://github.com/italoalmeida0/usal/wiki/API-Documentation) or https://usal.dev/#api
+## [📖 Complete API Documentation](https://github.com/usaljs/usal/wiki/API-Documentation) or https://usal.dev/#api
 
 ## 🎲 Demos
 
-![Animations](https://github.com/italoalmeida0/usal/raw/main/assets/all.gif)
+![Animations](https://github.com/usaljs/usal/raw/main/assets/all.gif)
 
-![Text Animations](https://github.com/italoalmeida0/usal/raw/main/assets/text.gif)
+![Text Animations](https://github.com/usaljs/usal/raw/main/assets/text.gif)
 
-![Count Animations](https://github.com/italoalmeida0/usal/raw/main/assets/count.gif)
+![Count Animations](https://github.com/usaljs/usal/raw/main/assets/count.gif)
 
-![Split Animations](https://github.com/italoalmeida0/usal/raw/main/assets/split.gif)
+![Split Animations](https://github.com/usaljs/usal/raw/main/assets/split.gif)
 
 ## 📊 Packages Overview
 
-| Package         | Description               | Version                                                                                                                                        |
-| --------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `usal`          | Core library (Vanilla JS) | ![npm](https://badge.usal.dev/?nn&ps=%40usal%2Freact%2C%40usal%2Fsolid%2C%40usal%2Fsvelte%2C%40usal%2Fvue%2C%40usal%2Flit%2C%40usal%2Fangular) |
-| `@usal/react`   | React integration         | ![npm](https://badge.usal.dev/?nn&p=%40usal%2Freact&color=grey)                                                                                |
-| `@usal/solid`   | Solid integration         | ![npm](https://badge.usal.dev/?nn&p=%40usal%2Fsolid&color=blue)                                                                                |
-| `@usal/svelte`  | Svelte integration        | ![npm](https://badge.usal.dev/?nn&p=%40usal%2Fsvelte&color=orange)                                                                             |
-| `@usal/vue`     | Vue integration           | ![npm](https://badge.usal.dev/?nn&p=%40usal%2Fvue&color=green)                                                                                 |
-| `@usal/lit`     | Lit integration           | ![npm](https://badge.usal.dev/?nn&p=%40usal%2Flit&color=cyan)                                                                                  |
-| `@usal/angular` | Angular integration       | ![npm](https://badge.usal.dev/?nn&p=%40usal%2Fangular&color=red)                                                                               |
+| Package         | Version                                                                                                                                        |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `usal`          | ![npm](https://badge.usal.dev/?nn&ps=%40usal%2Freact%2C%40usal%2Fsolid%2C%40usal%2Fsvelte%2C%40usal%2Fvue%2C%40usal%2Flit%2C%40usal%2Fangular) |
+| `@usal/react`   | ![npm](https://badge.usal.dev/?nn&p=%40usal%2Freact&color=grey)                                                                                |
+| `@usal/solid`   | ![npm](https://badge.usal.dev/?nn&p=%40usal%2Fsolid&color=blue)                                                                                |
+| `@usal/svelte`  | ![npm](https://badge.usal.dev/?nn&p=%40usal%2Fsvelte&color=orange)                                                                             |
+| `@usal/vue`     | ![npm](https://badge.usal.dev/?nn&p=%40usal%2Fvue&color=green)                                                                                 |
+| `@usal/lit`     | ![npm](https://badge.usal.dev/?nn&p=%40usal%2Flit&color=cyan)                                                                                  |
+| `@usal/angular` | ![npm](https://badge.usal.dev/?nn&p=%40usal%2Fangular&color=red)                                                                               |
 
 ## 📈 JavaScript Animation Frameworks Comparison (2025)
 
