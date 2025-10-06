@@ -1,84 +1,25 @@
 // noinspection JSBitwiseOperatorUsage
 
 const USAL = (() => {
-  // Return existing instance if already initialized
+  // Return existing instance
   if (typeof window !== 'undefined' && window.USAL) {
     return window.USAL;
   }
 
-  // SSR safety check
+  // SSR safety
   if (typeof window === 'undefined') {
-    const asyncNoop = async function () {
-      return this;
-    };
     return {
       config: function () {
         return arguments.length === 0 ? {} : this;
       },
-      destroy: asyncNoop,
-      restart: asyncNoop,
+      destroy: async () => {},
+      restart: async function () {
+        return this;
+      },
       initialized: () => false,
       version: '{%%VERSION%%}',
     };
   }
-
-  // ============================================================================
-  // Constants
-  // ============================================================================
-
-  // Selectors
-  const SHADOW_CAPABLE_SELECTOR =
-    '*:not(:is(area,base,br,col,embed,hr,img,input,link,meta,param,source,track,wbr,textarea,select,option,optgroup,script,style,title,iframe,object,video,audio,canvas,map,svg,math))';
-  const DATA_USAL_ATTRIBUTE = 'data-usal';
-  const DATA_USAL_ID = `${DATA_USAL_ATTRIBUTE}-id`;
-  const DATA_USAL_SELECTOR = `[${DATA_USAL_ATTRIBUTE}]`;
-
-  // Config indices
-  const CONFIG_ANIMATION = 0;
-  const CONFIG_DIRECTION = 1;
-  const CONFIG_DURATION = 2;
-  const CONFIG_DELAY = 3;
-  const CONFIG_THRESHOLD = 4;
-  const CONFIG_EASING = 5;
-  const CONFIG_BLUR = 6;
-  const CONFIG_ONCE = 7;
-  const CONFIG_SPLIT = 8;
-  const CONFIG_COUNT = 9;
-  const CONFIG_TEXT = 10;
-  const CONFIG_LOOP = 11;
-  const CONFIG_FORWARDS = 12;
-  const CONFIG_TUNING = 13;
-  const CONFIG_LINE = 14;
-  const CONFIG_STAGGER = 15;
-
-  // Direction flags
-  const DIRECTION_UP = 1;
-  const DIRECTION_DOWN = 2;
-  const DIRECTION_LEFT = 4;
-  const DIRECTION_RIGHT = 8;
-
-  // Style properties
-  const STYLE_OPACITY = 'opacity';
-  const STYLE_TRANSFORM = 'transform';
-  const STYLE_FILTER = 'filter';
-  const STYLE_PERSPECTIVE = 'perspective';
-  const STYLE_DISPLAY = 'display';
-  const STYLE_FONT_WEIGHT = 'fontWeight';
-  const CSS_NONE = 'none';
-  const CSS_INLINE_BLOCK = 'inline-block';
-
-  // Animation settings
-  const INTERSECTION_THRESHOLDS = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
-
-  // Animation Types
-  // ⚠️ WARNING: Order MUST match array below! ⚠️
-  const ANIMATION_FADE = 0;
-  const ANIMATION_ZOOMIN = 1;
-  const ANIMATION_ZOOMOUT = 2;
-  const ANIMATION_FLIP = 3;
-  const ANIMATION_SLIDE = 4;
-  // ⚠️ WARNING: Order MUST match constants above! ⚠️
-  const ANIMATION_TYPES = ['fade', 'zoomin', 'zoomout', 'flip', 'slide'];
 
   // ============================================================================
   // Configuration & State
@@ -111,12 +52,65 @@ const USAL = (() => {
   };
 
   // ============================================================================
+  // Constants
+  // ============================================================================
+
+  const SHADOW_CAPABLE_SELECTOR =
+    '*:not(:is(area,base,br,col,embed,hr,img,input,link,meta,param,source,track,wbr,textarea,select,option,optgroup,script,style,title,iframe,object,video,audio,canvas,map,svg,math))';
+
+  const DATA_USAL_ATTRIBUTE = 'data-usal';
+  const DATA_USAL_ID = `${DATA_USAL_ATTRIBUTE}-id`;
+  const DATA_USAL_SELECTOR = `[${DATA_USAL_ATTRIBUTE}]`;
+
+  const CONFIG_ANIMATION = 0;
+  const CONFIG_DIRECTION = 1;
+  const CONFIG_DURATION = 2;
+  const CONFIG_DELAY = 3;
+  const CONFIG_THRESHOLD = 4;
+  const CONFIG_EASING = 5;
+  const CONFIG_BLUR = 6;
+  const CONFIG_ONCE = 7;
+  const CONFIG_SPLIT = 8;
+  const CONFIG_COUNT = 9;
+  const CONFIG_TEXT = 10;
+  const CONFIG_LOOP = 11;
+  const CONFIG_FORWARDS = 12;
+  const CONFIG_TUNING = 13;
+  const CONFIG_LINE = 14;
+  const CONFIG_STAGGER = 15;
+
+  const DIRECTION_UP = 1;
+  const DIRECTION_DOWN = 2;
+  const DIRECTION_LEFT = 4;
+  const DIRECTION_RIGHT = 8;
+
+  const STYLE_OPACITY = 'opacity';
+  const STYLE_TRANSFORM = 'transform';
+  const STYLE_FILTER = 'filter';
+  const STYLE_PERSPECTIVE = 'perspective';
+  const STYLE_DISPLAY = 'display';
+  const STYLE_FONT_WEIGHT = 'fontWeight';
+  const CSS_NONE = 'none';
+  const CSS_INLINE_BLOCK = 'inline-block';
+
+  const INTERSECTION_THRESHOLDS = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
+  // Animation Types
+  // ⚠️ WARNING: Order MUST match array below! ⚠️
+  const ANIMATION_FADE = 0;
+  const ANIMATION_ZOOMIN = 1;
+  const ANIMATION_ZOOMOUT = 2;
+  const ANIMATION_FLIP = 3;
+  const ANIMATION_SLIDE = 4;
+  // ⚠️ WARNING: Order MUST match constants above! ⚠️
+  const ANIMATION_TYPES = ['fade', 'zoomin', 'zoomout', 'flip', 'slide'];
+
+  // ============================================================================
   // Utilities
   // ============================================================================
 
   const genTmpId = () => `__usal${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
-  const calculateVisibilityRatio = (element) => {
+  function calculateVisibilityRatio(element) {
     const rect = element.getBoundingClientRect();
     const windowHeight = window.innerHeight;
     const windowWidth = window.innerWidth;
@@ -133,9 +127,9 @@ const USAL = (() => {
     const visibleHeight = Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0);
     const visibleWidth = Math.min(rect.right, windowWidth) - Math.max(rect.left, 0);
     return (visibleHeight / rect.height) * (visibleWidth / rect.width);
-  };
+  }
 
-  const captureComputedStyle = (element) => {
+  function captureComputedStyle(element) {
     const computedStyle = window.getComputedStyle(element);
     return {
       [STYLE_OPACITY]: computedStyle[STYLE_OPACITY] || '1',
@@ -144,7 +138,7 @@ const USAL = (() => {
       [STYLE_PERSPECTIVE]: computedStyle[STYLE_PERSPECTIVE] || CSS_NONE,
       [STYLE_FONT_WEIGHT]: computedStyle[STYLE_FONT_WEIGHT] || '400',
     };
-  };
+  }
 
   // ============================================================================
   // Style Management
@@ -199,7 +193,7 @@ const USAL = (() => {
       });
     });
 
-  const resetStyle = (data) => {
+  function resetStyle(data) {
     if (data.config[CONFIG_LOOP]) return;
     const originalStyle = data.element.__usalOGStyle;
     if (data.countData) {
@@ -223,8 +217,7 @@ const USAL = (() => {
       applyStyles(data.element, createKeyframes(data.config, originalStyle)[0]);
     }
     data.stop = false;
-  };
-
+  }
   // ============================================================================
   // Configuration Parsing
   // ============================================================================
@@ -267,21 +260,16 @@ const USAL = (() => {
     return direction > 0 ? direction : fallback;
   };
 
-  const genEmptyConfig = () => {
+  function genEmptyConfig() {
     const config = new Array(16).fill(null);
     config[CONFIG_TUNING] = [];
     config[CONFIG_STAGGER] = 'index';
     return config;
-  };
+  }
 
-  const parseClasses = (classString) => {
+  function parseClasses(classString) {
     const config = genEmptyConfig();
 
-    // Remove comments
-    classString = classString.replace(/\/\/[^\n\r]*/g, '').replace(/\/\*.*?\*\//gs, '');
-    classString = classString.toLowerCase().trim();
-
-    // Extract complex configs
     classString = extractAndSetConfig('count', config, CONFIG_COUNT, classString);
     classString = extractAndSetConfig('easing', config, CONFIG_EASING, classString);
     classString = extractAndSetConfig('line', config, CONFIG_LINE, classString);
@@ -292,7 +280,6 @@ const USAL = (() => {
       const parts = token.split('-');
       const firstPart = parts[0];
 
-      // Check for animation type
       if (config[CONFIG_ANIMATION] === null) {
         config[CONFIG_ANIMATION] = extractAnimation(firstPart);
         if (config[CONFIG_ANIMATION] !== null) {
@@ -305,7 +292,6 @@ const USAL = (() => {
         }
       }
 
-      // Parse standalone keywords
       switch (token) {
         case 'once':
           config[CONFIG_ONCE] = true;
@@ -323,7 +309,6 @@ const USAL = (() => {
           config[CONFIG_EASING] = token;
           break;
         default:
-          // Parse prefixed configs
           switch (firstPart) {
             case 'split':
               if (parts[1])
@@ -356,7 +341,7 @@ const USAL = (() => {
     }
 
     return config;
-  };
+  }
 
   // ============================================================================
   // Animation Keyframes
@@ -365,13 +350,13 @@ const USAL = (() => {
   function parseTimeline(content, originalStyle, inlineBlock = false) {
     const clean = content.replace(/\s/g, '').toLowerCase();
 
-    const buildTransform = (type, axis, value, unit) => {
+    function buildTransform(type, axis, value, unit) {
       const axisStr =
         axis && ['x', 'y', 'z'].includes(axis) ? axis.toUpperCase() : type === 'rotate' ? 'Z' : '';
       return `${type}${axisStr}(${value}${unit})`;
-    };
+    }
 
-    const parseTransforms = (str) => {
+    function parseTransforms(str) {
       const regex = /(\w|\w\w)([+-]\d+(?:\.\d+)?)/g;
 
       let transforms = '';
@@ -425,7 +410,7 @@ const USAL = (() => {
       if (fontWeight) result[STYLE_FONT_WEIGHT] = fontWeight;
       if (perspective) result[STYLE_PERSPECTIVE] = perspective;
       return result;
-    };
+    }
 
     const keyframes = new Map();
     clean.split('|').forEach((frame, index) => {
@@ -439,7 +424,6 @@ const USAL = (() => {
       keyframes.set(percent, parseTransforms(frame.replace(/^\d+/, '')));
     });
 
-    // Ensure start and end keyframes
     if (Object.keys(keyframes.get(0)).length === 0) {
       keyframes.set(0, originalStyle);
     }
@@ -474,11 +458,10 @@ const USAL = (() => {
     return [{ offset: 0, ...first }, ...compressed, { offset: 1, ...last }];
   }
 
-  const createKeyframes = (config, originalStyle) => {
+  function createKeyframes(config, originalStyle) {
     if (!originalStyle) return;
     const isSplitText = config[CONFIG_SPLIT] && !config[CONFIG_SPLIT]?.includes('item');
 
-    // Text presets
     if (config[CONFIG_TEXT] === 'shimmer') config[CONFIG_LINE] = 'o+50g+100|50o+100g+130|o+50g+100';
     else if (config[CONFIG_TEXT] === 'fluid') config[CONFIG_LINE] = 'w+100|50w+900|w+100';
 
@@ -504,14 +487,13 @@ const USAL = (() => {
     const defaultDelta = isSplitText ? 50 : 15;
     const intensity = (lastTuning ?? defaultDelta) / 100;
 
-    // Zoom animations
     if (animationType === ANIMATION_ZOOMIN || animationType === ANIMATION_ZOOMOUT) {
+      // Zoom
       fromTimeline += `s+${1 + (animationType === ANIMATION_ZOOMIN ? -intensity : intensity)}`;
       firstTuning = null;
       secondTuning = tuning?.length === 2 ? null : secondTuning;
-    }
-    // Flip animation
-    else if (animationType === ANIMATION_FLIP) {
+    } else if (animationType === ANIMATION_FLIP) {
+      // Flip
       const angle = firstTuning ?? 90;
       if (direction & (DIRECTION_UP | DIRECTION_DOWN)) {
         const rotX = direction & DIRECTION_UP ? angle : -angle;
@@ -528,7 +510,6 @@ const USAL = (() => {
       fromTimeline += `p+${perspectiveValue ?? 25}`;
     }
 
-    // Slide direction
     if (animationType !== ANIMATION_FLIP && direction) {
       if (direction & DIRECTION_RIGHT) {
         fromTimeline += `tx-${firstTuning ?? defaultDelta}`;
@@ -543,7 +524,6 @@ const USAL = (() => {
       }
     }
 
-    // Blur effect
     if (blur) {
       const blurValue =
         blur === true
@@ -555,12 +535,11 @@ const USAL = (() => {
     }
 
     return parseTimeline(fromTimeline, originalStyle, isSplitText);
-  };
+  }
 
   // ============================================================================
   // Split Animation Setup
   // ============================================================================
-
   function getStaggerFunction(targets, strategy = 'index') {
     const targetsData = targets.map((target) => {
       const rect = target.getBoundingClientRect();
@@ -629,7 +608,7 @@ const USAL = (() => {
       });
   }
 
-  const setupSplit = (element, splitBy, strategy, resolve) => {
+  function setupSplit(element, splitBy, strategy, resolve) {
     const targets = [];
 
     // Split by child elements
@@ -642,13 +621,13 @@ const USAL = (() => {
     }
 
     // Split by text
-    const createSpan = (content) => {
+    function createSpan(content) {
       const span = document.createElement('span');
       span.textContent = content;
       return span;
-    };
+    }
 
-    const processTextContent = (text) => {
+    function processTextContent(text) {
       if (!text?.trim()) return text ? document.createTextNode(text) : null;
 
       const wrapper = document.createElement('span');
@@ -662,7 +641,7 @@ const USAL = (() => {
           return;
         }
 
-        // Split by word
+        // Split Word
         if (splitBy === 'word') {
           const span = createSpan(word);
           applyStyles(span, { [STYLE_DISPLAY]: CSS_INLINE_BLOCK });
@@ -671,7 +650,7 @@ const USAL = (() => {
           return;
         }
 
-        // Split by letter
+        // Split letter
         const container = document.createElement('span');
         applyStyles(container, { [STYLE_DISPLAY]: CSS_INLINE_BLOCK, whiteSpace: 'nowrap' });
 
@@ -695,7 +674,7 @@ const USAL = (() => {
       });
 
       return wrapper;
-    };
+    }
 
     const textNodes = [];
     let countTextNodes = 0;
@@ -734,13 +713,13 @@ const USAL = (() => {
     });
 
     return [getStaggerFunction(targets, strategy), wrappers];
-  };
+  }
 
   // ============================================================================
   // Count Animation Setup
   // ============================================================================
 
-  const setupCount = (element, config, data, resolve) => {
+  function setupCount(element, config, data, resolve) {
     const original = config[CONFIG_COUNT].trim();
     const clean = original.replace(/[^\d\s,.]/g, '');
 
@@ -754,7 +733,6 @@ const USAL = (() => {
       thousandSep = '',
       decimalSep = '';
 
-    // Parse number format
     if (separators.length === 0) {
       value = parseFloat(clean);
     } else if (separators.length === 1) {
@@ -782,7 +760,7 @@ const USAL = (() => {
     let span = null;
     let wrapper = null;
 
-    const findAndReplace = (node) => {
+    function findAndReplace(node) {
       if (span) return;
 
       if (node.nodeType === Node.TEXT_NODE) {
@@ -819,7 +797,7 @@ const USAL = (() => {
       } else if (node.nodeType === Node.ELEMENT_NODE) {
         Array.from(node.childNodes).forEach(findAndReplace);
       }
-    };
+    }
 
     findAndReplace(element);
 
@@ -830,45 +808,49 @@ const USAL = (() => {
 
     data.countData = { value, decimals, span, thousandSep, decimalSep };
     return true;
-  };
+  }
 
   // ============================================================================
-  // Count Animation Implementation
+  // Count Animation
   // ============================================================================
 
-  const animateCount = (countData, options) => {
+  function animateCount(countData, options) {
     const { duration, easing } = options;
     const { value, decimals, span, thousandSep, decimalSep } = countData;
 
-    let tickTime = null;
     let currentTime = 0;
     let playState = 'idle';
     let playbackRate = 1;
 
-    const getEasingFunction = (easingType) => {
+    function getEasingFunction(easingType) {
       switch (easingType) {
         case 'linear':
           return (t) => t;
+
         case 'ease':
           return (t) => {
             if (t === 0) return 0;
             if (t === 1) return 1;
             return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
           };
+
         case 'ease-in':
           return (t) => t * t * t;
+
         case 'ease-out':
           return (t) => 1 - Math.pow(1 - t, 3);
+
         case 'ease-in-out':
           return (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
         default:
           return (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
       }
-    };
+    }
 
     const easingFunction = getEasingFunction(easing);
 
-    const formatNumber = (val) => {
+    function formatNumber(val) {
       const parts = (decimals > 0 ? val.toFixed(decimals) : Math.floor(val).toString()).split('.');
       if (thousandSep && parts[0].length > 3) {
         const reversed = parts[0].split('').reverse();
@@ -878,9 +860,9 @@ const USAL = (() => {
         );
       }
       return parts.length > 1 && decimalSep ? parts[0] + decimalSep + parts[1] : parts[0];
-    };
+    }
 
-    const updateValue = (time) => {
+    function updateValue(time) {
       const progress = Math.max(0, Math.min(1, time / duration));
 
       if (progress <= 0.06) {
@@ -897,29 +879,22 @@ const USAL = (() => {
       if ((progress >= 1 && playbackRate > 0) || (progress <= 0 && playbackRate < 0)) {
         playState = 'finished';
       }
-    };
+    }
 
     return {
-      tick(now, loop = false) {
+      tick(elapsed, loop = false) {
         if ((loop && playState !== 'paused') || playState === 'running') {
           playState = 'running';
-          let elapsed = now - tickTime;
 
-          const maxElapsed = 100;
-          if (elapsed > maxElapsed) {
-            elapsed = 16.67;
-          }
           currentTime = currentTime + (playbackRate > 0 ? elapsed : -elapsed);
           currentTime = Math.max(0, Math.min(duration, currentTime));
 
-          tickTime = now;
           updateValue(currentTime);
         }
       },
 
       play() {
         if (playState === 'finished' || playState === 'running') return;
-        tickTime = performance.now();
         playState = 'running';
       },
 
@@ -958,21 +933,22 @@ const USAL = (() => {
         playbackRate = rate;
       },
     };
-  };
-
+  }
   // ============================================================================
-  // Animation Controller Class
+  // Animation Controller
   // ============================================================================
 
   class AnimationController {
+    reset() {
+      this.rafId = null;
+      this.lastTickTime = null;
+      this.virtualTime = 0;
+      this.animations = new Map();
+    }
+
     constructor(data) {
       this.data = data;
       this.reset();
-    }
-
-    reset() {
-      this.rafId = null;
-      this.animations = new Map();
     }
 
     timeToSayGoodbye() {
@@ -999,7 +975,7 @@ const USAL = (() => {
       });
     }
 
-    prepare(tickTime) {
+    prepare(elapsed) {
       const toCleanup = [];
       const toAnimate = [];
 
@@ -1009,7 +985,7 @@ const USAL = (() => {
           continue;
         }
 
-        animation.tick?.(tickTime, info.loop);
+        animation.tick?.(elapsed, info.loop);
 
         const progress = animation.currentTime / info.duration;
 
@@ -1027,17 +1003,19 @@ const USAL = (() => {
           animation.pause();
           info.waiting = true;
         }
-        if (info.pendingPlay && tickTime >= info.playAt) {
+
+        if (info.pendingPlay && this.virtualTime >= info.playAt) {
           info.pendingPlay = false;
           animation.play();
         }
+
         toAnimate.push(info);
       }
 
       return { toCleanup, toAnimate };
     }
 
-    animate(toAnimate, tickTime) {
+    animate(toAnimate) {
       if (toAnimate.length > 0 && toAnimate.every((info) => info.waiting)) {
         const isJump = toAnimate[0].loop === 'jump';
         const newPlaybackRate = isJump ? 1 : -toAnimate[0].playbackRate;
@@ -1064,7 +1042,7 @@ const USAL = (() => {
           if (delay === 0) {
             next.animation.play();
           } else {
-            next.playAt = tickTime + delay;
+            next.playAt = this.virtualTime + delay;
             next.pendingPlay = true;
           }
         });
@@ -1072,11 +1050,16 @@ const USAL = (() => {
     }
 
     tick() {
-      const tickTime = performance.now();
-      const { toCleanup, toAnimate } = this.prepare(tickTime);
+      const now = performance.now();
+      const elapsed = Math.min(now - (this.lastTickTime ?? now), 16.67);
+      this.virtualTime += elapsed;
+      this.lastTickTime = now;
+
+      const { toCleanup, toAnimate } = this.prepare(elapsed);
 
       this.cleanupAnimation(toCleanup);
-      this.animate(toAnimate, tickTime);
+
+      this.animate(toAnimate);
 
       if (!this.timeToSayGoodbye()) {
         this.rafId = requestAnimationFrame(() => this.tick());
@@ -1116,7 +1099,6 @@ const USAL = (() => {
         delay: 0,
         id: genTmpId(),
       };
-
       const animation = this.data.countData
         ? animateCount(this.data.countData, options)
         : element.animate(keyframes, options);
@@ -1177,7 +1159,7 @@ const USAL = (() => {
   // Main Animation Controller
   // ============================================================================
 
-  const tryAnimate = (data) => {
+  function tryAnimate(data) {
     if (data.stop) return;
     data.hasAnimated = true;
 
@@ -1189,9 +1171,9 @@ const USAL = (() => {
       data.processing = null;
       data.stop = true;
     });
-  };
+  }
 
-  const tryAnimateIfVisible = (data, ratio = null) => {
+  function tryAnimateIfVisible(data, ratio = null) {
     if (
       data.config[CONFIG_LOOP] ||
       data.processing !== null ||
@@ -1214,7 +1196,7 @@ const USAL = (() => {
     if (_ratio >= threshold) {
       tryAnimate(data);
     }
-  };
+  }
 
   // ============================================================================
   // Element Processing & Cleanup
@@ -1259,15 +1241,20 @@ const USAL = (() => {
       else data.stop = true;
     });
 
-  const processElement = (element, elementObserver) => {
+  function processElement(element, elementObserver) {
     if (element.__usalProcessing) return;
 
-    if (!element.__usalID) {
+    let classes = element.getAttribute(DATA_USAL_ATTRIBUTE) || '';
+    classes = classes
+      .replace(/\/\/[^\n\r]*/g, '')
+      .replace(/\/\*.*?\*\//gs, '')
+      .trim()
+      .toLowerCase();
+
+    if (!element.__usalID && classes !== '') {
       element.__usalOGStyle = captureComputedStyle(element);
       element.__usalID = element.getAttribute(DATA_USAL_ID) ?? genTmpId();
     }
-
-    const classes = element.getAttribute(DATA_USAL_ATTRIBUTE) || '';
 
     const existingData = instance.elements.get(element.__usalID);
     if (existingData) {
@@ -1282,6 +1269,8 @@ const USAL = (() => {
       }
       return;
     }
+
+    if (classes === '') return;
 
     element.__usalFragment = 1;
     const config = parseClasses(classes);
@@ -1354,13 +1343,13 @@ const USAL = (() => {
       }
       data.processing = null;
     });
-  };
+  }
 
   // ============================================================================
   // Observers Setup
   // ============================================================================
 
-  const setupObservers = () => {
+  function setupObservers() {
     const domObservers = new Set();
     const resizeObservers = new Set();
     const observedDOMs = new Set();
@@ -1381,7 +1370,7 @@ const USAL = (() => {
       { threshold: INTERSECTION_THRESHOLDS }
     );
 
-    const collectAllDOMs = (root = document.body, collected = new Set()) => {
+    function collectAllDOMs(root = document.body, collected = new Set()) {
       if (collected.has(root)) return collected;
       collected.add(root);
 
@@ -1393,9 +1382,9 @@ const USAL = (() => {
       }
 
       return collected;
-    };
+    }
 
-    const observeDOM = (dom) => {
+    function observeDOM(dom) {
       const mutationObs = new MutationObserver(handleObserverEvents);
       mutationObs.observe(dom, {
         childList: true,
@@ -1409,9 +1398,9 @@ const USAL = (() => {
         resizeObs.observe(dom === document.body ? dom : dom.host);
         resizeObservers.add(resizeObs);
       }
-    };
+    }
 
-    const scanAllDOMs = () => {
+    function scanAllDOMs() {
       // Clean disconnected elements
       for (const [id, data] of instance.elements) {
         if (!data || !data.element) {
@@ -1441,9 +1430,9 @@ const USAL = (() => {
         }
       }
       lastScan = Date.now();
-    };
+    }
 
-    const handleObserverEvents = (events) => {
+    function handleObserverEvents(events) {
       const items = Array.isArray(events) ? events : [events];
       const hasUsalFragment = (target) => !!target.__usalFragment;
 
@@ -1481,7 +1470,7 @@ const USAL = (() => {
           Math.max(0, instance.config.observersDelay - timeSinceLastScan)
         );
       }
-    };
+    }
 
     scanAllDOMs();
 
@@ -1494,7 +1483,18 @@ const USAL = (() => {
       resizeObservers.clear();
       observedDOMs.clear();
     };
-  };
+  }
+
+  // ============================================================================
+  // Initialization
+  // ============================================================================
+
+  function autoInit() {
+    if (!instance.initialized) {
+      instance.initialized = true;
+      instance.observers = setupObservers();
+    }
+  }
 
   // ============================================================================
   // Public API
@@ -1514,7 +1514,6 @@ const USAL = (() => {
       Object.assign(instance.config, newConfig);
       return publicAPI;
     },
-
     async destroy() {
       if (!instance.initialized) return Promise.resolve();
       if (instance.destroying != null) return instance.destroying;
@@ -1591,17 +1590,6 @@ const USAL = (() => {
 
     initialized: () => instance.initialized,
     version: '{%%VERSION%%}',
-  };
-
-  // ============================================================================
-  // Initialization
-  // ============================================================================
-
-  const autoInit = () => {
-    if (!instance.initialized) {
-      instance.initialized = true;
-      instance.observers = setupObservers();
-    }
   };
 
   // Initialize on DOM ready

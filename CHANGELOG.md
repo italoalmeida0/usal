@@ -5,6 +5,30 @@ All notable changes to USAL.js will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2025-10-06
+
+### Fixed
+
+- **Blazor component reuse compatibility**: Fixed edge case where Blazor's DOM element reuse caused animations to trigger on elements without `data-usal` attributes
+  - USAL now ignores elements with empty or whitespace-only `data-usal` values
+  - Prevents animations from triggering when Blazor strips attributes during navigation
+  - Special thanks to [@mdmontesinos](https://github.com/mdmontesinos) for the detailed investigation and testing [TypeError: Cannot read properties of null (reading 'replaceChild') #5](https://github.com/usaljs/usal/issues/5)
+
+- **Tab visibility desynchronization**: Fixed stagger timing issues when browser tabs become inactive
+  - Implemented virtual time system capped at 16.67ms per frame
+  - Stagger delays now remain synchronized after tab switches
+  - Eliminates animation "bunching" when returning to inactive tabs
+  - Applies to both split animations and count animations
+
+- **Console error handling**: Improved error handling for `replaceChild` operations during DOM manipulation
+  - Elements causing errors are now properly ignored and cleaned up
+  - No visual impact on animations
+  - Reduces console spam in edge cases
+
+- **Split animation nesting**: Fixed excessive DOM nesting in split letter/word animations
+  - Proper instance detection prevents duplicate wrapper generation
+  - Cleaner DOM structure with minimal nesting
+
 ## [1.3.0] - 2025-09-20
 
 ### Added
@@ -241,6 +265,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Threshold controls
 - Duration and delay modifiers
 
+[1.3.1]: https://github.com/usaljs/usal/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/usaljs/usal/compare/v1.2.3...v1.3.0
 [1.2.3]: https://github.com/usaljs/usal/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/usaljs/usal/compare/v1.2.1...v1.2.2

@@ -1104,6 +1104,72 @@ console.log(window.USAL.version); // string</code></pre>
               </h2>
 
               <div class="changelog-container">
+                <!-- v1.3.1 -->
+                <div class="changelog-entry" data-usal="fade-u delay-100">
+                  <div class="changelog-header">
+                    <h3 class="changelog-version">v1.3.1</h3>
+                    <span class="changelog-date">October 2025</span>
+                  </div>
+                  <div class="changelog-content">
+                    <h4>Bug Fixes & Stability</h4>
+                    <ul>
+                      <li>
+                        <strong>Blazor Component Reuse Compatibility</strong>: Fixed edge case where
+                        Blazor's DOM element reuse caused animations to trigger on elements without
+                        <code>data-usal</code> attributes
+                        <ul>
+                          <li>
+                            USAL now ignores elements with empty or whitespace-only
+                            <code>data-usal</code> values
+                          </li>
+                          <li>
+                            Prevents animations from triggering when Blazor strips attributes during
+                            navigation
+                          </li>
+                          <li>
+                            Special thanks to
+                            <a href="https://github.com/mdmontesinos" target="_blank"
+                              >@mdmontesinos</a
+                            >
+                            for the detailed investigation and testing (<a
+                              href="https://github.com/usaljs/usal/issues/5"
+                              target="_blank"
+                              >Issue #5</a
+                            >)
+                          </li>
+                        </ul>
+                      </li>
+                      <li>
+                        <strong>Tab Visibility Desynchronization</strong>: Fixed stagger timing
+                        issues when browser tabs become inactive
+                        <ul>
+                          <li>Implemented virtual time system capped at 16.67ms per frame</li>
+                          <li>Stagger delays now remain synchronized after tab switches</li>
+                          <li>Eliminates animation "bunching" when returning to inactive tabs</li>
+                          <li>Applies to both split animations and count animations</li>
+                        </ul>
+                      </li>
+                      <li>
+                        <strong>Console Error Handling</strong>: Improved error handling for
+                        <code>replaceChild</code> operations during DOM manipulation
+                        <ul>
+                          <li>Elements causing errors are now properly ignored and cleaned up</li>
+                          <li>No visual impact on animations</li>
+                          <li>Reduces console spam in edge cases</li>
+                        </ul>
+                      </li>
+                      <li>
+                        <strong>Split Animation Nesting</strong>: Fixed excessive DOM nesting in
+                        split letter/word animations
+                        <ul>
+                          <li>Proper instance detection prevents duplicate wrapper generation</li>
+                          <li>Cleaner DOM structure with minimal nesting</li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
                 <!-- v1.3.0 -->
                 <div class="changelog-entry" data-usal="fade-u delay-100">
                   <div class="changelog-header">
